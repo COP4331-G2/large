@@ -1,0 +1,28 @@
+body, html
+{
+    height: 100%;
+    overflow: hidden;
+}
+
+.bg 
+{ 
+    /* The image used */
+    background-image: url("http://blacktie.co/demo/premium/maxfront/demos/sliderbg_01.png");
+
+    /* Half height */
+    height: 100%; 
+
+    /* Center and scale the image nicely */
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: local;
+
+}
+
+.scrollertable 
+{
+    overflow-y: auto;
+    overflow-x:auto;
+    height: 70%;
+}
