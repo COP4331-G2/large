@@ -36,7 +36,7 @@ function login()
     var jsonPayload = {
         function: "loginAttempt",
         username: username,
-        password: password,
+        password: password
     };
     jsonPayload = JSON.stringify(jsonPayload);
     console.log("JSON Payload: " + jsonPayload);
@@ -145,22 +145,52 @@ function createAccount() {
     var username = document.getElementById("createUser").value;
     var password = document.getElementById("createPassword").value;
     var confirm = document.getElementById("confirmPassword").value;
+    var firstName = document.getElementById("createFirstName").value;
+    var lastName = document.getElementById("createLastName").value;
+    var email = document.getElementById("creatEmail").value;
+
 
     document.getElementById("createResult").innerHTML = "";
-
-    // Ensure that the HTML login result message is blank
-    // document.getElementById("createResult").innerHTML = "";
-
-    if (password !== confirm) {
+    if (username.length > 60)
+    {
+        document.getElementById("createResult").innerHTML = "Username must not exceed 60 characters.";
+        return;
+    }
+    if (password.length > 60)
+    {
+        document.getElementById("createResult").innerHTML = "Password must not exceed 60 characters.";
+        return;
+    }
+    if (firstName.length > 60)
+    {
+        document.getElementById("createResult").innerHTML = "That is a very long first name, can we call you another name?";
+        return;
+    }
+    if (lastName.length > 60)
+    {
+        document.getElementById("createResult").innerHTML = "That is a very long last name, can we call you another name?";
+        return;
+    }
+    if (email.length > 60 || !stringContains(email, "@"))
+    {
+        document.getElementById("createResult").innerHTML = "Please enter a valid email";
+        return;
+    } 
+    if (password !== confirm)
+    {
         document.getElementById("createResult").innerHTML = "Passwords don't match.";
         return;
     }
 
-    var jsonPayload = {
-        function: "createUser",
-        username: username,
-        password: password,
-    }
+    var jsonPayload =
+        {
+            function: "createUser",
+            username: username,
+            password: password,
+            firstName: firstName,
+            lastName: lastName,
+            email: email
+        };
 
     jsonPayload = JSON.stringify(jsonPayload);
     console.log("JSON Payload: " + jsonPayload);
@@ -185,7 +215,9 @@ function createAccount() {
         document.getElementById("createUser").innerHTML = "";
         document.getElementById("createPassword").innerHTML = "";
         document.getElementById("confirmPassword").innerHTML = "";
-
+        document.getElementById("createFirstName").innerHTML = "";
+        document.getElementById("creatEmail").innerHTML = "";
+        document.getElementById("createLastName").innerHTML = "";
         //hide sign up
         // hideOrShow("signupDiv", false);
 
