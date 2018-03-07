@@ -17,9 +17,6 @@ var failwhale = `
 </pre>
 `;
 
-/**
- * Attempt to login with the supplied username and password
- */
 function login()
 {
     // Get the username and password from the HTML fields
@@ -95,12 +92,6 @@ function login()
 }
 
 
-/**
- * Hide or show an HTML element
- *
- * @param string elementId HTML element to be made visible/hidden
- * @param boolean showState Whether or not to show an element
- */
 function hideOrShow(elementId, showState) {
     var componentToChange = document.getElementById(elementId);
 
@@ -139,7 +130,7 @@ function CallServerSide(jsonPayload) {
     try {
         xhr.onreadystatechange = function() {
 
-            if (this.readyState == 4 && this.status == 200) {
+            if (this.readyState === 4 && this.status === 200) {
                 var jsonObject = JSON.parse(xhr.responseText);
                 fillTable();
             }
@@ -210,5 +201,5 @@ function createAccount() {
 }
 
 function stringContains(stringToCheck, substring) {
-    return stringToCheck.toLowerCase().indexOf(substring.toLowerCase()) != -1;
+    return stringToCheck.toLowerCase().indexOf(substring.toLowerCase()) !== -1;
 }
