@@ -51,25 +51,42 @@
       -> ID for search contact result changed from: colorSearchResult To: contactSearchResult -->
     <div id="accessUIDiv">
         <div class="container-fluid">
-            <div class="card">
-                <div class="card-header">
-                    <form class="form-inline mr-sm-2 my-2 my-lg-0">
-                        <input type="text" class="form-control mr-auto" id="searchText" placeholder="Search Contacts" oninput="searchContacts();">
-                        <button type="button" class="btn btn-primary mx-1" data-toggle="modal" data-target="#addContactModal">
-                            <i class="fas fa-plus-circle mr-1"></i> Create Post
-                        </button>
-                    </form>
-                </div>
+            <div class="card center-block">
                 <div class="card-body row">
                     <!-- Table that will dsiplay the contacts
                     ->id = contactsTable  -->
-                    <div class="col-sm-3" style="background-color:#808080">
-                        
+                    <div class="col-sm-2" style="background-color:#808080">
+                              
+                       
                     </div>
-                    <div class="scrollertable col-sm-6">
-                        <table class="table" id="contactsTable"></table>
-                    </div>
-                    <div class="col-sm-3" style="background-color:#808080">
+
+                    <div class="scrollertable col-sm-8">
+                             <img src="https://www.w3schools.com/html/pulpitrock.jpg" alt="The Pulpit Rock" class="image">
+                    </div> 
+
+                    <div class="col-sm-2" style="background-color:#808080">
+
+
+                            <form class="form-inline mr-sm-2 my-2 my-lg-4 ml-auto">        
+                               <!-- div for Search Posts button
+                                  ->id = SearchPostDiv  -->
+                             <div id="SearchPostDiv" >
+             
+                             <button style="height:100px;width:200px" type="button" class="btn btn-danger ml-2" id="logoutButton" onclick="doSearchPosts();"><i class=" mr-1"></i>SearchPosts</button>
+                             </div>
+                           </form>
+                            <form class="form-inline mr-sm-2 my-2 my-lg-4 ml-auto">        
+                               <!-- div for Search Posts button
+                                  ->id = SearchPostDiv  -->
+                             <div id="SearchPostDiv" >
+             
+                             <button style="height:100px;width:200px" type="button" class="btn btn-primary mx-1" id="CreatePost" onclick="doCreatePost();"><i class=" mr-1"></i>CreatePost</button>
+                                   
+          
+                             </div>
+                           </form>
+
+
                         
                     </div>
                 </div>
