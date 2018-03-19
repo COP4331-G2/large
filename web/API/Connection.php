@@ -24,10 +24,10 @@ function establishConnection()
     // Check for a connection error
     if ($dbConnection->connect_error) {
         // If there was a connection error, reutrn error as JSON response
-        returnError('Connection error.');
+        // returnError('Connection error.');
 
         // This more verbose error message can be enabled for debug purposes
-        // returnError('Connection error: ' . $dbConnection->connect_error);
+        returnError('Connection error: ' . $dbConnection->connect_error);
     } else {
         // If the connection is good, return the connection object
         return $dbConnection;
