@@ -49,11 +49,7 @@ function readSecrets()
         returnError('Connection error (cannot open database credentials).');
     }
 
-    // While we haven't reached the EOF (end of file)...
-    while (!feof($secretsFile)) {
-        // Read each line of the file into a string
-        $secretsString = fgets($secretsFile);
-    }
+    $secretsString = fgets($secretsFile);
 
     // Close secrets file
     fclose($secretsFile);
@@ -62,10 +58,10 @@ function readSecrets()
     $secretsArray = explode(',', $secretsString);
 
     // Setup the array with key-value pairs (for more user-friendly interaction)
-    $secrets['host']     = $secretsArray[0];
-    $secrets['username'] = $secretsArray[1];
-    $secrets['passwd']   = $secretsArray[2];
-    $secrets['dbname']   = $secretsArray[3];
+    $secrets['host']     = trim($secretsArray[0]);
+    $secrets['username'] = trim($secretsArray[1]);
+    $secrets['passwd']   = trim($secretsArray[2]);
+    $secrets['dbname']   = trim($secretsArray[3]);
 
     // Return the array
     return $secrets;
