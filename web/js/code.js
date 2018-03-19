@@ -156,9 +156,21 @@ function createAccount() {
         document.getElementById("createResult").innerHTML = "Username must not exceed 60 characters.";
         return;
     }
+    if (username.length === 0) {
+        document.getElementById("createResult").innerHTML = "Username must not be empty.";
+        return;
+    }
     if (password.length > 60)
     {
         document.getElementById("createResult").innerHTML = "Password must not exceed 60 characters.";
+        return;
+    }
+    if (password.length < 6) {
+        document.getElementById("createResult").innerHTML = "Password must be longer than 6 characters.";
+        return;
+    }
+    if (password !== confirm) {
+        document.getElementById("createResult").innerHTML = "Passwords don't match.";
         return;
     }
     if (firstName.length > 60)
@@ -171,16 +183,11 @@ function createAccount() {
         document.getElementById("createResult").innerHTML = "That is a very long last name, can we call you another name?";
         return;
     }
-    if (email.length > 60 || !stringContains(email, "@"))
+    if (email.length > 60 || !stringContains(email, "@") || email.length < 4)
     {
         document.getElementById("createResult").innerHTML = "Please enter a valid email";
         return;
     } 
-    if (password !== confirm)
-    {
-        document.getElementById("createResult").innerHTML = "Passwords don't match.";
-        return;
-    }
 
     var jsonPayload =
         {
@@ -189,7 +196,7 @@ function createAccount() {
             password: password,
             firstName: firstName,
             lastName: lastName,
-            email: email
+            emailAddress: email
         };
 
     jsonPayload = JSON.stringify(jsonPayload);
@@ -235,3 +242,102 @@ function createAccount() {
 function stringContains(stringToCheck, substring) {
     return stringToCheck.toLowerCase().indexOf(substring.toLowerCase()) !== -1;
 }
+
+function fillTable() {
+    if (!currentUserID) {
+        return;
+    }
+
+    var jsonPayload = {
+        function: "getContacts",
+        userID: currentUserID,
+    };
+    jsonPayload = JSON.stringify(jsonPayload);
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", API, true);
+    xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+
+    try {
+        xhr.onreadystatechange = function () {
+
+            if (this.readyState == 4 && this.status == 200) {
+                var jsonObject = JSON.parse(xhr.responseText);
+                buildTableHeader();
+                buildTableData(jsonObject.results);
+                tableData = jsonObject.results;
+            }
+        };
+
+        xhr.send(jsonPayload);
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+
+function buildTableHeader() {
+    var tud = document.getElementById("posTable");
+    tud.innerHTML = "";
+    var thr = document.createElement('tr');
+    var firstNameHeader = document.createElement('th');
+    firstNameHeader.innerHTML = 'First Name';
+    var lastNameHeader = document.createElement('th');
+    lastNameHeader.innerHTML = 'Last Name';
+    var phoneNumberHeader = document.createElement('th');
+    phoneNumberHeader.innerHTML = 'Phone Number';
+    var emailHeader = document.createElement('th');
+    emailHeader.innerHTML = 'Email Address';
+    var deleteHeader = document.createElement('th');
+    deleteHeader.innerHTML = 'Delete';
+    deleteHeader.style.visibility = 'hidden';
+    deleteHeader.style.display = 'none';
+    deleteHeader.id = "deleteHeader"
+
+    thr.appendChild(firstNameHeader);
+    thr.appendChild(lastNameHeader);
+    thr.appendChild(phoneNumberHeader);
+    thr.appendChild(emailHeader);
+    thr.appendChild(deleteHeader);
+    tud.appendChild(thr);
+}
+
+function buildTableData(data) {
+     < data.length; i++) {
+        var tableRowvar tud = document.getElementById("posTable");
+    var i;
+    if (!data) {
+        return;
+    }
+    for (i = 0; i =d ocument.createElement('tr');
+        tableRow.id = data[i].contactId;
+        tableRow.align = "center";
+        var firstName = document.createElement('td');
+        firstName.innerHTML = data[i].firstName;
+        var lastName = document.createElement('td');
+        lastName.innerHTML = data[i].lastName;
+        var phoneNumber = document.createElement('td');
+        phoneNumber.innerHTML = data[i].phoneNumber;
+        var emailAddress = document.createElement('td');
+        emailAddress.innerHTML = data[i].emailAddress;
+        var deleteButton = document.createElement('input');
+        var deleteData = document.createElement('td');
+        var deleteDiv = document.createElement('div');
+        deleteDiv.className = "checkbox checkbox-success";
+
+        deleteButton.type = "checkbox";
+        deleteButton.style.visibility = "hidden";
+        deleteButton.style.display = "none";
+        deleteButton.className = "deleteButton styled ml-3";
+        deleteDiv.appendChild(deleteButton);
+        deleteData.appendChild(deleteDiv);
+
+        tableRow.appendChild(firstName);
+        tableRow.appendChild(lastName);
+        tableRow.appendChild(phoneNumber);
+        tableRow.appendChild(emailAddress);
+        tableRow.appendChild(deleteData);
+        tud.appendChild(tableRow);
+    }
+}
+
