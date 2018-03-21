@@ -1,4 +1,4 @@
-﻿<html>
+<html>
 
 <head>
     <script type="text/javascript" src="js/code.js"></script>
@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
     <link href="css/styles.css" rel="stylesheet">
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
@@ -52,57 +51,41 @@
       -> ID for search contact result changed from: colorSearchResult To: contactSearchResult -->
     <div id="accessUIDiv">
         <div class="container-fluid">
-            <div class="card center-block">
-                <div class="card-body row">
-                    <!-- Table that will dsiplay the contacts
-                    ->id = contactsTable  -->
-                    <div class="col-sm-2" style="background-color:#808080">
-                      <div id="mySidenav" class="sidenav">
-                          <a href="#" id="about">About</a>
-                          <a href="#" id="blog">Blog</a>
-                          <a href="#" id="projects">Projects</a>
-                          <a href="#" id="contact">Contact</a>
-                        </div>        
-                                               
-                    </div>
-
-                    <div class="scrollertable col-sm-8" id="postScroll">
-                             <img src="https://www.w3schools.com/html/pulpitrock.jpg" class="image">
-
-                             <!-- Add icon library -->
-                               
-                                <!-- Use an element to toggle between a like/dislike icon -->
-                              
-                                 <button type="button" class="fa fa-thumbs-up" id="logoutButton" onclick="myFunction(this)"><i class=" mr-1"></i></button>
-                    </div> 
-
-                    <div class="col-sm-2" style="background-color:#808080">
-
-
-                            <form class="form-inline mr-sm-2 my-2 my-lg-4 ml-auto">        
-                               <!-- div for Search Posts button
-                                  ->id = SearchPostDiv  -->
-                             <div id="SearchPostDiv" >
-             
-                             <button style="height:5%;width:100%" type="button" class="btn btn-danger ml-2" id="logoutButton" onclick="doSearchPosts();"><i class=" mr-1"></i>Search</button>
-                             </div>
-                           </form>
-                            <form class="form-inline mr-sm-2 my-2 my-lg-4 ml-auto">        
-                               <!-- div for Search Posts button
-                                  ->id = SearchPostDiv  -->
-                             <div id="SearchPostDiv" >
-             
-                             <button style="height:5%;width:100%" type="button" class="btn btn-primary mx-1" id="CreatePost" onclick="doCreatePost();"><i class=" mr-1"></i>Create</button>
-                                   
-          
-                             </div>
-                           </form>
-
-
-                        
-                    </div>
+            <div class="card">
+                <div class="card-header">
+                    <form class="form-inline mr-sm-2 my-2 my-lg-0">
+                        <input type="text" class="form-control mr-auto" id="searchText" placeholder="Search Contacts" oninput="searchContacts();">
+                        <button type="button" class="btn btn-primary mx-1" data-toggle="modal" data-target="#addContactModal">
+                            <i class="fas fa-plus-circle mr-1"></i> Create Post
+                        </button>
+                    </form>
                 </div>
-            </div>
+               
+                    <!-- Table that will dsiplay the contacts
+                        ->id = contactsTable  -->
+                    <div class = "card-body row " style = "height : 75%"  >
+                            <div class="col-sm-3" style="background-color:#808B96">  
+                                                               <input type="file" id="file"> -->
+                                      </fieldset>
+                                      <fieldset class="form-group">
+                                        <input class="form-control form-control-lg" type="text" placeholder="Your Name">
+                                      </fieldset> 
+                            </div>
+
+                            <div class="col-sm-9" >
+                                   <div class="col-sm-12" style="background-color:#808080; height : 50%" >
+                                    USER SETTINGS
+                                    </div>
+
+                            
+                                    <div class="col-sm-12" style="background-color:#D5F5E3 ; height : 50%">
+                                    ACCOUNT SETTINGS
+                                    </div>
+                        
+                             </div>
+                    </div>         
+              
+            
         </div>
         <!-- New Contact Modal -->
         <div class="container">
@@ -150,6 +133,7 @@
                 </div>
             </div>
         </div>
+    </div>
     </div>
     <script>
     var input = document.getElementById("loginName");

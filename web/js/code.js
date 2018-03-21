@@ -276,68 +276,29 @@ function fillTable() {
 }
 
 
-function buildTableHeader() {
-    var tud = document.getElementById("posTable");
-    tud.innerHTML = "";
-    var thr = document.createElement('tr');
-    var firstNameHeader = document.createElement('th');
-    firstNameHeader.innerHTML = 'First Name';
-    var lastNameHeader = document.createElement('th');
-    lastNameHeader.innerHTML = 'Last Name';
-    var phoneNumberHeader = document.createElement('th');
-    phoneNumberHeader.innerHTML = 'Phone Number';
-    var emailHeader = document.createElement('th');
-    emailHeader.innerHTML = 'Email Address';
-    var deleteHeader = document.createElement('th');
-    deleteHeader.innerHTML = 'Delete';
-    deleteHeader.style.visibility = 'hidden';
-    deleteHeader.style.display = 'none';
-    deleteHeader.id = "deleteHeader"
-
-    thr.appendChild(firstNameHeader);
-    thr.appendChild(lastNameHeader);
-    thr.appendChild(phoneNumberHeader);
-    thr.appendChild(emailHeader);
-    thr.appendChild(deleteHeader);
-    tud.appendChild(thr);
-}
-
-function buildTableData(data) {
-     < data.length; i++) {
-        var tableRowvar tud = document.getElementById("posTable");
+function buildTableData(data) 
+{
+    var tud = document.getElementById("postScroll");
     var i;
-    if (!data) {
-        return;
+    if(!data)
+    {
+      console.log("data is not available");
+      return;
     }
-    for (i = 0; i =d ocument.createElement('tr');
-        tableRow.id = data[i].contactId;
-        tableRow.align = "center";
-        var firstName = document.createElement('td');
-        firstName.innerHTML = data[i].firstName;
-        var lastName = document.createElement('td');
-        lastName.innerHTML = data[i].lastName;
-        var phoneNumber = document.createElement('td');
-        phoneNumber.innerHTML = data[i].phoneNumber;
-        var emailAddress = document.createElement('td');
-        emailAddress.innerHTML = data[i].emailAddress;
-        var deleteButton = document.createElement('input');
-        var deleteData = document.createElement('td');
-        var deleteDiv = document.createElement('div');
-        deleteDiv.className = "checkbox checkbox-success";
-
-        deleteButton.type = "checkbox";
-        deleteButton.style.visibility = "hidden";
-        deleteButton.style.display = "none";
-        deleteButton.className = "deleteButton styled ml-3";
-        deleteDiv.appendChild(deleteButton);
-        deleteData.appendChild(deleteDiv);
-
-        tableRow.appendChild(firstName);
-        tableRow.appendChild(lastName);
-        tableRow.appendChild(phoneNumber);
-        tableRow.appendChild(emailAddress);
-        tableRow.appendChild(deleteData);
-        tud.appendChild(tableRow);
+    for (i = 0; i < data.results.length; i++) 
+    {
+        var post = document.createElement('div');
+        var image = document.createElement('img');
+        var imageAddress = data.results[i].imageAddress;
+        image.style = "src="imageAddress;
+        image.elementClass = "image";
+        post.appendChild(image);
+        var tags = data.results[i].tags;
+        post.appendChild(tags);
+        post.id = data.results[i].postId;
+        tud.appendChild(post);
     }
 }
-
+function myFunction(x) {
+    x.classList.toggle("fa-thumbs-down");
+}
