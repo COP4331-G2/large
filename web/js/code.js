@@ -1,9 +1,10 @@
 // Constant value for API path (for ease of use)
 //const API = "API/API.php";
-const API = "http://34.205.31.49/small/web/API/API.php";
+//const API = "http://34.205.31.49/small/web/API/API.php";
+const API = "http://api.jsonbin.io/b/5ab2a48a2efae41465eb947d";
 
-var currentUserID;
-var tableData;
+var currentUserID = "Julian";
+var posts;
 
 var failwhale = `
 <pre>
@@ -16,6 +17,7 @@ var failwhale = `
                    (fail whale)
 </pre>
 `;
+
 
 function login()
 {
@@ -78,9 +80,7 @@ function login()
         // Show the post-login HTML elements
         hideOrShow("loggedinDiv", true);
         hideOrShow("accessUIDiv", true);
-
-        // Fill the user's contacts table
-        fillTable();
+        
     } catch (e) {
         // If there is an error parsing the JSON, attempt to set the HTML login result message
         document.getElementById("loginResult").innerHTML = e.message;
@@ -90,7 +90,6 @@ function login()
 
     return true;
 }
-
 
 function hideOrShow(elementId, showState) {
     var componentToChange = document.getElementById(elementId);
@@ -132,7 +131,7 @@ function CallServerSide(jsonPayload) {
 
             if (this.readyState === 4 && this.status === 200) {
                 var jsonObject = JSON.parse(xhr.responseText);
-                fillTable();
+                populatePosts();
             }
         };
         xhr.send(jsonPayload);
@@ -243,29 +242,29 @@ function stringContains(stringToCheck, substring) {
     return stringToCheck.toLowerCase().indexOf(substring.toLowerCase()) !== -1;
 }
 
-function fillTable() {
+function populatePosts()
+{
     if (!currentUserID) {
         return;
     }
 
     var jsonPayload = {
         function: "getContacts",
-        userID: currentUserID,
+        userID: currentUserID
     };
     jsonPayload = JSON.stringify(jsonPayload);
 
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", API, true);
+    xhr.open("GET", API, true);
     xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
 
     try {
         xhr.onreadystatechange = function () {
 
-            if (this.readyState == 4 && this.status == 200) {
+            if (this.readyState === 4 && this.status === 200) {
                 var jsonObject = JSON.parse(xhr.responseText);
-                buildTableHeader();
-                buildTableData(jsonObject.results);
-                tableData = jsonObject.results;
+                buildPostData(jsonObject.posts);
+                posts = jsonObject.results;
             }
         };
 
@@ -275,8 +274,7 @@ function fillTable() {
     }
 }
 
-
-function buildTableData(data) 
+function buildPostData(data) 
 {
     var tud = document.getElementById("postScroll");
     var i;
@@ -285,20 +283,14 @@ function buildTableData(data)
       console.log("data is not available");
       return;
     }
-    for (i = 0; i < data.results.length; i++) 
+    for (i = 0; i < data.length; i++) 
     {
         var post = document.createElement('div');
         var image = document.createElement('img');
-        var imageAddress = data.results[i].imageAddress;
-        image.style = "src="imageAddress;
-        image.elementClass = "image";
+        image.src = data[i].imageAddress;
+        image.className = "image";
         post.appendChild(image);
-        var tags = data.results[i].tags;
-        post.appendChild(tags);
-        post.id = data.results[i].postId;
         tud.appendChild(post);
     }
 }
-function myFunction(x) {
-    x.classList.toggle("fa-thumbs-down");
-}
+
