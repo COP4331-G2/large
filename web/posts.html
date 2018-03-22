@@ -18,25 +18,12 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="col-sm-2"><a class="navbar-brand mt-0" href="#">連絡<hr class="mx-0 my-0"> <span style="font-size: 12px">Musū</span> </a></div>
-        <!-- div for Search and Add Contacts buttons
-            ->Hidden on homepage, visible on logged in
-            ->ID: loggedInButtonsDiv              -->
         <div id="loggedInButtonsDiv">
             <form class="form-inline mr-sm-2 my-2 my-lg-0"></form>
         </div>
-        <!-- UL class to seperate button spacing on navbar -->
-        <!-- Div for navbar buttons
-            ->Visible on homepage, hidden while logged in
-            ->ID: loginDiv  -->
-        <form class="form-inline mr-sm-2 my-2 my-lg-0 ml-auto">        
-            <!-- div for logout button and "Logged in as" text
-            ->Hidden on homepage, always shown while logged in
-            ->id = loggedInDiv  -->
+        <form class="form-inline mr-sm-2 my-2 my-lg-0 ml-auto">       
             <div id="loggedinDiv" >
-                <!-- span contning "logged in text"
-                  ->Empty on homepage, always userLastName, userFirstName while logged in
-                  ->id = loggedInUserFullName -->
-                <span class="navbar-text">Logged in as&nbsp;</span><span class="navbar-text text-info mr-2" id="currentUserName"></span>
+                <span class="navbar-text">Logged in as&nbsp;</span><span class="navbar-text text-info mr-2" id="currentUserName">username</span>
                 <button type="button" class="btn btn-danger ml-2" id="logoutButton" onclick=""><i class="fas fa-sign-out-alt mr-1"></i>Logout</button>
             </div>
         </form>

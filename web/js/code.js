@@ -1,7 +1,7 @@
 // Constant value for API path (for ease of use)
 //const API = "API/API.php";
 //const API = "http://34.205.31.49/small/web/API/API.php";
-const API = "http://api.jsonbin.io/b/5ab2a48a2efae41465eb947d";
+const API = "http://api.jsonbin.io/b/5ab43edd989617146bd6f3a7";
 
 var currentUserID = "Julian";
 var posts;
@@ -73,20 +73,14 @@ function login()
 
         // Hide the login HTML elements
         hideOrShow("loginDiv", false);
-
-        // Hide the landing page
-        hideOrShow("landingPageDiv", false);
-
-        // Show the post-login HTML elements
-        hideOrShow("loggedinDiv", true);
-        hideOrShow("accessUIDiv", true);
         
     } catch (e) {
         // If there is an error parsing the JSON, attempt to set the HTML login result message
         document.getElementById("loginResult").innerHTML = e.message;
     }
 
-    document.getElementById("currentUserName").innerHTML = jsonObject.results.username;
+    //document.getElementById("currentUserName").innerHTML = jsonObject.results.username;
+    document.getElementById("currentUserName").innerHTML = "username";
 
     return true;
 }
@@ -140,7 +134,8 @@ function CallServerSide(jsonPayload) {
     }
 }
 
-function createAccount() {
+function createAccount()
+{
     var username = document.getElementById("createUser").value;
     var password = document.getElementById("createPassword").value;
     var confirm = document.getElementById("confirmPassword").value;
@@ -225,10 +220,7 @@ function createAccount() {
         document.getElementById("creatEmail").innerHTML = "";
         document.getElementById("createLastName").innerHTML = "";
         //hide sign up
-        // hideOrShow("signupDiv", false);
-
-        //go back to login page
-        // hideOrShow("homepageWelcomeDiv",true);
+        hideOrShow("signupDiv", false);        
 
     } catch (e) {
         // If there is an error parsing the JSON, attempt to set the HTML login result message
@@ -292,8 +284,7 @@ function buildPostData(data)
       return;
     }
     
-    for (i = 0; i < data.length; i++) 
-    {
+    for (i = 0; i < data.length; i++) {
         var post = document.createElement('div');
         var text = document.createElement('div');
         var tags = document.createElement('div');
