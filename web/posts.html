@@ -16,7 +16,7 @@
 </head>
 
 <body>
-   ai <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="col-sm-2"><a class="navbar-brand mt-0" href="#">連絡<hr class="mx-0 my-0"> <span style="font-size: 12px">Musū</span> </a></div>
         <!-- div for Search and Add Contacts buttons
             ->Hidden on homepage, visible on logged in
@@ -88,107 +88,13 @@
         </div>
     </div>
     <script>
-    var input = document.getElementById("loginName");
-    input.addEventListener("keyup", function(event) {
-        event.preventDefault();
-        if (event.keyCode === 13) {
-            document.getElementById("loginButton").click();
-        }
-    });
-    </script>
-    <script>
-    var input = document.getElementById("loginPassword");
-    input.addEventListener("keyup", function(event) {
-        event.preventDefault();
-        if (event.keyCode === 13) {
-            document.getElementById("loginButton").click();
-        }
-    });
-    </script>
-    <script>
-    var input = document.getElementById("firstNameNewEntry");
-    input.addEventListener("keyup", function(event) {
-        event.preventDefault();
-        if (event.keyCode === 13) {
-            document.getElementById("addContactButton").click();
-        }
-    });
-    </script>
-    <script>
-    var input = document.getElementById("lastNameNewEntry");
-    input.addEventListener("keyup", function(event) {
-        event.preventDefault();
-        if (event.keyCode === 13) {
-            document.getElementById("addContactButton").click();
-        }
-    });
-    </script>
-    <script>
-    var input = document.getElementById("emailNewEntry");
-    input.addEventListener("keyup", function(event) {
-        event.preventDefault();
-        if (event.keyCode === 13) {
-            document.getElementById("addContactButton").click();
-        }
-    });
-    </script>
-    <script>
-    var input = document.getElementById("phoneNewEntry");
-    input.addEventListener("keyup", function(event) {
-        event.preventDefault();
-        if (event.keyCode === 13) {
-            document.getElementById("addContactButton").click();
-        }
-    });
-    </script>
-    <script>
-    var input = document.getElementById("confirmPassword");
-    input.addEventListener("keyup", function(event) {
-        event.preventDefault();
-        // 13 = Enter key
-        if (event.keyCode === 13) {
-            document.getElementById("createUserButton").click();
-        }
-    });
-    </script>
-    <script>
-    function doCreateAccount() {
-        if (createAccount()) {
-            $("#signupModal").modal('hide');
-            clearErrors();
-        }
-    }
-
-    function doAddContact() {
-        if (addContact()) {
-            $("#addContactModal").modal('hide');
-            clearErrors();
-        }
-    }
+    this.addEventListener('DOMContentLoaded', populatePosts(), false);
+    
 
     function clearErrors() {
-        document.getElementById("loginResult").innerHTML = "";
-        document.getElementById("createResult").innerHTML = "";
         document.getElementById("contactAddResult").innerHTML = "";
     }
-
-    function doLogin() {
-        if (!login()) {
-            $("#loginErrorModal").modal('show');
-        }
-    }
-    </script>
-    <script>
-    document.addEventListener("keyup", function(event) {
-        event.preventDefault();
-        // 27 = Escape key
-        if (event.keyCode === 27) {
-            $("#signupModal").modal('hide');
-            $("#addContactModal").modal('hide');
-            $("#loginErrorModal").modal('hide');
-            clearErrors();
-        }
-    });
+        
     </script>
 </body>
 

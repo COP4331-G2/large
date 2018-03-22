@@ -63,7 +63,7 @@ body, html
     margin-left: auto;
     margin-right: auto;
     width: 90%;
-    border-top:2px solid ##FFFFFF;
+    border-top:2px solid #FFFFFF;
     height:1px;
     background:#A9A9A9;
 }
@@ -76,7 +76,7 @@ body, html
     font-family: 'Roboto', sans-serif;
     font-size: 18px; /* Increase font size */
     color: black;
-    font-weight: 520;
+    font-weight: 500;
     width: 85%;
 }
 

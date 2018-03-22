@@ -329,7 +329,7 @@ function buildPostData(data)
 function likeButtonPress(button)
 {
     
-      button.classList.toggle("fa fa-thumbs-up");
+     // button.classList.toggle("fa fa-thumbs-up");
 
      /* button.className = "fa fa-thumbs-down";
     if(button.className == "fa fa-thumbs-up") 
