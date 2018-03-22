@@ -244,24 +244,30 @@ function stringContains(stringToCheck, substring) {
 
 function populatePosts()
 {
-    if (!currentUserID) {
+    if (!currentUserID) 
+    {
         return;
     }
 
-    var jsonPayload = {
+    var jsonPayload = 
+    {
         function: "getContacts",
         userID: currentUserID
     };
+
     jsonPayload = JSON.stringify(jsonPayload);
 
     var xhr = new XMLHttpRequest();
     xhr.open("GET", API, true);
     xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
 
-    try {
-        xhr.onreadystatechange = function () {
+    try 
+    {
+        xhr.onreadystatechange = function ()
+        {
 
-            if (this.readyState === 4 && this.status === 200) {
+            if (this.readyState === 4 && this.status === 200)
+            {
                 var jsonObject = JSON.parse(xhr.responseText);
                 buildPostData(jsonObject.posts);
                 posts = jsonObject.results;
@@ -269,7 +275,8 @@ function populatePosts()
         };
 
         xhr.send(jsonPayload);
-    } catch (err) {
+    } catch (err) 
+    {
         console.log(err);
     }
 }
@@ -283,14 +290,54 @@ function buildPostData(data)
       console.log("data is not available");
       return;
     }
+    
     for (i = 0; i < data.length; i++) 
     {
         var post = document.createElement('div');
+        var text = document.createElement('div');
+        var tags = document.createElement('div');
+        var username = document.createElement('div');
+        var verticalLine = document.createElement('div');
+        var tumbsupdiv = document.createElement('div');
+        tumbsupdiv.className = "buttsup";
+        var tumbsup = document.createElement('button');
+        tumbsup.className = "fa fa-thumbs-up";
+        tumbsup.id = data[i].postID;
+        tumbsup.addEventListener("onclick", likeButtonPress(tumbsup));
+        verticalLine.className = "line-separator";
+        text.innerHTML = data[i].postText;
+        tags.innerHTML = data[i].tags;
+        username.innerHTML = data[i].userName;
         var image = document.createElement('img');
         image.src = data[i].imageAddress;
         image.className = "image";
+        text.className = "postBodyText";
+        tags.className = "tagsText";
+        username.className = "usernamePostText";
+        tumbsupdiv.appendChild(tumbsup);
+        post.appendChild(username);
+        post.appendChild(tags);
+        post.appendChild(text);
         post.appendChild(image);
+        post.appendChild(tumbsupdiv);
+        post.appendChild(verticalLine);
         tud.appendChild(post);
     }
 }
 
+function likeButtonPress(button)
+{
+    
+      button.classList.toggle("fa fa-thumbs-up");
+
+     /* button.className = "fa fa-thumbs-down";
+    if(button.className == "fa fa-thumbs-up") 
+    {
+        button.className = "fa fa-thumbs-down";
+    }
+    else if(button.className == "fa fa-thumbs-down")
+    {
+        button.className = "fa fa-thumbs-up";
+    }*/
+    
+}
