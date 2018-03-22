@@ -284,6 +284,7 @@ function populatePosts()
 function buildPostData(data) 
 {
     var tud = document.getElementById("postScroll");
+    tud.innerHTML = "";
     var i;
     if(!data)
     {
