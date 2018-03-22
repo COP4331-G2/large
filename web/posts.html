@@ -16,7 +16,7 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+   ai <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="col-sm-2"><a class="navbar-brand mt-0" href="#">連絡<hr class="mx-0 my-0"> <span style="font-size: 12px">Musū</span> </a></div>
         <!-- div for Search and Add Contacts buttons
             ->Hidden on homepage, visible on logged in
@@ -33,7 +33,7 @@
             ->Hidden on homepage, always shown while logged in
             ->id = loggedInDiv  -->
             <div id="loggedinDiv" >
-                <!-- span containing "logged in text"
+                <!-- span contning "logged in text"
                   ->Empty on homepage, always userLastName, userFirstName while logged in
                   ->id = loggedInUserFullName -->
                 <span class="navbar-text">Logged in as&nbsp;</span><span class="navbar-text text-info mr-2" id="currentUserName"></span>
@@ -49,13 +49,13 @@
       ->id = accessUIDiv
       -> Function for searching a contact changed from: searchColor() To: searchContact()
       -> ID for search contact result changed from: colorSearchResult To: contactSearchResult -->
-    <div id="accessUIDiv">
+    <div id="accessUIDiv" >
         <div class="container-fluid">
             <div class="card center-block">
-                <div class="card-body row">
+                <div class="card-body row" style="background-color:#FFFFFF">
                     <!-- Table that will dsiplay the contacts
                     ->id = contactsTable  -->
-                    <div class="col-sm-2" style="background-color:#808080">
+                    <div class="col-sm-2" >
                         <div id="mySidenav" class="sidenav">
                             <a href="#" id="about">About</a>
                             <a href="#" id="blog">Blog</a>
@@ -65,9 +65,9 @@
                     </div>
                     <div class="scrollertable col-sm-8" id="postScroll">
                               
-                            <button type="button" class="fa fa-thumbs-up" id="logoutButton" onclick="myFunction(this)"><i class=" mr-1"></i></button>
+                            <!-- This is where posts go -->
                     </div> 
-                    <div class="col-sm-2" style="background-color:#808080">
+                    <div class="col-sm-2">
                             <form class="form-inline mr-sm-2 my-2 my-lg-4 ml-auto">        
                                <!-- div for Search Posts button
                                   ->id = SearchPostDiv  -->
