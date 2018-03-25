@@ -3,6 +3,9 @@
 // Add file with connection-related functions
 require 'Connection.php';
 
+// Crete a session for the username
+session_start();
+
 // Receive decoded JSON payload from client
 $jsonPayload = getJSONPayload();
 
@@ -11,6 +14,9 @@ $dbConnection = establishConnection();
 
 // Call the client-requested function
 callVariableFunction($dbConnection, $jsonPayload);
+
+// Folder were all images will be save.
+$destinationFolder = "uploads/";
 
 /* *************** */
 /* Functions Below */
@@ -68,7 +74,8 @@ function loginAttempt($dbConnection, $jsonPayload)
         if (password_verify($password, $row['password'])) {
             // If the password is correct...
             // Return the JSON success response (including user's id)
-            returnSuccess('Login successful.', $row['id']);
+            $_SESSION['id'] = $row['id'];
+            returnSuccess('Login successful.', $_SESSION['id']);
         } else {
             // If the password isn't correct...
             // Return a JSON error response
@@ -145,6 +152,7 @@ function createUser($dbConnection, $jsonPayload)
 
         // Check to see if the insertion was successful...
         if ($result) {
+          $_SESSION['id'] = $row['id'];
             // If successful, return JSON success response
             returnSuccess('User created.');
         } else {
@@ -174,7 +182,11 @@ function deleteUser($dbConnection, $jsonPayload)
   Logout function
 */
 function logout()
-{}
+{
+  session_destroy();
+  if($_SESSION==null)
+  returnSuccess('User has logout');
+}
 
 /** Verify if passwords match
   *Checks if unsername exist
@@ -201,10 +213,18 @@ function autoTag()
 /*
   function utilized to create postings in feed
 */
-function createPost()
+function createPost($jsonPayload)
 {
   //call autoTag function
   //implement posting capabilities
+  $file = $_FILES['file'];
+
+  $image = uploadImageHelper($file);
+
+  // get tag array. Insert in the database
+  // the image name and the tags associate to the image.
+  // after run the line below to save the image.
+  move_uploaded_file($_FILES['file']['tmp_name'], $destinationFolder.$image);
 }
 
  /** Search by tags function
@@ -229,5 +249,34 @@ function settings()
 {
   // implement connections for settings
 
+
+}
+
+/*
+ *   Upload image helper function
+ */
+function uploadImageHelper($image)
+{
+  // Gets the image, make sure the upload was successful,
+  // checks the extension and rename it with an unique name.
+  // Then it returns the new name.
+  $extAllow = array('jpg', 'jpeg', 'png', 'gif');
+  $ext = strtolower(end(explode('.', $image['file']['name'])));
+
+  if(in_array($ext, $extAllow))
+  {
+    if($image['file']['error'] === 0)
+    {
+      return $imageNewName = uniqid('', true).".".$ext;
+    }
+    else
+    {
+      returnError('An error occur while uploading the image.');
+    }
+  }
+  else
+  {
+    returnError('Image extension is not allow.');
+  }
 
 }
