@@ -194,12 +194,15 @@ function authentication()
 /** Machine Learning function
   *
  */
-function autoTag()
+function autoTag($dbConnection, $jsonPayload)
 {
   // implement machine learning algorithm
   // separate machine learning from create post? as a stand alone funct?
   // image to text
   //text to tags
+
+
+
 }
 
 /*
@@ -207,14 +210,14 @@ function autoTag()
 */
 function createPost($dbConnection, $jsonPayload)
 {
-  // Get from JSON: username, body text,  image URL
-  $username = trim($jsonPayload['username']);
+  // Get from JSON: userID, body text,  image URL
+  $userID = $jsonPayload['userID'];
   $bodyText = trim($jsonPayload['bodyText']);
   $imageURL = trim($jsonPayload['imageURL']);
 
   // Add post to the database
   $query = $dbConnection->prepare("INSERT INTO Posts (userID, bodyText, imageName) VALUES ('?', '?', '?')");
-  $query->bind_param('sss', $username, $bodyText, $imageURL);
+  $query->bind_param('iss', $userID, $bodyText, $imageURL);
   $query->execute();
 
   // Result from the query
@@ -240,7 +243,7 @@ function createPost($dbConnection, $jsonPayload)
  /** Search by tags function
    *
   */
-function tagSearch()
+function tagSearch($dbConnection, $jsonPayload)
 {
   //implement search logic
   /*
@@ -255,7 +258,7 @@ function tagSearch()
 /*
  *  Settings function
 */
-function settings()
+function settings($dbConnection, $jsonPayload)
 {
   // implement connections for settings
 
