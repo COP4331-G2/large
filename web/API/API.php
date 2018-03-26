@@ -209,12 +209,12 @@ function createPost($dbConnection, $jsonPayload)
 {
   // Get from JSON: username, body text,  image URL
   $username = trim($jsonPayload['username']);
-  $bodyText = $jsonPayload['bodyText'];
-  $imageURL = $jsonPayload['imageURL'];
+  $bodyText = trim($jsonPayload['bodyText']);
+  $imageURL = trim($jsonPayload['imageURL']);
 
 
   // Add post to the database
-  $query = $dbConnection->prepare("INSERT INTO Posts (username, bodyText, imageName) VALUES ('?', '?', '?')");
+  $query = $dbConnection->prepare("INSERT INTO Posts (userID, bodyText, imageName) VALUES ('?', '?', '?')");
   $query->bind_param('sss', $username, $bodyText, $imageURL);
   $query->execute();
 
@@ -228,7 +228,7 @@ function createPost($dbConnection, $jsonPayload)
   } else {
   // If not successful, return JSON error response
   returnError($dbConnection->error);
-  }  
+  }
 
 
   // We don't need a relational table for posts and users
