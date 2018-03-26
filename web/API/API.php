@@ -205,7 +205,7 @@ function createPost($dbConnection, $jsonPayload)
 {
   // Get from JSON: username, body text,  image URL
   $username = trim($jsonPayload['username']);
-  $bodyText = $jsonPayload['bodyText'];
+  $bodyText = trim($jsonPayload['bodyText']);
   $imageURL = $jsonPayload['imageURL'];
 
 
