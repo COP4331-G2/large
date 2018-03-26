@@ -1,7 +1,7 @@
 // Constant value for API path (for ease of use)
-//const API = "API/API.php";
-//const API = "http://34.205.31.49/small/web/API/API.php";
-const API = "https://api.myjson.com/bins/119p5f";
+const API = "API/API.php";
+// const API = "http://34.205.31.49/small/web/API/API.php";
+// const API = "https://api.myjson.com/bins/119p5f";
 
 var currentUserID = "";
 
@@ -76,14 +76,11 @@ function login()
 
         // Hide the login HTML elements
         hideOrShow("loginDiv", false);
-        
+
     } catch (e) {
         // If there is an error parsing the JSON, attempt to set the HTML login result message
         document.getElementById("loginResult").innerHTML = e.message;
     }
-
-    //document.getElementById("currentUserName").innerHTML = jsonObject.results.username;
-    document.getElementById("currentUserName").innerHTML = "username";
 
     return true;
 }
@@ -184,7 +181,7 @@ function createAccount()
     {
         document.getElementById("createResult").innerHTML = "Please enter a valid email";
         return;
-    } 
+    }
 
     var jsonPayload =
         {
@@ -223,7 +220,7 @@ function createAccount()
         document.getElementById("creatEmail").innerHTML = "";
         document.getElementById("createLastName").innerHTML = "";
         //hide sign up
-        hideOrShow("signupDiv", false);        
+        hideOrShow("signupDiv", false);
 
     } catch (e) {
         // If there is an error parsing the JSON, attempt to set the HTML login result message
@@ -239,7 +236,7 @@ function stringContains(stringToCheck, substring) {
 
 function populatePosts()
 {
-    var jsonPayload = 
+    var jsonPayload =
     {
         function: "getContacts",
         userID: currentUserID
@@ -251,7 +248,7 @@ function populatePosts()
     xhr.open("GET", API, true);
     xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
 
-    try 
+    try
     {
         xhr.onreadystatechange = function ()
         {
@@ -269,13 +266,13 @@ function populatePosts()
         };
 
         xhr.send(jsonPayload);
-    } catch (err) 
+    } catch (err)
     {
         console.log(err);
     }
 }
 
-function buildPostData(posts) 
+function buildPostData(posts)
 {
     console.log(posts);
     var tud = document.getElementById("postScroll");
@@ -285,7 +282,7 @@ function buildPostData(posts)
       console.log("data is not available");
       return;
     }
-    
+
     for (i = 0; i < posts.length; i++) {
         var post = document.createElement('div');
         var text = document.createElement('div');
@@ -344,7 +341,7 @@ function likeButtonPress(button)
     // button.classList.toggle("fa fa-thumbs-up");
 
     //button.className = "fa fa-thumbs-down";
-    /*if(button.className == "fa fa-thumbs-up") 
+    /*if(button.className == "fa fa-thumbs-up")
     {
         button.className = "fa fa-thumbs-down";
     }
