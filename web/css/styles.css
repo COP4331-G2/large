@@ -110,7 +110,6 @@ body, html
     width: 95%;
 }
 
-/* Style the links inside the sidenav */
 #mySidenav a {
     position: absolute; /* Position them relative to the browser window */
     left: -80px; /* Position them outside of the screen */
