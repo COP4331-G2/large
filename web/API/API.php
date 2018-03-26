@@ -3,6 +3,9 @@
 // Add file with connection-related functions
 require 'Connection.php';
 
+// Crete a session for the username
+session_start();
+
 // Receive decoded JSON payload from client
 $jsonPayload = getJSONPayload();
 
@@ -37,7 +40,7 @@ function callVariableFunction($dbConnection, $jsonPayload)
     }
 }
 
-/** NEED
+/**
  * Verify username/password information and (perhaps) login to a user's account
  *
  * @param mysqli $dbConnection MySQL connection instance
@@ -68,7 +71,8 @@ function loginAttempt($dbConnection, $jsonPayload)
         if (password_verify($password, $row['password'])) {
             // If the password is correct...
             // Return the JSON success response (including user's id)
-            returnSuccess('Login successful.', $row['id']);
+            $_SESSION['id'] = $row['id'];
+            returnSuccess('Login successful.', $_SESSION['id']);
         } else {
             // If the password isn't correct...
             // Return a JSON error response
@@ -81,7 +85,7 @@ function loginAttempt($dbConnection, $jsonPayload)
     }
 }
 
-/** NEED
+/**
  * Create a new user account
  *
  * @param mysqli $dbConnection MySQL connection instance
