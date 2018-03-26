@@ -3,6 +3,9 @@
 // Add file with connection-related functions
 require 'Connection.php';
 
+// Crete a session for the username
+session_start();
+
 // Receive decoded JSON payload from client
 $jsonPayload = getJSONPayload();
 
@@ -37,7 +40,7 @@ function callVariableFunction($dbConnection, $jsonPayload)
     }
 }
 
-/** NEED
+/**
  * Verify username/password information and (perhaps) login to a user's account
  *
  * @param mysqli $dbConnection MySQL connection instance
@@ -68,7 +71,8 @@ function loginAttempt($dbConnection, $jsonPayload)
         if (password_verify($password, $row['password'])) {
             // If the password is correct...
             // Return the JSON success response (including user's id)
-            returnSuccess('Login successful.', $row['id']);
+            $_SESSION['id'] = $row['id'];
+            returnSuccess('Login successful.', $_SESSION['id']);
         } else {
             // If the password isn't correct...
             // Return a JSON error response
@@ -81,7 +85,7 @@ function loginAttempt($dbConnection, $jsonPayload)
     }
 }
 
-/** NEED
+/**
  * Create a new user account
  *
  * @param mysqli $dbConnection MySQL connection instance
@@ -190,27 +194,56 @@ function authentication()
 /** Machine Learning function
   *
  */
-function autoTag()
+function autoTag($dbConnection, $jsonPayload)
 {
   // implement machine learning algorithm
   // separate machine learning from create post? as a stand alone funct?
   // image to text
   //text to tags
+
+
+
 }
 
 /*
   function utilized to create postings in feed
 */
-function createPost()
+function createPost($dbConnection, $jsonPayload)
 {
-  //call autoTag function
-  //implement posting capabilities
+  // Get from JSON: userID, body text,  image URL
+  $userID = $jsonPayload['userID'];
+  $bodyText = trim($jsonPayload['bodyText']);
+  $imageURL = trim($jsonPayload['imageURL']);
+
+  // Add post to the database
+  $query = $dbConnection->prepare("INSERT INTO Posts (userID, bodyText, imageName) VALUES ('?', '?', '?')");
+  $query->bind_param('iss', $userID, $bodyText, $imageURL);
+  $query->execute();
+
+  // Result from the query
+  $result = $query->get_result();
+
+  // Check to see if the insertion was successful...
+  if ($result) {
+  // If successful, return JSON success response
+  returnSuccess('Post created.');
+  } else {
+  // If not successful, return JSON error response
+  returnError($dbConnection->error);
+  }
+
+
+  // We don't need a relational table for posts and users
+
+
+  // Call image tagger and populate relational table: Posts_Tags
+
 }
 
  /** Search by tags function
    *
   */
-function tagSearch()
+function tagSearch($dbConnection, $jsonPayload)
 {
   //implement search logic
   /*
@@ -225,7 +258,7 @@ function tagSearch()
 /*
  *  Settings function
 */
-function settings()
+function settings($dbConnection, $jsonPayload)
 {
   // implement connections for settings
 
