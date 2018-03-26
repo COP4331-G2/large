@@ -201,10 +201,37 @@ function autoTag()
 /*
   function utilized to create postings in feed
 */
-function createPost()
+function createPost($dbConnection, $jsonPayload)
 {
-  //call autoTag function
-  //implement posting capabilities
+  // Get from JSON: username, body text,  image URL
+  $username = trim($jsonPayload['username']);
+  $bodyText = $jsonPayload['bodyText'];
+  $imageURL = $jsonPayload['imageURL'];
+
+
+  // Add post to the database
+  $query = $dbConnection->prepare("INSERT INTO Posts (username, bodyText, imageName) VALUES ('?', '?', '?')");
+  $query->bind_param('sss', $username, $bodyText, $imageURL);
+  $query->execute();
+
+  // Result from the query
+  $result = $query->get_result();
+
+  // Check to see if the insertion was successful...
+  if ($result) {
+  // If successful, return JSON success response
+  returnSuccess('Post created.');
+  } else {
+  // If not successful, return JSON error response
+  returnError($dbConnection->error);
+  }  
+
+
+  // We don't need a relational table for posts and users
+
+
+  // Call image tagger and populate relational table: Posts_Tags
+
 }
 
  /** Search by tags function
