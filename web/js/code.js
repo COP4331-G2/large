@@ -1,10 +1,12 @@
 // Constant value for API path (for ease of use)
 //const API = "API/API.php";
 //const API = "http://34.205.31.49/small/web/API/API.php";
-const API = "http://api.jsonbin.io/b/5ab43edd989617146bd6f3a7";
+const API = "https://api.myjson.com/bins/119p5f";
 
-var currentUserID = "Julian";
-var posts;
+var currentUserID = "";
+var postList;
+var filteredPostList;
+var indexLoaded;
 
 var failwhale = `
 <pre>
@@ -116,6 +118,23 @@ function hideOrShowByClass(elementClass, showState) {
     }
 }
 
+function CallServerSide(jsonPayload) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", API, true);
+    xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+    try {
+        xhr.onreadystatechange = function() {
+
+            if (this.readyState === 4 && this.status === 200) {
+                var jsonObject = JSON.parse(xhr.responseText);
+                populatePosts();
+            }
+        };
+        xhr.send(jsonPayload);
+    } catch (err) {
+        console.log(err);
+    }
+}
 
 function createAccount()
 {
@@ -214,16 +233,11 @@ function createAccount()
 }
 
 function stringContains(stringToCheck, substring) {
-    return stringToCheck.toLowerCase().indexOf(substring.toLowerCase()) !== -1;
+    return stringToCheck.toString().toLowerCase().indexOf(substring.toLowerCase()) !== -1;
 }
 
 function populatePosts()
 {
-    if (!currentUserID) 
-    {
-        return;
-    }
-
     var jsonPayload = 
     {
         function: "getContacts",
@@ -244,8 +258,12 @@ function populatePosts()
             if (this.readyState === 4 && this.status === 200)
             {
                 var jsonObject = JSON.parse(xhr.responseText);
-                posts = jsonObject.results;
-                buildPostData();
+                postList = jsonObject.posts;
+                filteredPostList = jsonObject.posts;
+                indexLoaded = 0;
+                var tud = document.getElementById("postScroll");
+                tud.innerHTML = "";
+                buildPostData(filteredPostList.slice(0,5));
             }
         };
 
@@ -256,10 +274,10 @@ function populatePosts()
     }
 }
 
-function buildPostData() 
+function buildPostData(posts) 
 {
+    console.log(posts);
     var tud = document.getElementById("postScroll");
-    tud.innerHTML = "";
     var i;
     if(!posts)
     {
@@ -298,12 +316,31 @@ function buildPostData()
         post.appendChild(verticalLine);
         tud.appendChild(post);
     }
+
+    indexLoaded += posts.length;
+}
+
+function searchPosts()
+{
+    var typedSearch = document.getElementById("searchText").value;
+    filteredPostList = postList.filter(function (item) {
+        return (stringContains(item.tags, typedSearch) || stringContains(item.userName, typedSearch) || stringContains(item.postText, typedSearch));
+    });
+    indexLoaded = 0;
+    var tud = document.getElementById("postScroll");
+    tud.innerHTML = "";
+    buildPostData(filteredPostList.slice(0, 5));
+}
+
+function loadNext()
+{
+    buildPostData(filteredPostList.slice(indexLoaded, indexLoaded + 5));
 }
 
 function likeButtonPress(button)
 {
-    
-     // button.classList.toggle("fa fa-thumbs-up");
+
+    // button.classList.toggle("fa fa-thumbs-up");
 
     //button.className = "fa fa-thumbs-down";
     /*if(button.className == "fa fa-thumbs-up") 
@@ -314,5 +351,5 @@ function likeButtonPress(button)
     {
         button.className = "fa fa-thumbs-up";
     }*/
-    
+
 }

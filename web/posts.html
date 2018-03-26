@@ -43,8 +43,13 @@
                         </div>
                     </div>
 
-                    <div class="scrollertable col-sm-8" id="postScroll">                              
+                    <div class="col-sm-8">   
+                        <div style="padding-bottom: 5px">
+                            <input type="text" class="form-control mr-auto postSearch" id="searchText" placeholder="Search Posts" oninput="searchPosts()" />
+                        </div>
+                        <div class="scrollertable" id="postScroll">                            
                             <!-- This is where posts go -->
+                        </div>
                     </div> 
 
                     <div class="col-sm-2">
@@ -55,12 +60,14 @@
         </div>
     </div>
     <script>
-    this.addEventListener('DOMContentLoaded', populatePosts(), false);
-    
+        this.addEventListener('DOMContentLoaded', populatePosts(), false);
 
-    function clearErrors() {
-        document.getElementById("contactAddResult").innerHTML = "";
-    }
+        $('#postScroll').on('scroll', function ()
+        {
+            if ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
+                loadNext();
+            }
+        })
         
     </script>
 </body>

@@ -4,13 +4,11 @@ body, html
     overflow: hidden;
 }
 
-.bg {
+.bg
+{
     /* The image used */
-    /*background-image: url("http://blacktie.co/demo/premium/maxfront/demos/sliderbg_01.png");*/
     background-image: url("https://media0.giphy.com/media/BHNfhgU63qrks/source.gif");
-    /* Half height */
     height: 100%;
-    /* Center and scale the image nicely */
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
@@ -56,6 +54,14 @@ body, html
     font-weight: 300;
     width: 95%;
 
+}
+
+.postSearch {
+    margin-left: auto;
+    margin-right: auto;
+    width: 95%;
+    height: 30px;
+    border-radius: 15px;
 }
 
 .line-separator {
