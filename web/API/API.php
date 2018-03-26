@@ -122,7 +122,7 @@ function createUser($dbConnection, $jsonPayload)
     }else {
         // This block uses prepared statements and parameterized queries to protect against SQL injection
         // MySQL query to check if a username already exists in the database
-        $query = $dbConnection->prepare("SELECT * FROM Users WHERE username='?'");
+        $query = $dbConnection->prepare("SELECT * FROM Users WHERE username=?");
         $query->bind_param('s', $username);
         $query->execute();
 
@@ -135,12 +135,14 @@ function createUser($dbConnection, $jsonPayload)
             returnError('Username already exists.');
         }
 
+        $query->close();
+
         // Encrypt the password (using PHP defaults)
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
         // This block uses prepared statements and parameterized queries to protect against SQL injection
         // MySQL query to add the username and password into the database
-        $query = $dbConnection->prepare("INSERT INTO Users (username, password, firstName, lastName, emailAddress, isGroup) VALUES ('?', '?','?', '?','?','?' )");
+        $query = $dbConnection->prepare("INSERT INTO Users (username, password, firstName, lastName, emailAddress, isGroup) VALUES (?, ?,?, ?,?,? )");
         $query->bind_param('sssssi', $username, $hashedPassword, $firstName, $lastName, $emailAddress, $isGroup);
         $query->execute();
 
@@ -150,9 +152,11 @@ function createUser($dbConnection, $jsonPayload)
         // Check to see if the insertion was successful...
         if ($result) {
             // If successful, return JSON success response
+            $query->close();
             returnSuccess('User created.');
         } else {
             // If not successful, return JSON error response
+            $query->close();
             returnError($dbConnection->error);
         }
     }
@@ -216,7 +220,7 @@ function createPost($dbConnection, $jsonPayload)
   $imageURL = trim($jsonPayload['imageURL']);
 
   // Add post to the database
-  $query = $dbConnection->prepare("INSERT INTO Posts (userID, bodyText, imageName) VALUES ('?', '?', '?')");
+  $query = $dbConnection->prepare("INSERT INTO Posts (userID, bodyText, imageName) VALUES (?, ?, ?)");
   $query->bind_param('iss', $userID, $bodyText, $imageURL);
   $query->execute();
 
