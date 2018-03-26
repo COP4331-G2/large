@@ -116,23 +116,6 @@ function hideOrShowByClass(elementClass, showState) {
     }
 }
 
-function CallServerSide(jsonPayload) {
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", API, true);
-    xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
-    try {
-        xhr.onreadystatechange = function() {
-
-            if (this.readyState === 4 && this.status === 200) {
-                var jsonObject = JSON.parse(xhr.responseText);
-                populatePosts();
-            }
-        };
-        xhr.send(jsonPayload);
-    } catch (err) {
-        console.log(err);
-    }
-}
 
 function createAccount()
 {
@@ -261,8 +244,8 @@ function populatePosts()
             if (this.readyState === 4 && this.status === 200)
             {
                 var jsonObject = JSON.parse(xhr.responseText);
-                buildPostData(jsonObject.posts);
                 posts = jsonObject.results;
+                buildPostData();
             }
         };
 
@@ -273,18 +256,18 @@ function populatePosts()
     }
 }
 
-function buildPostData(data) 
+function buildPostData() 
 {
     var tud = document.getElementById("postScroll");
     tud.innerHTML = "";
     var i;
-    if(!data)
+    if(!posts)
     {
       console.log("data is not available");
       return;
     }
     
-    for (i = 0; i < data.length; i++) {
+    for (i = 0; i < posts.length; i++) {
         var post = document.createElement('div');
         var text = document.createElement('div');
         var tags = document.createElement('div');
@@ -294,14 +277,14 @@ function buildPostData(data)
         tumbsupdiv.className = "buttsup";
         var tumbsup = document.createElement('button');
         tumbsup.className = "fa fa-thumbs-up";
-        tumbsup.id = data[i].postID;
+        tumbsup.id = posts[i].postID;
         tumbsup.addEventListener("onclick", likeButtonPress(tumbsup));
         verticalLine.className = "line-separator";
-        text.innerHTML = data[i].postText;
-        tags.innerHTML = data[i].tags;
-        username.innerHTML = data[i].userName;
+        text.innerHTML = posts[i].postText;
+        tags.innerHTML = posts[i].tags;
+        username.innerHTML = posts[i].userName;
         var image = document.createElement('img');
-        image.src = data[i].imageAddress;
+        image.src = posts[i].imageAddress;
         image.className = "image";
         text.className = "postBodyText";
         tags.className = "tagsText";
