@@ -216,7 +216,7 @@ function createPost($dbConnection, $jsonPayload)
   $imageURL = trim($jsonPayload['imageURL']);
 
   // Add post to the database
-  $query = $dbConnection->prepare("INSERT INTO Posts (userID, bodyText, imageName) VALUES (?, '?', '?')");
+  $query = $dbConnection->prepare("INSERT INTO Posts (userID, bodyText, imageName) VALUES ('?', '?', '?')");
   $query->bind_param('iss', $userID, $bodyText, $imageURL);
   $query->execute();
 
