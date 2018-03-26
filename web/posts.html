@@ -1,246 +1,67 @@
 ﻿<html>
+ 
 
 <head>
+    <title>Musū</title>
     <script type="text/javascript" src="js/code.js"></script>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
     <link href="css/styles.css" rel="stylesheet">
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 </head>
-<header>
-    <title>Musū</title>
-</header>
 
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="col-sm-2"><a class="navbar-brand mt-0" href="#">連絡<hr class="mx-0 my-0"> <span style="font-size: 12px">Musū</span> </a></div>
-        <!-- div for Search and Add Contacts buttons
-            ->Hidden on homepage, visible on logged in
-            ->ID: loggedInButtonsDiv              -->
         <div id="loggedInButtonsDiv">
             <form class="form-inline mr-sm-2 my-2 my-lg-0"></form>
         </div>
-        <!-- UL class to seperate button spacing on navbar -->
-        <!-- Div for navbar buttons
-            ->Visible on homepage, hidden while logged in
-            ->ID: loginDiv  -->
-        <form class="form-inline mr-sm-2 my-2 my-lg-0 ml-auto">        
-            <!-- div for logout button and "Logged in as" text
-            ->Hidden on homepage, always shown while logged in
-            ->id = loggedInDiv  -->
+        <form class="form-inline mr-sm-2 my-2 my-lg-0 ml-auto">       
             <div id="loggedinDiv" >
-                <!-- span containing "logged in text"
-                  ->Empty on homepage, always userLastName, userFirstName while logged in
-                  ->id = loggedInUserFullName -->
-                <span class="navbar-text">Logged in as&nbsp;</span><span class="navbar-text text-info mr-2" id="currentUserName"></span>
-                <button type="button" class="btn btn-danger ml-2" id="logoutButton" onclick="doLogout();"><i class="fas fa-sign-out-alt mr-1"></i>Logout</button>
+                <span class="navbar-text">Logged in as&nbsp;</span><span class="navbar-text text-info mr-2" id="currentUserName">username</span>
+                <button type="button" class="btn btn-danger ml-2" id="logoutButton" onclick=""><i class="fas fa-sign-out-alt mr-1"></i>Logout</button>
             </div>
         </form>
     </nav>
     
-    
-   
-    <!-- Div that dispalys contacts and search bar
-        ->Hidden on homepage, shown while on contact List
-      ->id = accessUIDiv
-      -> Function for searching a contact changed from: searchColor() To: searchContact()
-      -> ID for search contact result changed from: colorSearchResult To: contactSearchResult -->
-    <div id="accessUIDiv">
+    <div id="accessUIDiv" >
         <div class="container-fluid">
             <div class="card center-block">
-                <div class="card-body row">
-                    <!-- Table that will dsiplay the contacts
-                    ->id = contactsTable  -->
-                    <div class="col-sm-2" style="background-color:#808080">
-                              
-                       
+                <div class="card-body row" style="background-color:#FFFFFF">
+
+                    <div class="col-sm-2" >
+                        <div id="mySidenav" class="sidenav">
+                            <a href="#" id="about">About</a>
+                            <a href="#" id="blog">Blog</a>
+                            <a href="#" id="projects">Projects</a>
+                            <a href="#" id="contact">Contact</a>
+                        </div>
                     </div>
 
-                    <div class="scrollertable col-sm-8">
-                             <img src="https://www.w3schools.com/html/pulpitrock.jpg" alt="The Pulpit Rock" class="image">
+                    <div class="scrollertable col-sm-8" id="postScroll">                              
+                            <!-- This is where posts go -->
                     </div> 
 
-                    <div class="col-sm-2" style="background-color:#808080">
-
-
-                            <form class="form-inline mr-sm-2 my-2 my-lg-4 ml-auto">        
-                               <!-- div for Search Posts button
-                                  ->id = SearchPostDiv  -->
-                             <div id="SearchPostDiv" >
-             
-                             <button style="height:100px;width:200px" type="button" class="btn btn-danger ml-2" id="logoutButton" onclick="doSearchPosts();"><i class=" mr-1"></i>SearchPosts</button>
-                             </div>
-                           </form>
-                            <form class="form-inline mr-sm-2 my-2 my-lg-4 ml-auto">        
-                               <!-- div for Search Posts button
-                                  ->id = SearchPostDiv  -->
-                             <div id="SearchPostDiv" >
-             
-                             <button style="height:100px;width:200px" type="button" class="btn btn-primary mx-1" id="CreatePost" onclick="doCreatePost();"><i class=" mr-1"></i>CreatePost</button>
-                                   
-          
-                             </div>
-                           </form>
-
-
-                        
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- New Contact Modal -->
-        <div class="container">
-            <div class="modal fade" id="createPost">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <!-- Modal Header -->
-                        <div class="modal-header">
-                            <h4 class="modal-title">Create Post</h4>
-                            <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        </div>
-                        <!-- Modal body -->
-                        <div class="container">
-                            <div class="modal-body">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <!-- Form for adding a new contact. IDs:
-                                        ->ID for First Name field: firstNameNewEntry
-                                        ->ID for Last Name field: lastNameNewEntry
-                                        ->ID for E-Mail field: emailNewEntry
-                                        ->ID for Phone Number field: phoneNewEntry  -->
-                                        <form>
-                                            <div class="form-row">
-                                                <div class="form-group col-sm-6 col-md-6">
-                                                    <label for="Text">First Name</label>
-                                                    <input type="text" class="form-control" id="PostTextEntry" placeholder="Text">
-                                                </div>
-                                                <div class="form-group col-sm-6 col-md-6">
-                                                    <label for="Tags">Last Name</label>
-                                                    <input type="text" class="form-control" id="PostTags" placeholder="Tags">
-                                                </div>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Modal footer -->
-                            <div class="modal-footer">
-                                <span id="createPost" class="text-danger mr-auto"> </span>
-                                <button type="button" class="btn btn-secondary" id="addPost" onclick="">Post</button>
-                                <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="clearErrors();">Cancel</button>
-                            </div>
-                        </div>
+                    <div class="col-sm-2">
+                        <!-- This is where right column goes -->
                     </div>
                 </div>
             </div>
         </div>
     </div>
     <script>
-    var input = document.getElementById("loginName");
-    input.addEventListener("keyup", function(event) {
-        event.preventDefault();
-        if (event.keyCode === 13) {
-            document.getElementById("loginButton").click();
-        }
-    });
-    </script>
-    <script>
-    var input = document.getElementById("loginPassword");
-    input.addEventListener("keyup", function(event) {
-        event.preventDefault();
-        if (event.keyCode === 13) {
-            document.getElementById("loginButton").click();
-        }
-    });
-    </script>
-    <script>
-    var input = document.getElementById("firstNameNewEntry");
-    input.addEventListener("keyup", function(event) {
-        event.preventDefault();
-        if (event.keyCode === 13) {
-            document.getElementById("addContactButton").click();
-        }
-    });
-    </script>
-    <script>
-    var input = document.getElementById("lastNameNewEntry");
-    input.addEventListener("keyup", function(event) {
-        event.preventDefault();
-        if (event.keyCode === 13) {
-            document.getElementById("addContactButton").click();
-        }
-    });
-    </script>
-    <script>
-    var input = document.getElementById("emailNewEntry");
-    input.addEventListener("keyup", function(event) {
-        event.preventDefault();
-        if (event.keyCode === 13) {
-            document.getElementById("addContactButton").click();
-        }
-    });
-    </script>
-    <script>
-    var input = document.getElementById("phoneNewEntry");
-    input.addEventListener("keyup", function(event) {
-        event.preventDefault();
-        if (event.keyCode === 13) {
-            document.getElementById("addContactButton").click();
-        }
-    });
-    </script>
-    <script>
-    var input = document.getElementById("confirmPassword");
-    input.addEventListener("keyup", function(event) {
-        event.preventDefault();
-        // 13 = Enter key
-        if (event.keyCode === 13) {
-            document.getElementById("createUserButton").click();
-        }
-    });
-    </script>
-    <script>
-    function doCreateAccount() {
-        if (createAccount()) {
-            $("#signupModal").modal('hide');
-            clearErrors();
-        }
-    }
-
-    function doAddContact() {
-        if (addContact()) {
-            $("#addContactModal").modal('hide');
-            clearErrors();
-        }
-    }
+    this.addEventListener('DOMContentLoaded', populatePosts(), false);
+    
 
     function clearErrors() {
-        document.getElementById("loginResult").innerHTML = "";
-        document.getElementById("createResult").innerHTML = "";
         document.getElementById("contactAddResult").innerHTML = "";
     }
-
-    function doLogin() {
-        if (!login()) {
-            $("#loginErrorModal").modal('show');
-        }
-    }
-    </script>
-    <script>
-    document.addEventListener("keyup", function(event) {
-        event.preventDefault();
-        // 27 = Escape key
-        if (event.keyCode === 27) {
-            $("#signupModal").modal('hide');
-            $("#addContactModal").modal('hide');
-            $("#loginErrorModal").modal('hide');
-            clearErrors();
-        }
-    });
+        
     </script>
 </body>
 

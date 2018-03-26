@@ -1,9 +1,10 @@
 // Constant value for API path (for ease of use)
 //const API = "API/API.php";
-const API = "http://34.205.31.49/small/web/API/API.php";
+//const API = "http://34.205.31.49/small/web/API/API.php";
+const API = "http://api.jsonbin.io/b/5ab43edd989617146bd6f3a7";
 
-var currentUserID;
-var tableData;
+var currentUserID = "Julian";
+var posts;
 
 var failwhale = `
 <pre>
@@ -16,6 +17,7 @@ var failwhale = `
                    (fail whale)
 </pre>
 `;
+
 
 function login()
 {
@@ -71,26 +73,17 @@ function login()
 
         // Hide the login HTML elements
         hideOrShow("loginDiv", false);
-
-        // Hide the landing page
-        hideOrShow("landingPageDiv", false);
-
-        // Show the post-login HTML elements
-        hideOrShow("loggedinDiv", true);
-        hideOrShow("accessUIDiv", true);
-
-        // Fill the user's contacts table
-        fillTable();
+        
     } catch (e) {
         // If there is an error parsing the JSON, attempt to set the HTML login result message
         document.getElementById("loginResult").innerHTML = e.message;
     }
 
-    document.getElementById("currentUserName").innerHTML = jsonObject.results.username;
+    //document.getElementById("currentUserName").innerHTML = jsonObject.results.username;
+    document.getElementById("currentUserName").innerHTML = "username";
 
     return true;
 }
-
 
 function hideOrShow(elementId, showState) {
     var componentToChange = document.getElementById(elementId);
@@ -132,7 +125,7 @@ function CallServerSide(jsonPayload) {
 
             if (this.readyState === 4 && this.status === 200) {
                 var jsonObject = JSON.parse(xhr.responseText);
-                fillTable();
+                populatePosts();
             }
         };
         xhr.send(jsonPayload);
@@ -141,7 +134,8 @@ function CallServerSide(jsonPayload) {
     }
 }
 
-function createAccount() {
+function createAccount()
+{
     var username = document.getElementById("createUser").value;
     var password = document.getElementById("createPassword").value;
     var confirm = document.getElementById("confirmPassword").value;
@@ -226,10 +220,7 @@ function createAccount() {
         document.getElementById("creatEmail").innerHTML = "";
         document.getElementById("createLastName").innerHTML = "";
         //hide sign up
-        // hideOrShow("signupDiv", false);
-
-        //go back to login page
-        // hideOrShow("homepageWelcomeDiv",true);
+        hideOrShow("signupDiv", false);        
 
     } catch (e) {
         // If there is an error parsing the JSON, attempt to set the HTML login result message
@@ -243,101 +234,102 @@ function stringContains(stringToCheck, substring) {
     return stringToCheck.toLowerCase().indexOf(substring.toLowerCase()) !== -1;
 }
 
-function fillTable() {
-    if (!currentUserID) {
+function populatePosts()
+{
+    if (!currentUserID) 
+    {
         return;
     }
 
-    var jsonPayload = {
+    var jsonPayload = 
+    {
         function: "getContacts",
-        userID: currentUserID,
+        userID: currentUserID
     };
+
     jsonPayload = JSON.stringify(jsonPayload);
 
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", API, true);
+    xhr.open("GET", API, true);
     xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
 
-    try {
-        xhr.onreadystatechange = function () {
+    try 
+    {
+        xhr.onreadystatechange = function ()
+        {
 
-            if (this.readyState == 4 && this.status == 200) {
+            if (this.readyState === 4 && this.status === 200)
+            {
                 var jsonObject = JSON.parse(xhr.responseText);
-                buildTableHeader();
-                buildTableData(jsonObject.results);
-                tableData = jsonObject.results;
+                buildPostData(jsonObject.posts);
+                posts = jsonObject.results;
             }
         };
 
         xhr.send(jsonPayload);
-    } catch (err) {
+    } catch (err) 
+    {
         console.log(err);
     }
 }
 
-
-function buildTableHeader() {
-    var tud = document.getElementById("posTable");
+function buildPostData(data) 
+{
+    var tud = document.getElementById("postScroll");
     tud.innerHTML = "";
-    var thr = document.createElement('tr');
-    var firstNameHeader = document.createElement('th');
-    firstNameHeader.innerHTML = 'First Name';
-    var lastNameHeader = document.createElement('th');
-    lastNameHeader.innerHTML = 'Last Name';
-    var phoneNumberHeader = document.createElement('th');
-    phoneNumberHeader.innerHTML = 'Phone Number';
-    var emailHeader = document.createElement('th');
-    emailHeader.innerHTML = 'Email Address';
-    var deleteHeader = document.createElement('th');
-    deleteHeader.innerHTML = 'Delete';
-    deleteHeader.style.visibility = 'hidden';
-    deleteHeader.style.display = 'none';
-    deleteHeader.id = "deleteHeader"
-
-    thr.appendChild(firstNameHeader);
-    thr.appendChild(lastNameHeader);
-    thr.appendChild(phoneNumberHeader);
-    thr.appendChild(emailHeader);
-    thr.appendChild(deleteHeader);
-    tud.appendChild(thr);
-}
-
-function buildTableData(data) {
-     < data.length; i++) {
-        var tableRowvar tud = document.getElementById("posTable");
     var i;
-    if (!data) {
-        return;
+    if(!data)
+    {
+      console.log("data is not available");
+      return;
     }
-    for (i = 0; i =d ocument.createElement('tr');
-        tableRow.id = data[i].contactId;
-        tableRow.align = "center";
-        var firstName = document.createElement('td');
-        firstName.innerHTML = data[i].firstName;
-        var lastName = document.createElement('td');
-        lastName.innerHTML = data[i].lastName;
-        var phoneNumber = document.createElement('td');
-        phoneNumber.innerHTML = data[i].phoneNumber;
-        var emailAddress = document.createElement('td');
-        emailAddress.innerHTML = data[i].emailAddress;
-        var deleteButton = document.createElement('input');
-        var deleteData = document.createElement('td');
-        var deleteDiv = document.createElement('div');
-        deleteDiv.className = "checkbox checkbox-success";
-
-        deleteButton.type = "checkbox";
-        deleteButton.style.visibility = "hidden";
-        deleteButton.style.display = "none";
-        deleteButton.className = "deleteButton styled ml-3";
-        deleteDiv.appendChild(deleteButton);
-        deleteData.appendChild(deleteDiv);
-
-        tableRow.appendChild(firstName);
-        tableRow.appendChild(lastName);
-        tableRow.appendChild(phoneNumber);
-        tableRow.appendChild(emailAddress);
-        tableRow.appendChild(deleteData);
-        tud.appendChild(tableRow);
+    
+    for (i = 0; i < data.length; i++) {
+        var post = document.createElement('div');
+        var text = document.createElement('div');
+        var tags = document.createElement('div');
+        var username = document.createElement('div');
+        var verticalLine = document.createElement('div');
+        var tumbsupdiv = document.createElement('div');
+        tumbsupdiv.className = "buttsup";
+        var tumbsup = document.createElement('button');
+        tumbsup.className = "fa fa-thumbs-up";
+        tumbsup.id = data[i].postID;
+        tumbsup.addEventListener("onclick", likeButtonPress(tumbsup));
+        verticalLine.className = "line-separator";
+        text.innerHTML = data[i].postText;
+        tags.innerHTML = data[i].tags;
+        username.innerHTML = data[i].userName;
+        var image = document.createElement('img');
+        image.src = data[i].imageAddress;
+        image.className = "image";
+        text.className = "postBodyText";
+        tags.className = "tagsText";
+        username.className = "usernamePostText";
+        tumbsupdiv.appendChild(tumbsup);
+        post.appendChild(username);
+        post.appendChild(tags);
+        post.appendChild(text);
+        post.appendChild(image);
+        post.appendChild(tumbsupdiv);
+        post.appendChild(verticalLine);
+        tud.appendChild(post);
     }
 }
 
+function likeButtonPress(button)
+{
+    
+     // button.classList.toggle("fa fa-thumbs-up");
+
+    //button.className = "fa fa-thumbs-down";
+    /*if(button.className == "fa fa-thumbs-up") 
+    {
+        button.className = "fa fa-thumbs-down";
+    }
+    else if(button.className == "fa fa-thumbs-down")
+    {
+        button.className = "fa fa-thumbs-up";
+    }*/
+    
+}
