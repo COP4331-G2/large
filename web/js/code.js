@@ -4,9 +4,10 @@
 const API = "https://api.myjson.com/bins/119p5f";
 
 var currentUserID = "";
-var postList;
-var filteredPostList;
-var indexLoaded;
+
+var postList;                       //List provided by backend, usually really big
+var filteredPostList;               //List filtered by search bar, can be really big. If not filtered, is the same as post list.
+var indexLoaded;                    //Last index loaded by page on filtered post list
 
 var failwhale = `
 <pre>
@@ -263,7 +264,7 @@ function populatePosts()
                 indexLoaded = 0;
                 var tud = document.getElementById("postScroll");
                 tud.innerHTML = "";
-                buildPostData(filteredPostList.slice(0,5));
+                buildPostData(filteredPostList.slice(0,10));
             }
         };
 
@@ -329,12 +330,12 @@ function searchPosts()
     indexLoaded = 0;
     var tud = document.getElementById("postScroll");
     tud.innerHTML = "";
-    buildPostData(filteredPostList.slice(0, 5));
+    buildPostData(filteredPostList.slice(0, 10));
 }
 
 function loadNext()
 {
-    buildPostData(filteredPostList.slice(indexLoaded, indexLoaded + 5));
+    buildPostData(filteredPostList.slice(indexLoaded, indexLoaded + 10));
 }
 
 function likeButtonPress(button)
