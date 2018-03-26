@@ -210,12 +210,7 @@ function createPost($dbConnection, $jsonPayload)
   // Get from JSON: username, body text,  image URL
   $username = trim($jsonPayload['username']);
   $bodyText = trim($jsonPayload['bodyText']);
-<<<<<<< HEAD
   $imageURL = trim($jsonPayload['imageURL']);
-=======
-  $imageURL = $jsonPayload['imageURL'];
->>>>>>> f8a42b9858e70f509eb323053a3cf3e960558ab9
-
 
   // Add post to the database
   $query = $dbConnection->prepare("INSERT INTO Posts (userID, bodyText, imageName) VALUES ('?', '?', '?')");
