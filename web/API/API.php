@@ -43,7 +43,7 @@ function callVariableFunction($dbConnection, $jsonPayload)
     }
 }
 
-/** NEED
+/**
  * Verify username/password information and (perhaps) login to a user's account
  *
  * @param mysqli $dbConnection MySQL connection instance
@@ -88,7 +88,7 @@ function loginAttempt($dbConnection, $jsonPayload)
     }
 }
 
-/** NEED
+/**
  * Create a new user account
  *
  * @param mysqli $dbConnection MySQL connection instance
@@ -125,7 +125,7 @@ function createUser($dbConnection, $jsonPayload)
     }else {
         // This block uses prepared statements and parameterized queries to protect against SQL injection
         // MySQL query to check if a username already exists in the database
-        $query = $dbConnection->prepare("SELECT * FROM Users WHERE username='?'");
+        $query = $dbConnection->prepare("SELECT * FROM Users WHERE username=?");
         $query->bind_param('s', $username);
         $query->execute();
 
@@ -138,12 +138,14 @@ function createUser($dbConnection, $jsonPayload)
             returnError('Username already exists.');
         }
 
+        $query->close();
+
         // Encrypt the password (using PHP defaults)
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
         // This block uses prepared statements and parameterized queries to protect against SQL injection
         // MySQL query to add the username and password into the database
-        $query = $dbConnection->prepare("INSERT INTO Users (username, password, firstName, lastName, emailAddress, isGroup) VALUES ('?', '?','?', '?','?','?' )");
+        $query = $dbConnection->prepare("INSERT INTO Users (username, password, firstName, lastName, emailAddress, isGroup) VALUES (?, ?, ?, ?, ?, ?)");
         $query->bind_param('sssssi', $username, $hashedPassword, $firstName, $lastName, $emailAddress, $isGroup);
         $query->execute();
 
@@ -154,9 +156,11 @@ function createUser($dbConnection, $jsonPayload)
         if ($result) {
           $_SESSION['id'] = $row['id'];
             // If successful, return JSON success response
+            $query->close();
             returnSuccess('User created.');
         } else {
             // If not successful, return JSON error response
+            $query->close();
             returnError($dbConnection->error);
         }
     }
@@ -202,18 +206,22 @@ function authentication()
 /** Machine Learning function
   *
  */
-function autoTag()
+function autoTag($dbConnection, $jsonPayload)
 {
   // implement machine learning algorithm
   // separate machine learning from create post? as a stand alone funct?
   // image to text
   //text to tags
+
+
+
 }
 
 /*
   function utilized to create postings in feed
 */
-function createPost($jsonPayload)
+
+function createPost($dbConnection, $jsonPayload)
 {
   //call autoTag function
   //implement posting capabilities
@@ -225,12 +233,40 @@ function createPost($jsonPayload)
   // the image name and the tags associate to the image.
   // after run the line below to save the image.
   move_uploaded_file($_FILES['file']['tmp_name'], $destinationFolder.$image);
+  // Get from JSON: userID, body text,  image URL
+  $userID = $jsonPayload['userID'];
+  $bodyText = trim($jsonPayload['bodyText']);
+  $imageURL = trim($jsonPayload['imageURL']);
+
+  // Add post to the database
+  $query = $dbConnection->prepare("INSERT INTO Posts (userID, bodyText, imageName) VALUES (?, ?, ?)");
+  $query->bind_param('iss', $userID, $bodyText, $imageURL);
+  $query->execute();
+
+  // Result from the query
+  $result = $query->get_result();
+
+  // Check to see if the insertion was successful...
+  if ($result) {
+  // If successful, return JSON success response
+  returnSuccess('Post created.');
+  } else {
+  // If not successful, return JSON error response
+  returnError($dbConnection->error);
+  }
+
+
+  // We don't need a relational table for posts and users
+
+
+  // Call image tagger and populate relational table: Posts_Tags
+
 }
 
  /** Search by tags function
    *
   */
-function tagSearch()
+function tagSearch($dbConnection, $jsonPayload)
 {
   //implement search logic
   /*
@@ -245,7 +281,7 @@ function tagSearch()
 /*
  *  Settings function
 */
-function settings()
+function settings($dbConnection, $jsonPayload)
 {
   // implement connections for settings
 

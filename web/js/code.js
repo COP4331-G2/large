@@ -1,9 +1,13 @@
 // Constant value for API path (for ease of use)
-//const API = "API/API.php";
-const API = "http://34.205.31.49/small/web/API/API.php";
+const API = "API/API.php";
+// const API = "http://34.205.31.49/small/web/API/API.php";
+// const API = "https://api.myjson.com/bins/119p5f";
 
-var currentUserID;
-var tableData;
+var currentUserID = "";
+
+var postList;                       //List provided by backend, usually really big
+var filteredPostList;               //List filtered by search bar, can be really big. If not filtered, is the same as post list.
+var indexLoaded;                    //Last index loaded by page on filtered post list
 
 var failwhale = `
 <pre>
@@ -16,6 +20,7 @@ var failwhale = `
                    (fail whale)
 </pre>
 `;
+
 
 function login()
 {
@@ -72,25 +77,13 @@ function login()
         // Hide the login HTML elements
         hideOrShow("loginDiv", false);
 
-        // Hide the landing page
-        hideOrShow("landingPageDiv", false);
-
-        // Show the post-login HTML elements
-        hideOrShow("loggedinDiv", true);
-        hideOrShow("accessUIDiv", true);
-
-        // Fill the user's contacts table
-        fillTable();
     } catch (e) {
         // If there is an error parsing the JSON, attempt to set the HTML login result message
         document.getElementById("loginResult").innerHTML = e.message;
     }
 
-    document.getElementById("currentUserName").innerHTML = jsonObject.results.username;
-
     return true;
 }
-
 
 function hideOrShow(elementId, showState) {
     var componentToChange = document.getElementById(elementId);
@@ -132,7 +125,7 @@ function CallServerSide(jsonPayload) {
 
             if (this.readyState === 4 && this.status === 200) {
                 var jsonObject = JSON.parse(xhr.responseText);
-                fillTable();
+                populatePosts();
             }
         };
         xhr.send(jsonPayload);
@@ -141,7 +134,8 @@ function CallServerSide(jsonPayload) {
     }
 }
 
-function createAccount() {
+function createAccount()
+{
     var username = document.getElementById("createUser").value;
     var password = document.getElementById("createPassword").value;
     var confirm = document.getElementById("confirmPassword").value;
@@ -156,9 +150,21 @@ function createAccount() {
         document.getElementById("createResult").innerHTML = "Username must not exceed 60 characters.";
         return;
     }
+    if (username.length === 0) {
+        document.getElementById("createResult").innerHTML = "Username must not be empty.";
+        return;
+    }
     if (password.length > 60)
     {
         document.getElementById("createResult").innerHTML = "Password must not exceed 60 characters.";
+        return;
+    }
+    if (password.length < 6) {
+        document.getElementById("createResult").innerHTML = "Password must be longer than 6 characters.";
+        return;
+    }
+    if (password !== confirm) {
+        document.getElementById("createResult").innerHTML = "Passwords don't match.";
         return;
     }
     if (firstName.length > 60)
@@ -171,14 +177,9 @@ function createAccount() {
         document.getElementById("createResult").innerHTML = "That is a very long last name, can we call you another name?";
         return;
     }
-    if (email.length > 60 || !stringContains(email, "@"))
+    if (email.length > 60 || !stringContains(email, "@") || email.length < 4)
     {
         document.getElementById("createResult").innerHTML = "Please enter a valid email";
-        return;
-    } 
-    if (password !== confirm)
-    {
-        document.getElementById("createResult").innerHTML = "Passwords don't match.";
         return;
     }
 
@@ -189,7 +190,7 @@ function createAccount() {
             password: password,
             firstName: firstName,
             lastName: lastName,
-            email: email
+            emailAddress: email
         };
 
     jsonPayload = JSON.stringify(jsonPayload);
@@ -219,10 +220,7 @@ function createAccount() {
         document.getElementById("creatEmail").innerHTML = "";
         document.getElementById("createLastName").innerHTML = "";
         //hide sign up
-        // hideOrShow("signupDiv", false);
-
-        //go back to login page
-        // hideOrShow("homepageWelcomeDiv",true);
+        hideOrShow("signupDiv", false);
 
     } catch (e) {
         // If there is an error parsing the JSON, attempt to set the HTML login result message
@@ -233,5 +231,123 @@ function createAccount() {
 }
 
 function stringContains(stringToCheck, substring) {
-    return stringToCheck.toLowerCase().indexOf(substring.toLowerCase()) !== -1;
+    return stringToCheck.toString().toLowerCase().indexOf(substring.toLowerCase()) !== -1;
+}
+
+function populatePosts()
+{
+    var jsonPayload =
+    {
+        function: "getContacts",
+        userID: currentUserID
+    };
+
+    jsonPayload = JSON.stringify(jsonPayload);
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", API, true);
+    xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+
+    try
+    {
+        xhr.onreadystatechange = function ()
+        {
+
+            if (this.readyState === 4 && this.status === 200)
+            {
+                var jsonObject = JSON.parse(xhr.responseText);
+                postList = jsonObject.posts;
+                filteredPostList = jsonObject.posts;
+                indexLoaded = 0;
+                var tud = document.getElementById("postScroll");
+                tud.innerHTML = "";
+                buildPostData(filteredPostList.slice(0,10));
+            }
+        };
+
+        xhr.send(jsonPayload);
+    } catch (err)
+    {
+        console.log(err);
+    }
+}
+
+function buildPostData(posts)
+{
+    console.log(posts);
+    var tud = document.getElementById("postScroll");
+    var i;
+    if(!posts)
+    {
+      console.log("data is not available");
+      return;
+    }
+
+    for (i = 0; i < posts.length; i++) {
+        var post = document.createElement('div');
+        var text = document.createElement('div');
+        var tags = document.createElement('div');
+        var username = document.createElement('div');
+        var verticalLine = document.createElement('div');
+        var tumbsupdiv = document.createElement('div');
+        tumbsupdiv.className = "buttsup";
+        var tumbsup = document.createElement('button');
+        tumbsup.className = "fa fa-thumbs-up";
+        tumbsup.id = posts[i].postID;
+        tumbsup.addEventListener("onclick", likeButtonPress(tumbsup));
+        verticalLine.className = "line-separator";
+        text.innerHTML = posts[i].postText;
+        tags.innerHTML = posts[i].tags;
+        username.innerHTML = posts[i].userName;
+        var image = document.createElement('img');
+        image.src = posts[i].imageAddress;
+        image.className = "image";
+        text.className = "postBodyText";
+        tags.className = "tagsText";
+        username.className = "usernamePostText";
+        tumbsupdiv.appendChild(tumbsup);
+        post.appendChild(username);
+        post.appendChild(tags);
+        post.appendChild(text);
+        post.appendChild(image);
+        post.appendChild(tumbsupdiv);
+        post.appendChild(verticalLine);
+        tud.appendChild(post);
+    }
+
+    indexLoaded += posts.length;
+}
+
+function searchPosts()
+{
+    var typedSearch = document.getElementById("searchText").value;
+    filteredPostList = postList.filter(function (item) {
+        return (stringContains(item.tags, typedSearch) || stringContains(item.userName, typedSearch) || stringContains(item.postText, typedSearch));
+    });
+    indexLoaded = 0;
+    var tud = document.getElementById("postScroll");
+    tud.innerHTML = "";
+    buildPostData(filteredPostList.slice(0, 10));
+}
+
+function loadNext()
+{
+    buildPostData(filteredPostList.slice(indexLoaded, indexLoaded + 10));
+}
+
+function likeButtonPress(button)
+{
+
+    // button.classList.toggle("fa fa-thumbs-up");
+
+    //button.className = "fa fa-thumbs-down";
+    /*if(button.className == "fa fa-thumbs-up")
+    {
+        button.className = "fa fa-thumbs-down";
+    }
+    else if(button.className == "fa fa-thumbs-down")
+    {
+        button.className = "fa fa-thumbs-up";
+    }*/
+
 }
