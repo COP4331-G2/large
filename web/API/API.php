@@ -152,7 +152,7 @@ function createUser($dbConnection, $jsonPayload)
         // Result from the query
         $result = $query->get_result();
 
-        error_log($result, 3, "error.log");
+        error_log($result, 3, "/home/bitnami/htdocs/large/web/error.log");
 
         // Check to see if the insertion was successful...
         if ($result) {
