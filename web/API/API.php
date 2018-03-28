@@ -164,7 +164,7 @@ function createUser($dbConnection, $jsonPayload)
         } else {
             // If not successful, return JSON error response
             // $query->close();
-            returnError($dbConnection->error);
+            returnError("[".$result."]");
             // returnError("TEST");
         }
     }
