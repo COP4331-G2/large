@@ -150,7 +150,7 @@ function createUser($dbConnection, $jsonPayload)
         $query->execute();
 
         // Result from the query
-        $result = $query->get_result();
+        $result = mysqli_affected_rows($dbConnection);
 
         error_log($result, 3, "/home/bitnami/htdocs/large/web/error.log");
         error_log("TEST\n", 3, "/home/bitnami/htdocs/large/web/error.log");
