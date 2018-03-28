@@ -152,9 +152,6 @@ function createUser($dbConnection, $jsonPayload)
         // Result from the query
         $result = mysqli_affected_rows($dbConnection);
 
-        error_log($result, 3, "/home/bitnami/htdocs/large/web/error.log");
-        error_log("TEST\n", 3, "/home/bitnami/htdocs/large/web/error.log");
-
         // Check to see if the insertion was successful...
         if ($result) {
           $_SESSION['id'] = $row['id'];
@@ -163,9 +160,8 @@ function createUser($dbConnection, $jsonPayload)
             returnSuccess('User created.');
         } else {
             // If not successful, return JSON error response
-            // $query->close();
-            returnError("[".$result."]");
-            // returnError("TEST");
+            $query->close();
+            returnError('User not created: ' . $dbConnection->error);
         }
     }
 }
