@@ -253,6 +253,7 @@ function createPost($dbConnection, $jsonPayload)
     createPostTags($dbConnection, $jsonPayload, $postID);
   // If successful, return JSON success response
   returnSuccess('Post created.');
+  
   } else {
   // If not successful, return JSON error response
   returnError($dbConnection->error);
@@ -295,6 +296,7 @@ function createPostTags($dbConnection, $jsonPayload, $postID){
           $query->bind_param('ii', $postID, $id);
           $query->execute();
           $result = $query->get_result();
+
           if(!$result){
             returnError('There was an error in creating the post tag(s).');
           }
@@ -312,46 +314,47 @@ function createPostTags($dbConnection, $jsonPayload, $postID){
  /** Search by tags function
    *
   */
-function tagSearchTable($dbConnection, $tag)
-{
-  //implement search logic
-  /*
-    4 different searches (similar calls, all within same function?):
-      personalized (Favorites)
-      latest
-      groups
-      my post
-  */
-
-  // Check to see if the tag name pass exists in the Tags table. return 1 = true or 0 =f alse
-  $query = $dbConnection->prepare("SELECT name FROM Tags WHERE name = ?");
-  $query->bind_param('s', $tag);
-  $query->execute();
-  $result =  $query->get_result();
-
-  return $result->num_rows > 0 ? 1 : 0;
-}
-
-// Returns the Tag id for a Tag in the Tags table.
-function getTagIDfromTagsTable($dbConnection, $tag)
-{
-
-  if(tagSearchTable($dbConnection, $tag))
+  function tagSearchTable($dbConnection, $tag)
   {
-    $query = $dbConnection->prepare("SELECT id FROM Tags WHERE name = ?");
+    //implement search logic
+    /*
+      4 different searches (similar calls, all within same function?):
+        personalized (Favorites)
+        latest
+        groups
+        my post
+    */
+
+
+    // Check to see if the tag name pass exists in the Tags table. return 1 = true or 0 =f alse
+    $query = $dbConnection->prepare("SELECT name FROM Tags WHERE name = ?");
     $query->bind_param('s', $tag);
     $query->execute();
     $result =  $query->get_result();
 
-    $row = $result->fetch_assoc();
+    return $result->num_rows > 0 ? 1 : 0;
+  }
 
-    return $row['id'];
+  // Returns the Tag id for a Tag in the Tags table.
+  function getTagIDfromTagsTable($dbConnection, $tag)
+  {
+
+    if(tagSearchTable($dbConnection, $tag))
+    {
+      $query = $dbConnection->prepare("SELECT id FROM Tags WHERE name = ?");
+      $query->bind_param('s', $tag);
+      $query->execute();
+      $result =  $query->get_result();
+
+      $row = $result->fetch_assoc();
+
+      return $row['id'];
+    }
+    // no id exists for that tag.
+    else{
+      return -1;
+    }
   }
-  // no id exists for that tag.
-  else{
-    return -1;
-  }
-}
 
 /*
  *  Settings function
