@@ -232,15 +232,15 @@ function createPost($dbConnection, $jsonPayload)
   // get tag array. Insert in the database
   // the image name and the tags associate to the image.
   // after run the line below to save the image.
-  move_uploaded_file($_FILES['file']['tmp_name'], $destinationFolder.$image);
+
   // Get from JSON: userID, body text,  image URL
-  $userID = $jsonPayload['userID'];
+  $userID = $_SESSION['id'];
   $bodyText = trim($jsonPayload['bodyText']);
-  $imageURL = trim($jsonPayload['imageURL']);
+  $imageName = trim($image);
 
   // Add post to the database
   $query = $dbConnection->prepare("INSERT INTO Posts (userID, bodyText, imageName) VALUES (?, ?, ?)");
-  $query->bind_param('iss', $userID, $bodyText, $imageURL);
+  $query->bind_param('iss', $userID, $bodyText, $imageName);
   $query->execute();
 
   // Result from the query
@@ -248,6 +248,9 @@ function createPost($dbConnection, $jsonPayload)
 
   // Check to see if the insertion was successful...
   if ($result) {
+    $postTags = $dbConnection->insert_id;
+    move_uploaded_file($_FILES['file']['tmp_name'], $destinationFolder.$image);
+    createPostTags($dbConnection, $jsonPayload, $postID);
   // If successful, return JSON success response
   returnSuccess('Post created.');
   } else {
@@ -262,11 +265,54 @@ function createPost($dbConnection, $jsonPayload)
   // Call image tagger and populate relational table: Posts_Tags
 
 }
+function createPostTags($dbConnection, $jsonPayload, $postID){
+
+  $postTags = $jsonPayload['tag'];
+  $len = count($postTags);
+  $i = 0;
+
+    do{
+      $id = getTagIDfromTagsTable($dbConnection, $postTags[i]);
+      if($id !== -1){
+        $query = $dbConnection->prepare("INSERT INTO Posts_Tags (postID, tagID) VALUES (?, ?)");
+        $query->bind_param('ii', $postID, $id);
+        $query->execute();
+        $result = $query->get_result();
+        if(!$result){
+          returnError('There was an error in creating the post tag(s).');
+        }
+      }
+      // Tag doesnt exist. Insert to tags table
+      else{
+        $query = $dbConnection->prepare("INSERT INTO Tags (name) VALUES (?)");
+        $query->bind_param('s', $postTags[i]);
+        $query->execute();
+        $result = $query->get_result();
+        if($result){
+          $tagID = $dbConnection->insert_id;
+
+          $query = $dbConnection->prepare("INSERT INTO Posts_Tags (postID, tagID) VALUES (?, ?)");
+          $query->bind_param('ii', $postID, $id);
+          $query->execute();
+          $result = $query->get_result();
+          if(!$result){
+            returnError('There was an error in creating the post tag(s).');
+          }
+
+        }
+      }
+
+    }while($i<$len);
+
+    returnSuccess('Post tag(s) were successfuly created.');
+
+}
+
 
  /** Search by tags function
    *
   */
-function tagSearch($dbConnection, $jsonPayload)
+function tagSearchTable($dbConnection, $tag)
 {
   //implement search logic
   /*
@@ -276,6 +322,35 @@ function tagSearch($dbConnection, $jsonPayload)
       groups
       my post
   */
+
+  // Check to see if the tag name pass exists in the Tags table. return 1 = true or 0 =f alse
+  $query = $dbConnection->prepare("SELECT name FROM Tags WHERE name = ?");
+  $query->bind_param('s', $tag);
+  $query->execute();
+  $result =  $query->get_result();
+
+  return $result->num_rows > 0 ? 1 : 0;
+}
+
+// Returns the Tag id for a Tag in the Tags table.
+function getTagIDfromTagsTable($dbConnection, $tag)
+{
+
+  if(tagSearchTable($dbConnection, $tag))
+  {
+    $query = $dbConnection->prepare("SELECT id FROM Tags WHERE name = ?");
+    $query->bind_param('s', $tag);
+    $query->execute();
+    $result =  $query->get_result();
+
+    $row = $result->fetch_assoc();
+
+    return $row['id'];
+  }
+  // no id exists for that tag.
+  else{
+    return -1;
+  }
 }
 
 /*
