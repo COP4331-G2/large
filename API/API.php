@@ -150,7 +150,7 @@ function createUser($dbConnection, $jsonPayload)
         $query->execute();
 
         // Result from the query
-        $result = $query->get_result();
+        $result = mysqli_affected_rows($dbConnection);
 
         // Check to see if the insertion was successful...
         if ($result) {
@@ -161,7 +161,7 @@ function createUser($dbConnection, $jsonPayload)
         } else {
             // If not successful, return JSON error response
             $query->close();
-            returnError($dbConnection->error);
+            returnError('User not created: ' . $dbConnection->error);
         }
     }
 }
