@@ -253,7 +253,7 @@ function createPost($dbConnection, $jsonPayload)
     createPostTags($dbConnection, $jsonPayload, $postID);
   // If successful, return JSON success response
   returnSuccess('Post created.');
-  
+
   } else {
   // If not successful, return JSON error response
   returnError($dbConnection->error);
@@ -273,15 +273,16 @@ function createPostTags($dbConnection, $jsonPayload, $postID){
   $i = 0;
 
     do{
-      $id = getTagIDfromTagsTable($dbConnection, $postTags[i]);
+      $id = getTagIDfromTagsTable($dbConnection, $postTags[$i]);
       if($id !== -1){
         $query = $dbConnection->prepare("INSERT INTO Posts_Tags (postID, tagID) VALUES (?, ?)");
         $query->bind_param('ii', $postID, $id);
         $query->execute();
         $result = $query->get_result();
-        if(!$result){
+        if($result->num_rows < 0){
           returnError('There was an error in creating the post tag(s).');
         }
+        UserTagsAddLike($dbConnection, $postTags[$i]);
       }
       // Tag doesnt exist. Insert to tags table
       else{
@@ -289,25 +290,72 @@ function createPostTags($dbConnection, $jsonPayload, $postID){
         $query->bind_param('s', $postTags[i]);
         $query->execute();
         $result = $query->get_result();
-        if($result){
+        if($result->num_rows > 0){
           $tagID = $dbConnection->insert_id;
 
           $query = $dbConnection->prepare("INSERT INTO Posts_Tags (postID, tagID) VALUES (?, ?)");
-          $query->bind_param('ii', $postID, $id);
+          $query->bind_param('ii', $postID, $tagID);
           $query->execute();
           $result = $query->get_result();
 
-          if(!$result){
+          if($result->num_rows > 0){
+            UserTagsAddLike($dbConnection, $tagID);
+          }
+          else{
             returnError('There was an error in creating the post tag(s).');
           }
-
         }
       }
-
     }while($i<$len);
 
     returnSuccess('Post tag(s) were successfuly created.');
+}
 
+// Increment strength for a tag associate to an user or add the tag.
+function UserTagsAddLike($dbConnection, $tagId)
+{
+  if(userTagSearchTable($dbConnection, $tagId))
+  {
+    $query = $dbConnection->prepare("UPDATE Users_Tags SET strength = strength+1 WHERE tagID = ? AND userID = ?");
+    $query->bind_param('ii', $tag, $_SESSION['id']);
+    $query->execute();
+    $result =  $query->get_result();
+    if($result->num_rows > 0){
+      incStrengthInUser($dbConnection);
+      returnSuccess('successfuly like the tag.');
+    }else
+    {
+      returnError('');
+    }
+  }else
+  {
+    $query = $dbConnection->prepare("INSERT INTO userID, tagID, strength FROM Users_Tags");
+    $query->bind_param('iii', $_SESSION['id'], $tagID, 1);
+    $query->execute();
+    $result =  $query->get_result();
+    if($result->num_rows > 0){
+      incStrengthInUser($dbConnection);
+      returnSuccess('Inserting tag in User Tags successful.');
+    }else
+    {
+      returnError('');
+    }
+  }
+}
+
+function incStrengthInUser($dbConnection)
+{
+  $query = $dbConnection->prepare("UPDATE Users SET strengthCount = strengthCount+1 WHERE id = ?");
+  $query->bind_param('i', $_SESSION['id']);
+  $query->execute();
+  $result =  $query->get_result();
+  if($result->num_rows > 0)
+  {
+    returnSuccess('');
+  }else
+  {
+    returnError('');
+  }
 }
 
 
@@ -354,6 +402,18 @@ function createPostTags($dbConnection, $jsonPayload, $postID){
     else{
       return -1;
     }
+  }
+
+  function userTagSearchTable($dbConnection, $tagID)
+  {
+    // Check to see if the tag id pass for the user exists in the Users tag table.
+    //return 1 = true or 0 =f alse
+    $query = $dbConnection->prepare("SELECT * FROM Users_Tags WHERE userID = ? AND tagID = ?");
+    $query->bind_param('ii', $_SESSION['id'], $tagID);
+    $query->execute();
+    $result =  $query->get_result();
+
+    return $result->num_rows > 0 ? 1 : 0;
   }
 
 /*
