@@ -245,9 +245,10 @@ function createPost($dbConnection, $jsonPayload)
 
   // Result from the query
   $result = $query->get_result();
+  $query->close();
 
   // Check to see if the insertion was successful...
-  if ($result) {
+  if ($result->num_rows > 0) {
     $postTags = $dbConnection->insert_id;
     move_uploaded_file($_FILES['file']['tmp_name'], $destinationFolder.$image);
     createPostTags($dbConnection, $jsonPayload, $postID);
@@ -280,6 +281,7 @@ function createPostTags($dbConnection, $jsonPayload, $postID){
         $query->execute();
         $result = $query->get_result();
         if($result->num_rows < 0){
+          $query->close();
           returnError('There was an error in creating the post tag(s).');
         }
         UserTagsAddLike($dbConnection, $postTags[$i]);
@@ -302,11 +304,14 @@ function createPostTags($dbConnection, $jsonPayload, $postID){
             UserTagsAddLike($dbConnection, $tagID);
           }
           else{
+            $query->close();
             returnError('There was an error in creating the post tag(s).');
           }
         }
       }
     }while($i<$len);
+
+    $query->close();
 
     returnSuccess('Post tag(s) were successfuly created.');
 }
@@ -320,6 +325,8 @@ function UserTagsAddLike($dbConnection, $tagId)
     $query->bind_param('ii', $tag, $_SESSION['id']);
     $query->execute();
     $result =  $query->get_result();
+    $query->close();
+
     if($result->num_rows > 0){
       incStrengthInUser($dbConnection);
       returnSuccess('successfuly like the tag.');
@@ -333,6 +340,8 @@ function UserTagsAddLike($dbConnection, $tagId)
     $query->bind_param('iii', $_SESSION['id'], $tagID, 1);
     $query->execute();
     $result =  $query->get_result();
+    $query->close();
+
     if($result->num_rows > 0){
       incStrengthInUser($dbConnection);
       returnSuccess('Inserting tag in User Tags successful.');
@@ -349,6 +358,8 @@ function incStrengthInUser($dbConnection)
   $query->bind_param('i', $_SESSION['id']);
   $query->execute();
   $result =  $query->get_result();
+  $query->close();
+
   if($result->num_rows > 0)
   {
     returnSuccess('');
@@ -379,7 +390,7 @@ function incStrengthInUser($dbConnection)
     $query->bind_param('s', $tag);
     $query->execute();
     $result =  $query->get_result();
-
+    $query->close();
     return $result->num_rows > 0 ? 1 : 0;
   }
 
@@ -395,7 +406,7 @@ function incStrengthInUser($dbConnection)
       $result =  $query->get_result();
 
       $row = $result->fetch_assoc();
-
+      $query->close();
       return $row['id'];
     }
     // no id exists for that tag.
@@ -412,6 +423,7 @@ function incStrengthInUser($dbConnection)
     $query->bind_param('ii', $_SESSION['id'], $tagID);
     $query->execute();
     $result =  $query->get_result();
+    $query->close();
 
     return $result->num_rows > 0 ? 1 : 0;
   }
