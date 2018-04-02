@@ -12,8 +12,13 @@ $jsonPayload = getJSONPayload();
 // Establish a connection to the database
 $dbConnection = establishConnection();
 
+// White list of API callable functions
+$functionWhiteList = [
+    'loginAttempt',
+];
+
 // Call the client-requested function
-callVariableFunction($dbConnection, $jsonPayload);
+callVariableFunction($dbConnection, $jsonPayload, $functionWhiteList);
 
 // Folder were all images will be save.
 $destinationFolder = "uploads/";
@@ -28,10 +33,22 @@ $destinationFolder = "uploads/";
  * @param mysqli $dbConnection MySQL connection instance
  * @param object $jsonPayload Decoded JSON stdClass object
  */
-function callVariableFunction($dbConnection, $jsonPayload)
+function callVariableFunction($dbConnection, $jsonPayload, $functionWhiteList)
 {
     // Get function name (as string) from the JSON payload
     $function = $jsonPayload['function'];
+
+    // Ensure that the function is in the white list (and use strict)
+    $funcIndex = array_search($function, $functionWhiteList, TRUE);
+
+    // Use the functionWhiteList version, not the user-supplied version
+    // This is for security reasons
+    if ($funcIndex !== FALSE && $funcIndex !== NULL) {
+        $function = $functionWhiteList[$funcIndex];
+    } else {
+        // If the function is not part of the white list, return a JSON error response
+        returnError('JSON payload tried to call non-white list PHP function ' . $function . '()');
+    }
 
     // Ensure that the function exists and is callable
     if (is_callable($function)) {
