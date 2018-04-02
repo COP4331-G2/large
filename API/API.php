@@ -175,91 +175,32 @@ function createUser($dbConnection, $jsonPayload)
         // If successful, return JSON success response
         returnSuccess('User created.');
     } else {
-        // If not successful, return JSON error response
         $query->close();
+        // If not successful, return JSON error response
         returnError('User not created: ' . $dbConnection->error);
     }
 }
 
 /**
- * Delete a user account (and all associated contacts)
+ * Create a post from a user
  *
  * @param mysqli $dbConnection MySQL connection instance
  * @param object $jsonPayload Decoded JSON stdClass object
  */
-function deleteUser($dbConnection, $jsonPayload)
-{
-    /* Not yet implemented */
-
-    // Will need to get the user's id
-    // Then iterate through all contacts and delete them (via deleteContact())
-    // Then delete the user itself
-
-}
-
-/*
-Logout function
- */
-function logout()
-{
-    session_destroy();
-    if ($_SESSION == null) {
-        returnSuccess('User has logout');
-    }
-
-}
-
-/** Verify if passwords match
- *Checks if unsername exist
- *
- */
-
-function authentication()
-{
-    //database call to check if the username exists
-    // checks paasword input from both fields (could this be done on the frontend?)
-}
-
-/** Machine Learning function
- *
- */
-function autoTag($dbConnection, $jsonPayload)
-{
-    // implement machine learning algorithm
-    // separate machine learning from create post? as a stand alone funct?
-    // image to text
-    //text to tags
-
-}
-
-/*
-function utilized to create postings in feed
- */
-
 function createPost($dbConnection, $jsonPayload)
 {
-    //call autoTag function
-    //implement posting capabilities
-    $file = $_FILES['file'];
-
-    $image = uploadImageHelper($file);
-
-    // get tag array. Insert in the database
-    // the image name and the tags associate to the image.
-    // after run the line below to save the image.
-    move_uploaded_file($_FILES['file']['tmp_name'], $destinationFolder . $image);
-    // Get from JSON: userID, body text,  image URL
     $userID   = $jsonPayload['userID'];
     $bodyText = trim($jsonPayload['bodyText']);
     $imageURL = trim($jsonPayload['imageURL']);
 
+    // TODO: This should call a function to create tags
+
     // Add post to the database
-    $query = $dbConnection->prepare("INSERT INTO Posts (userID, bodyText, imageName) VALUES (?, ?, ?)");
+    $query = $dbConnection->prepare("INSERT INTO Posts (userID, bodyText, imageURL) VALUES (?, ?, ?)");
     $query->bind_param('iss', $userID, $bodyText, $imageURL);
     $query->execute();
 
-    // Result from the query
-    $result = $query->get_result();
+    $result = mysqli_affected_rows($dbConnection);
 
     // Check to see if the insertion was successful...
     if ($result) {
@@ -267,58 +208,32 @@ function createPost($dbConnection, $jsonPayload)
         returnSuccess('Post created.');
     } else {
         // If not successful, return JSON error response
-        returnError($dbConnection->error);
+        returnError('Post not created: ' . $dbConnection->error);
     }
-
-    // We don't need a relational table for posts and users
-
-    // Call image tagger and populate relational table: Posts_Tags
-
 }
 
-/** Search by tags function
+/**
+ * Create a post from a user
  *
+ * @param mysqli $dbConnection MySQL connection instance
+ * @param object $jsonPayload Decoded JSON stdClass object
  */
-function tagSearch($dbConnection, $jsonPayload)
+function getPostsLatest($dbConnection, $jsonPayload)
 {
-    //implement search logic
-    /*
-4 different searches (similar calls, all within same function?):
-personalized (Favorites)
-latest
-groups
-my post
- */
-}
+    $query = $dbConnection->prepare("");
+    $query->bind_param('', );
+    $query->execute();
 
-/*
- *  Settings function
- */
-function settings($dbConnection, $jsonPayload)
-{
-    // implement connections for settings
+    $result = $query->get_result();
 
-}
-
-/*
- *   Upload image helper function
- */
-function uploadImageHelper($image)
-{
-    // Gets the image, make sure the upload was successful,
-    // checks the extension and rename it with an unique name.
-    // Then it returns the new name.
-    $extAllow = array('jpg', 'jpeg', 'png', 'gif');
-    $ext      = strtolower(end(explode('.', $image['file']['name'])));
-
-    if (in_array($ext, $extAllow)) {
-        if ($image['file']['error'] === 0) {
-            return $imageNewName = uniqid('', true) . "." . $ext;
-        } else {
-            returnError('An error occur while uploading the image.');
-        }
+    // Verify posts were found
+    if ($result->num_rows > 0) {
+        // ...
     } else {
-        returnError('Image extension is not allow.');
+        returnError('No posts found: ' . $dbConnection->error);
     }
-
 }
+
+// TODO: getPostsPersonal()
+// TODO: getPostsGroups()
+// TODO: likePost()
