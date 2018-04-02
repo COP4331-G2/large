@@ -16,6 +16,10 @@ $dbConnection = establishConnection();
 $functionWhiteList = [
     'loginAttempt',
     'createUser',
+    'getPostsLatest',
+
+    // REMOVE BEFORE DEPLOY
+    'testUpload',
 ];
 
 // Call the client-requested function
@@ -220,18 +224,57 @@ function createPost($dbConnection, $jsonPayload)
  */
 function getPostsLatest($dbConnection, $jsonPayload)
 {
-    $query = $dbConnection->prepare("");
-    $query->bind_param('', );
+    $numberOfPosts = $jsonPayload['numberOfPosts'];
+
+    $query = $dbConnection->prepare("SELECT * FROM Posts ORDER BY id DESC LIMIT ?;");
+    $query->bind_param('i', $numberOfPosts);
     $query->execute();
 
     $result = $query->get_result();
 
     // Verify posts were found
-    if ($result->num_rows > 0) {
-        // ...
-    } else {
+    if ($result->num_rows <= 0) {
         returnError('No posts found: ' . $dbConnection->error);
     }
+
+    $postResults = [];
+
+    while ($row = $result->fetch_assoc()) {
+        $postInformation = [
+            'postID'   => $row['id'],
+            'userID'   => $row['userID'],
+            'bodyText' => $row['bodyText'],
+            'imageURL' => $row['imageURL'],
+        ];
+
+        // Append this information to the searchResults array
+        $postResults[] = $postInformation;
+    }
+
+    returnSuccess('Posts found.', $postResults);
+}
+
+// DANGEROUS: ONLY FOR TESTING PURPOSES
+// REMOVE BEFORE DEPLOY
+// Make sure to add "return;" in returnSuccess()
+// And remove first "die;" statement in this function
+function testUpload($dbConnection, $jsonPayload)
+{
+    die;
+
+    for ($i = 1; $i <= 545; $i++) {
+        $imageURL = "http://res.cloudinary.com/cop4331g2/image/upload/v1522708347/image" . $i . ".jpg";
+
+        $jsonPayload = [
+            'imageURL' => $imageURL,
+            'userID' => 3,
+            'bodyText' => "Testing...1...2...3...",
+        ];
+
+        createPost($dbConnection, $jsonPayload);
+    }
+
+    die;
 }
 
 // TODO: getPostsPersonal()
