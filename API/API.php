@@ -15,13 +15,11 @@ $dbConnection = establishConnection();
 // White list of API callable functions
 $functionWhiteList = [
     'loginAttempt',
+    'createUser',
 ];
 
 // Call the client-requested function
 callVariableFunction($dbConnection, $jsonPayload, $functionWhiteList);
-
-// Folder were all images will be save.
-$destinationFolder = "uploads/";
 
 /* *************** */
 /* Functions Below */
@@ -69,8 +67,8 @@ function callVariableFunction($dbConnection, $jsonPayload, $functionWhiteList)
 function loginAttempt($dbConnection, $jsonPayload)
 {
     // Get the username and password from the JSON payload
-    $username = trim($jsonPayload['username']);
-    $password = $jsonPayload['password'];
+    $username = strtolower(trim($jsonPayload['username']));
+    $password = trim($jsonPayload['password']);
 
     // This block uses prepared statements and parameterized queries to protect against SQL injection
     // MySQL query to check if the username exists in the database
@@ -113,13 +111,14 @@ function loginAttempt($dbConnection, $jsonPayload)
  */
 function createUser($dbConnection, $jsonPayload)
 {
-    // Get the username and password from the JSON payload
-    $username = trim($jsonPayload['username']);
-    $password = $jsonPayload['password'];
-    $firstName = trim($jsonPayload['firstName']);
-    $lastName = trim($jsonPayload['lastName']);
+    // Get the new account information from the JSON payload
+    $username     = strtolower(trim($jsonPayload['username']));
+    $password     = trim($jsonPayload['password']);
+    $firstName    = trim($jsonPayload['firstName']);
+    $lastName     = trim($jsonPayload['lastName']);
     $emailAddress = trim($jsonPayload['emailAddress']);
-    $isGroup = 0;
+    $isGroup      = 0;
+
     // Check for various error-inducing situations
     if (strlen($username) > 60) {
         returnError('Username cannot exceed 60 characters.');
@@ -130,56 +129,55 @@ function createUser($dbConnection, $jsonPayload)
     } else if (strlen($firstName) > 60) {
         returnError('First name cannot exceed 60 characters.');
     } else if (strlen($firstName) <= 0) {
-            returnError('First name cannot be empty.');
+        returnError('First name cannot be empty.');
     } else if (strlen($lastName) > 60) {
-      returnError('Last name cannot exceed 60 characters.');
+        returnError('Last name cannot exceed 60 characters.');
     } else if (strlen($lastName) <= 0) {
-          returnError('Last name cannot be empty.');
+        returnError('Last name cannot be empty.');
     } else if (strlen($emailAddress) > 60) {
-          returnError('Email address cannot exceed 60 characters.');
+        returnError('Email address cannot exceed 60 characters.');
     } else if (strlen($emailAddress) <= 0) {
-              returnError('Email address cannot be empty.');
-    }else {
-        // This block uses prepared statements and parameterized queries to protect against SQL injection
-        // MySQL query to check if a username already exists in the database
-        $query = $dbConnection->prepare("SELECT * FROM Users WHERE username=?");
-        $query->bind_param('s', $username);
-        $query->execute();
+        returnError('Email address cannot be empty.');
+    }
 
-        // Result from the query
-        $result = $query->get_result();
+    // This block uses prepared statements and parameterized queries to protect against SQL injection
+    // MySQL query to check if a username already exists in the database
+    $query = $dbConnection->prepare("SELECT * FROM Users WHERE username = ?");
+    $query->bind_param('s', $username);
+    $query->execute();
 
-        // If a username already exists...
-        // Return a JSON error response
-        if ($result->num_rows > 0) {
-            returnError('Username already exists.');
-        }
+    // Result from the query
+    $result = $query->get_result();
 
+    // If a username already exists...
+    // Return a JSON error response
+    if ($result->num_rows > 0) {
+        returnError('Username already exists.');
+    }
+
+    $query->close();
+
+    // Encrypt the password (using PHP defaults)
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+    // This block uses prepared statements and parameterized queries to protect against SQL injection
+    // MySQL query to add the username and password into the database
+    $query = $dbConnection->prepare("INSERT INTO Users (username, password, firstName, lastName, emailAddress, isGroup) VALUES (?, ?, ?, ?, ?, ?)");
+    $query->bind_param('sssssi', $username, $hashedPassword, $firstName, $lastName, $emailAddress, $isGroup);
+    $query->execute();
+
+    // Result from the query
+    $result = mysqli_affected_rows($dbConnection);
+
+    // Check to see if the insertion was successful...
+    if ($result) {
         $query->close();
-
-        // Encrypt the password (using PHP defaults)
-        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-
-        // This block uses prepared statements and parameterized queries to protect against SQL injection
-        // MySQL query to add the username and password into the database
-        $query = $dbConnection->prepare("INSERT INTO Users (username, password, firstName, lastName, emailAddress, isGroup) VALUES (?, ?, ?, ?, ?, ?)");
-        $query->bind_param('sssssi', $username, $hashedPassword, $firstName, $lastName, $emailAddress, $isGroup);
-        $query->execute();
-
-        // Result from the query
-        $result = mysqli_affected_rows($dbConnection);
-
-        // Check to see if the insertion was successful...
-        if ($result) {
-          $_SESSION['id'] = $row['id'];
-            // If successful, return JSON success response
-            $query->close();
-            returnSuccess('User created.');
-        } else {
-            // If not successful, return JSON error response
-            $query->close();
-            returnError('User not created: ' . $dbConnection->error);
-        }
+        // If successful, return JSON success response
+        returnSuccess('User created.');
+    } else {
+        // If not successful, return JSON error response
+        $query->close();
+        returnError('User not created: ' . $dbConnection->error);
     }
 }
 
