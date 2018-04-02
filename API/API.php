@@ -37,11 +37,11 @@ function callVariableFunction($dbConnection, $jsonPayload, $functionWhiteList)
     $function = $jsonPayload['function'];
 
     // Ensure that the function is in the white list (and use strict)
-    $funcIndex = array_search($function, $functionWhiteList, TRUE);
+    $funcIndex = array_search($function, $functionWhiteList, true);
 
     // Use the functionWhiteList version, not the user-supplied version
     // This is for security reasons
-    if ($funcIndex !== FALSE && $funcIndex !== NULL) {
+    if ($funcIndex !== false && $funcIndex !== null) {
         $function = $functionWhiteList[$funcIndex];
     } else {
         // If the function is not part of the white list, return a JSON error response
@@ -198,108 +198,105 @@ function deleteUser($dbConnection, $jsonPayload)
 }
 
 /*
-  Logout function
-*/
+Logout function
+ */
 function logout()
 {
-  session_destroy();
-  if($_SESSION==null)
-  returnSuccess('User has logout');
+    session_destroy();
+    if ($_SESSION == null) {
+        returnSuccess('User has logout');
+    }
+
 }
 
 /** Verify if passwords match
-  *Checks if unsername exist
-  *
+ *Checks if unsername exist
+ *
  */
 
 function authentication()
 {
-  //database call to check if the username exists
- // checks paasword input from both fields (could this be done on the frontend?)
+    //database call to check if the username exists
+    // checks paasword input from both fields (could this be done on the frontend?)
 }
 
 /** Machine Learning function
-  *
+ *
  */
 function autoTag($dbConnection, $jsonPayload)
 {
-  // implement machine learning algorithm
-  // separate machine learning from create post? as a stand alone funct?
-  // image to text
-  //text to tags
-
-
+    // implement machine learning algorithm
+    // separate machine learning from create post? as a stand alone funct?
+    // image to text
+    //text to tags
 
 }
 
 /*
-  function utilized to create postings in feed
-*/
+function utilized to create postings in feed
+ */
 
 function createPost($dbConnection, $jsonPayload)
 {
-  //call autoTag function
-  //implement posting capabilities
-  $file = $_FILES['file'];
+    //call autoTag function
+    //implement posting capabilities
+    $file = $_FILES['file'];
 
-  $image = uploadImageHelper($file);
+    $image = uploadImageHelper($file);
 
-  // get tag array. Insert in the database
-  // the image name and the tags associate to the image.
-  // after run the line below to save the image.
-  move_uploaded_file($_FILES['file']['tmp_name'], $destinationFolder.$image);
-  // Get from JSON: userID, body text,  image URL
-  $userID = $jsonPayload['userID'];
-  $bodyText = trim($jsonPayload['bodyText']);
-  $imageURL = trim($jsonPayload['imageURL']);
+    // get tag array. Insert in the database
+    // the image name and the tags associate to the image.
+    // after run the line below to save the image.
+    move_uploaded_file($_FILES['file']['tmp_name'], $destinationFolder . $image);
+    // Get from JSON: userID, body text,  image URL
+    $userID   = $jsonPayload['userID'];
+    $bodyText = trim($jsonPayload['bodyText']);
+    $imageURL = trim($jsonPayload['imageURL']);
 
-  // Add post to the database
-  $query = $dbConnection->prepare("INSERT INTO Posts (userID, bodyText, imageName) VALUES (?, ?, ?)");
-  $query->bind_param('iss', $userID, $bodyText, $imageURL);
-  $query->execute();
+    // Add post to the database
+    $query = $dbConnection->prepare("INSERT INTO Posts (userID, bodyText, imageName) VALUES (?, ?, ?)");
+    $query->bind_param('iss', $userID, $bodyText, $imageURL);
+    $query->execute();
 
-  // Result from the query
-  $result = $query->get_result();
+    // Result from the query
+    $result = $query->get_result();
 
-  // Check to see if the insertion was successful...
-  if ($result) {
-  // If successful, return JSON success response
-  returnSuccess('Post created.');
-  } else {
-  // If not successful, return JSON error response
-  returnError($dbConnection->error);
-  }
+    // Check to see if the insertion was successful...
+    if ($result) {
+        // If successful, return JSON success response
+        returnSuccess('Post created.');
+    } else {
+        // If not successful, return JSON error response
+        returnError($dbConnection->error);
+    }
 
+    // We don't need a relational table for posts and users
 
-  // We don't need a relational table for posts and users
-
-
-  // Call image tagger and populate relational table: Posts_Tags
+    // Call image tagger and populate relational table: Posts_Tags
 
 }
 
- /** Search by tags function
-   *
-  */
+/** Search by tags function
+ *
+ */
 function tagSearch($dbConnection, $jsonPayload)
 {
-  //implement search logic
-  /*
-    4 different searches (similar calls, all within same function?):
-      personalized (Favorites)
-      latest
-      groups
-      my post
-  */
+    //implement search logic
+    /*
+4 different searches (similar calls, all within same function?):
+personalized (Favorites)
+latest
+groups
+my post
+ */
 }
 
 /*
  *  Settings function
-*/
+ */
 function settings($dbConnection, $jsonPayload)
 {
-  // implement connections for settings
-
+    // implement connections for settings
 
 }
 
@@ -308,26 +305,20 @@ function settings($dbConnection, $jsonPayload)
  */
 function uploadImageHelper($image)
 {
-  // Gets the image, make sure the upload was successful,
-  // checks the extension and rename it with an unique name.
-  // Then it returns the new name.
-  $extAllow = array('jpg', 'jpeg', 'png', 'gif');
-  $ext = strtolower(end(explode('.', $image['file']['name'])));
+    // Gets the image, make sure the upload was successful,
+    // checks the extension and rename it with an unique name.
+    // Then it returns the new name.
+    $extAllow = array('jpg', 'jpeg', 'png', 'gif');
+    $ext      = strtolower(end(explode('.', $image['file']['name'])));
 
-  if(in_array($ext, $extAllow))
-  {
-    if($image['file']['error'] === 0)
-    {
-      return $imageNewName = uniqid('', true).".".$ext;
+    if (in_array($ext, $extAllow)) {
+        if ($image['file']['error'] === 0) {
+            return $imageNewName = uniqid('', true) . "." . $ext;
+        } else {
+            returnError('An error occur while uploading the image.');
+        }
+    } else {
+        returnError('Image extension is not allow.');
     }
-    else
-    {
-      returnError('An error occur while uploading the image.');
-    }
-  }
-  else
-  {
-    returnError('Image extension is not allow.');
-  }
 
 }
