@@ -17,6 +17,7 @@ $functionWhiteList = [
     'loginAttempt',
     'createUser',
     'getPostsLatest',
+    'createPost',
 
     // REMOVE BEFORE DEPLOY
     'testUpload',
@@ -163,8 +164,7 @@ function createPost($dbConnection, $jsonPayload)
     $userID   = $jsonPayload['userID'];
     $bodyText = trim($jsonPayload['bodyText']);
     $imageURL = trim($jsonPayload['imageURL']);
-
-    // TODO: This should call a function to create tags
+    $tags     = $jsonPayload['tags'];
 
     // Add post to the database
     $query = $dbConnection->prepare("INSERT INTO Posts (userID, bodyText, imageURL) VALUES (?, ?, ?)");
@@ -175,6 +175,9 @@ function createPost($dbConnection, $jsonPayload)
 
     // Check to see if the insertion was successful...
     if ($result) {
+        $postID = $query->insert_id;
+        createPostsTagsRow($dbConnection, $postID, $tags);
+
         // If successful, return JSON success response
         returnSuccess('Post created.');
     } else {
@@ -273,6 +276,35 @@ function getPostTags($dbConnection, $postID)
     }
 
     return $tagResults;
+}
+
+function createPostsTagsRow($dbConnection, $postID, $tags)
+{
+    foreach ($tags as $tag) {
+        $query = $dbConnection->prepare("SELECT * FROM Tags WHERE name = ?");
+        $query->bind_param('s', $tag);
+        $query->execute();
+
+        $result = $query->get_result();
+
+        if ($result->num_rows > 0) {
+            $row    = $result->fetch_assoc();
+
+            $tagID = $row['id'];
+        } else {
+            $query->close();
+            $query = $dbConnection->prepare("INSERT INTO Tags (name) VALUES (?)");
+            $query->bind_param('s', $tag);
+            $query->execute();
+
+            $tagID = $query->insert_id;
+            $query->close();
+        }
+
+        $query = $dbConnection->prepare("INSERT INTO Posts_Tags (postID, tagID) VALUES (?, ?)");
+        $query->bind_param('ii', $postID, $tagID);
+        $query->execute();
+    }
 }
 
 /* ******************** */
