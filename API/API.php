@@ -26,41 +26,8 @@ $functionWhiteList = [
 callVariableFunction($dbConnection, $jsonPayload, $functionWhiteList);
 
 /* *************** */
-/* Functions Below */
+/* Endpoints Below */
 /* *************** */
-
-/**
- * Call a variable function passed as a string from the client-side
- *
- * @param mysqli $dbConnection MySQL connection instance
- * @param object $jsonPayload Decoded JSON stdClass object
- */
-function callVariableFunction($dbConnection, $jsonPayload, $functionWhiteList)
-{
-    // Get function name (as string) from the JSON payload
-    $function = $jsonPayload['function'];
-
-    // Ensure that the function is in the white list (and use strict)
-    $funcIndex = array_search($function, $functionWhiteList, true);
-
-    // Use the functionWhiteList version, not the user-supplied version
-    // This is for security reasons
-    if ($funcIndex !== false && $funcIndex !== null) {
-        $function = $functionWhiteList[$funcIndex];
-    } else {
-        // If the function is not part of the white list, return a JSON error response
-        returnError('JSON payload tried to call non-white list PHP function ' . $function . '()');
-    }
-
-    // Ensure that the function exists and is callable
-    if (is_callable($function)) {
-        // Use the JSON payload 'function' string field to call a PHP function
-        $function($dbConnection, $jsonPayload);
-    } else {
-        // If the function is not callable, return a JSON error response
-        returnError('JSON payload tried to call undefined PHP function ' . $function . '()');
-    }
-}
 
 /**
  * Verify username/password information and (perhaps) login to a user's account
@@ -245,6 +212,7 @@ function getPostsLatest($dbConnection, $jsonPayload)
             'userID'   => $row['userID'],
             'bodyText' => $row['bodyText'],
             'imageURL' => $row['imageURL'],
+            'tags'     => getPostTags($dbConnection, $row['id']),
         ];
 
         $postResults[] = $postInformation;
@@ -252,6 +220,64 @@ function getPostsLatest($dbConnection, $jsonPayload)
 
     returnSuccess('Posts found.', $postResults);
 }
+
+/* *************** */
+/* Functions Below */
+/* *************** */
+
+/**
+ * Call a variable function passed as a string from the client-side
+ *
+ * @param mysqli $dbConnection MySQL connection instance
+ * @param object $jsonPayload Decoded JSON stdClass object
+ */
+function callVariableFunction($dbConnection, $jsonPayload, $functionWhiteList)
+{
+    // Get function name (as string) from the JSON payload
+    $function = $jsonPayload['function'];
+
+    // Ensure that the function is in the white list (and use strict)
+    $funcIndex = array_search($function, $functionWhiteList, true);
+
+    // Use the functionWhiteList version, not the user-supplied version
+    // This is for security reasons
+    if ($funcIndex !== false && $funcIndex !== null) {
+        $function = $functionWhiteList[$funcIndex];
+    } else {
+        // If the function is not part of the white list, return a JSON error response
+        returnError('JSON payload tried to call non-white list PHP function ' . $function . '()');
+    }
+
+    // Ensure that the function exists and is callable
+    if (is_callable($function)) {
+        // Use the JSON payload 'function' string field to call a PHP function
+        $function($dbConnection, $jsonPayload);
+    } else {
+        // If the function is not callable, return a JSON error response
+        returnError('JSON payload tried to call undefined PHP function ' . $function . '()');
+    }
+}
+
+function getPostTags($dbConnection, $postID)
+{
+    $query = $dbConnection->prepare("SELECT name FROM Tags WHERE id IN (SELECT tagID FROM Posts_Tags WHERE postID = ?);");
+    $query->bind_param('i', $postID);
+    $query->execute();
+
+    $result = $query->get_result();
+
+    $tagResults = [];
+
+    while ($row = $result->fetch_assoc()) {
+        $tagResults[] = $row['name'];
+    }
+
+    return $tagResults;
+}
+
+/* ******************** */
+/* TEST Functions Below */
+/* ******************** */
 
 // DANGEROUS: ONLY FOR TESTING PURPOSES
 // REMOVE BEFORE DEPLOY
