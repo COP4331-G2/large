@@ -42,17 +42,21 @@ callVariableFunction($dbConnection, $jsonPayload, $functionWhiteList);
 function loginAttempt($dbConnection, $jsonPayload)
 {
     // Get the username and password from the JSON payload
+    // Always store usernames in lowercase
     $username = strtolower(trim($jsonPayload['username']));
     $password = trim($jsonPayload['password']);
 
     // This block uses prepared statements and parameterized queries to protect against SQL injection
     // MySQL query to check if the username exists in the database
-    $query = $dbConnection->prepare("SELECT * FROM Users WHERE username = ?");
+    $statement = "SELECT * FROM Users WHERE username = ?";
+    $query = $dbConnection->prepare($statement);
     $query->bind_param('s', $username);
     $query->execute();
 
     // Result from the query
     $result = $query->get_result();
+
+    $query->close();
 
     // Verify if the username exists
     if ($result->num_rows > 0) {
@@ -62,13 +66,13 @@ function loginAttempt($dbConnection, $jsonPayload)
 
         // Verify if the password is correct
         if (password_verify($password, $row['password'])) {
-            $result = [];
-            $result['userID'] = $row['id'];
-            $result['username'] = $row['username'];
+            $userInfo = [];
+            $userInfo['userID'] = $row['id'];
+            $userInfo['username'] = $row['username'];
 
             // If the password is correct...
             // Return the JSON success response (including user's id)
-            returnSuccess('Login successful.', $result);
+            returnSuccess('Login successful.', $userInfo);
         } else {
             // If the password isn't correct...
             // Return a JSON error response
@@ -120,12 +124,15 @@ function createUser($dbConnection, $jsonPayload)
 
     // This block uses prepared statements and parameterized queries to protect against SQL injection
     // MySQL query to check if a username already exists in the database
-    $query = $dbConnection->prepare("SELECT * FROM Users WHERE username = ?");
+    $statement = "SELECT * FROM Users WHERE username = ?";
+    $query = $dbConnection->prepare($statement);
     $query->bind_param('s', $username);
     $query->execute();
 
     // Result from the query
     $result = $query->get_result();
+
+    $query->close();
 
     // If a username already exists...
     // Return a JSON error response
@@ -133,34 +140,34 @@ function createUser($dbConnection, $jsonPayload)
         returnError('Username already exists.');
     }
 
-    $query->close();
-
     // Encrypt the password (using PHP defaults)
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
     // This block uses prepared statements and parameterized queries to protect against SQL injection
     // MySQL query to add the username and password into the database
-    $query = $dbConnection->prepare("INSERT INTO Users (username, password, firstName, lastName, emailAddress, isGroup) VALUES (?, ?, ?, ?, ?, ?)");
+    $statement = "INSERT INTO Users (username, password, firstName, lastName, emailAddress, isGroup) VALUES (?, ?, ?, ?, ?, ?)";
+    $query = $dbConnection->prepare($statement);
     $query->bind_param('sssssi', $username, $hashedPassword, $firstName, $lastName, $emailAddress, $isGroup);
     $query->execute();
 
     // Result from the query
-    $result = mysqli_affected_rows($dbConnection);
+    $result = $query->affected_rows;
+
+    if ($result) {
+        $userID = $query->insert_id;
+    }
+
+    $query->close();
 
     // Check to see if the insertion was successful...
     if ($result) {
-        $userID = $query->insert_id;
-        $query->close();
-
-        $result = [];
-        $result['userID'] = $userID;
-        $result['username'] = getUsernameFromUserID($dbConnection, $userID);
+        $userInfo = [];
+        $userInfo['userID'] = $userID;
+        $userInfo['username'] = getUsernameFromUserID($dbConnection, $userID);
 
         // If successful, return JSON success response
-        returnSuccess('User created.', $result);
+        returnSuccess('User created.', $userInfo);
     } else {
-        $query->close();
-
         // If not successful, return JSON error response
         returnError('User not created: ' . $dbConnection->error);
     }
@@ -180,15 +187,21 @@ function createPost($dbConnection, $jsonPayload)
     $tags     = $jsonPayload['tags'];
 
     // Add post to the database
-    $query = $dbConnection->prepare("INSERT INTO Posts (userID, bodyText, imageURL) VALUES (?, ?, ?)");
+    $statement = "INSERT INTO Posts (userID, bodyText, imageURL) VALUES (?, ?, ?)";
+    $query = $dbConnection->prepare($statement);
     $query->bind_param('iss', $userID, $bodyText, $imageURL);
     $query->execute();
 
-    $result = mysqli_affected_rows($dbConnection);
+    $result = $query->affected_rows;
+
+    if ($result) {
+        $postID = $query->insert_id;
+    }
+
+    $query->close();
 
     // Check to see if the insertion was successful...
     if ($result) {
-        $postID = $query->insert_id;
         createPostsTagsRow($dbConnection, $postID, $tags);
 
         // If successful, return JSON success response
@@ -222,9 +235,11 @@ function getPost($dbConnection, $jsonPayload)
  */
 function getPostsLatest($dbConnection, $jsonPayload)
 {
+    $userID        = $jsonPayload['userID'];
     $numberOfPosts = $jsonPayload['numberOfPosts'];
 
-    $query = $dbConnection->prepare("SELECT * FROM Posts ORDER BY id DESC LIMIT ?;");
+    $statement = "SELECT * FROM Posts ORDER BY id DESC LIMIT ?;";
+    $query = $dbConnection->prepare($statement);
     $query->bind_param('i', $numberOfPosts);
     $query->execute();
 
@@ -239,39 +254,47 @@ function getPostsLatest($dbConnection, $jsonPayload)
 
     $postResults = [];
 
+    // NOTE: $userID is the ID of the actual user fetching the posts
+    //       $row['userID'] is the ID of each user that created the post(s) being fetched
     while ($row = $result->fetch_assoc()) {
+        $postID = $row['id'];
+
         $postInformation = [
-            'postID'   => $row['id'],
+            'postID'   => $postID,
             'userID'   => $row['userID'],
             'username' => getUsernameFromUserID($dbConnection, $row['userID']),
             'bodyText' => $row['bodyText'],
             'imageURL' => $row['imageURL'],
-            'tags'     => getPostTags($dbConnection, $row['id']),
+            'tags'     => getPostTags($dbConnection, $postID),
+            'isLiked'  => isPostLiked($dbConnection, $userID, $postID),
         ];
 
         $postResults[] = $postInformation;
     }
 
-    returnSuccess('Posts found.', $postResults);
+    returnSuccess('Post(s) found.', $postResults);
 }
 
-// TODO: Add SQL checks throughout this function
 function likePost($dbConnection, $jsonPayload)
 {
     $userID = $jsonPayload['userID'];
     $postID = $jsonPayload['postID'];
 
-    $query = $dbConnection->prepare("INSERT IGNORE INTO Users_Posts_Likes (userID, postID) VALUES (?, ?);");
+    $statement = "INSERT IGNORE INTO Users_Posts_Likes (userID, postID) VALUES (?, ?);";
+    $query = $dbConnection->prepare($statement);
     $query->bind_param('ii', $userID, $postID);
     $query->execute();
-    $result = $dbConnection->affected_rows;
+
+    $result = $query->affected_rows;
+
     $query->close();
 
     if ($result <= 0) {
         returnError('Previously liked post.');
     }
 
-    $query = $dbConnection->prepare("SELECT tagID FROM Posts_Tags WHERE postID = ?;");
+    $statement = "SELECT tagID FROM Posts_Tags WHERE postID = ?;";
+    $query = $dbConnection->prepare($statement);
     $query->bind_param('i', $postID);
     $query->execute();
 
@@ -281,12 +304,13 @@ function likePost($dbConnection, $jsonPayload)
 
     $tags = [];
 
-    while ($row = $result->fetch_array(MYSQLI_NUM)) {
-        $tags[] = $row[0];
+    while ($row = $result->fetch_assoc()) {
+        $tags[] = $row['tagID'];
     }
 
     foreach ($tags as $tagID) {
-        $query = $dbConnection->prepare("INSERT INTO Users_Tags_Likes (userID, tagID) VALUES (?, ?) ON DUPLICATE KEY UPDATE strength = strength + 1;");
+        $statement = "INSERT INTO Users_Tags_Likes (userID, tagID) VALUES (?, ?) ON DUPLICATE KEY UPDATE strength = strength + 1";
+        $query = $dbConnection->prepare($statement);
         $query->bind_param('ii', $userID, $tagID);
         $query->execute();
 
@@ -301,19 +325,24 @@ function unlikePost($dbConnection, $jsonPayload)
     $userID = $jsonPayload['userID'];
     $postID = $jsonPayload['postID'];
 
-    $query = $dbConnection->prepare("DELETE FROM Users_Posts_Likes WHERE userID = ? AND postID = ?;");
+    $statement = "DELETE FROM Users_Posts_Likes WHERE userID = ? AND postID = ?";
+    $query = $dbConnection->prepare($statement);
     $query->bind_param('ii', $userID, $postID);
     $query->execute();
+
     $result = $dbConnection->affected_rows;
+
     $query->close();
 
     if ($result <= 0) {
         returnError('Post was not previously liked.');
     }
 
-    $query = $dbConnection->prepare("UPDATE Users_Tags_Likes SET strength = strength - 1 WHERE userID = ? AND tagID IN (SELECT tagID FROM Posts_Tags WHERE postID = ?);");
+    $statement = "UPDATE Users_Tags_Likes SET strength = strength - 1 WHERE userID = ? AND tagID IN (SELECT tagID FROM Posts_Tags WHERE postID = ?)";
+    $query = $dbConnection->prepare($statement);
     $query->bind_param('ii', $userID, $postID);
     $query->execute();
+
     $query->close();
 
     returnSuccess('Post unliked.');
@@ -358,11 +387,14 @@ function callVariableFunction($dbConnection, $jsonPayload, $functionWhiteList)
 
 function getPostTags($dbConnection, $postID)
 {
-    $query = $dbConnection->prepare("SELECT t.name FROM Tags AS t, Posts_Tags AS pt WHERE pt.postID = ? AND t.id = pt.tagID;");
+    $statement = "SELECT t.name FROM Tags AS t, Posts_Tags AS pt WHERE pt.postID = ? AND t.id = pt.tagID";
+    $query = $dbConnection->prepare($statement);
     $query->bind_param('i', $postID);
     $query->execute();
 
     $result = $query->get_result();
+
+    $query->close();
 
     $tagResults = [];
 
@@ -376,36 +408,41 @@ function getPostTags($dbConnection, $postID)
 function createPostsTagsRow($dbConnection, $postID, $tags)
 {
     foreach ($tags as $tag) {
-        $query = $dbConnection->prepare("SELECT * FROM Tags WHERE name = ?");
+        $statement = "SELECT * FROM Tags WHERE name = ?";
+        $query = $dbConnection->prepare($statement);
         $query->bind_param('s', $tag);
         $query->execute();
 
         $result = $query->get_result();
 
-        if ($result->num_rows > 0) {
-            $row    = $result->fetch_assoc();
+        $query->close();
 
-            $tagID = $row['id'];
+        if ($result->num_rows > 0) {
+            $tagID = $result->fetch_assoc()['id'];
         } else {
-            $query->close();
-            $query = $dbConnection->prepare("INSERT INTO Tags (name) VALUES (?)");
+            $statement = "INSERT INTO Tags (name) VALUES (?)";
+            $query = $dbConnection->prepare($statement);
             $query->bind_param('s', $tag);
             $query->execute();
 
             $tagID = $query->insert_id;
+
             $query->close();
         }
 
-        $query = $dbConnection->prepare("INSERT INTO Posts_Tags (postID, tagID) VALUES (?, ?)");
+        $statement = "INSERT INTO Posts_Tags (postID, tagID) VALUES (?, ?)";
+        $query = $dbConnection->prepare($statement);
         $query->bind_param('ii', $postID, $tagID);
         $query->execute();
+
         $query->close();
     }
 }
 
 function getPostByID($dbConnection, $postID)
 {
-    $query = $dbConnection->prepare("SELECT * FROM Posts WHERE id = ?");
+    $statement = "SELECT * FROM Posts WHERE id = ?";
+    $query = $dbConnection->prepare($statement);
     $query->bind_param('i', $postID);
     $query->execute();
 
@@ -421,12 +458,13 @@ function getPostByID($dbConnection, $postID)
         'tags'     => getPostTags($dbConnection, $row['id']),
     ];
 
-    return($post);
+    return $post;
 }
 
 function getUsernameFromUserID($dbConnection, $userID)
 {
-    $query = $dbConnection->prepare("SELECT username FROM Users WHERE id = ?;");
+    $statement = "SELECT username FROM Users WHERE id = ?;";
+    $query = $dbConnection->prepare($statement);
     $query->bind_param('i', $userID);
     $query->execute();
 
@@ -434,7 +472,23 @@ function getUsernameFromUserID($dbConnection, $userID)
 
     $query->close();
 
-    return($username);
+    return $username;
+}
+
+function isPostLiked($dbConnection, $userID, $postID)
+{
+    $statement = "SELECT * FROM Users_Posts_Likes WHERE userID = ? AND postID = ?";
+    $query = $dbConnection->prepare($statement);
+    $query->bind_param('ii', $userID, $postID);
+    $query->execute();
+
+    $result = $query->get_result();
+
+    $query->close();
+
+    // Return true if a row was found (meaning the post is liked by the user)
+    // Return false otherwise (meaning the post is not liked by the user)
+    return ($result->num_rows > 0);
 }
 
 /* ******************** */
@@ -466,5 +520,4 @@ function testUpload($dbConnection, $jsonPayload)
 
 // TODO: getPostsPersonal()
 // TODO: getPostsGroups()
-// TODO: getPostByID()
 // TODO: suggestTags()
