@@ -224,6 +224,8 @@ function getPostsLatest($dbConnection, $jsonPayload)
 
     $result = $query->get_result();
 
+    $query->close();
+
     // Verify posts were found
     if ($result->num_rows <= 0) {
         returnError('No posts found: ' . $dbConnection->error);
@@ -235,7 +237,7 @@ function getPostsLatest($dbConnection, $jsonPayload)
         $postInformation = [
             'postID'   => $row['id'],
             'userID'   => $row['userID'],
-            'username' => getUsernameFromUserID($dbConnection, $userID),
+            'username' => getUsernameFromUserID($dbConnection, $row['userID']),
             'bodyText' => $row['bodyText'],
             'imageURL' => $row['imageURL'],
             'tags'     => getPostTags($dbConnection, $row['id']),
@@ -417,15 +419,11 @@ function getPostByID($dbConnection, $postID)
 
 function getUsernameFromUserID($dbConnection, $userID)
 {
-    $query = $dbConnection->prepare("SELECT username FROM Users WHERE id = ?");
+    $query = $dbConnection->prepare("SELECT username FROM Users WHERE id = ?;");
     $query->bind_param('i', $userID);
     $query->execute();
 
-    $result = $query->get_result();
-
-    $row = $result->fetch_assoc();
-
-    $username = $row['username'];
+    $username = $query->get_result()->fetch_assoc()['username'];
 
     $query->close();
 
