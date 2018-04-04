@@ -9,7 +9,7 @@ $dbConnection = establishConnection();
 // Receive decoded JSON payload from client
 $jsonPayload = getJSONPayload();
 
-// White list of API callable functions
+// White list of API-callable functions
 $functionWhiteList = [
     'loginAttempt',
     'createUser',
@@ -19,7 +19,7 @@ $functionWhiteList = [
     'unlikePost',
     'getPost',
 
-    // REMOVE BEFORE DEPLOY
+    // TODO: REMOVE BEFORE DEPLOY
     'testUpload',
 ];
 
@@ -32,6 +32,9 @@ callVariableFunction($dbConnection, $jsonPayload, $functionWhiteList);
 
 /**
  * Verify username/password information and (perhaps) login to a user's account
+ *
+ * @json Payload : function, username, password
+ * @json Response: userID, username
  *
  * @param mysqli $dbConnection MySQL connection instance
  * @param object $jsonPayload Decoded JSON stdClass object
@@ -62,6 +65,7 @@ function loginAttempt($dbConnection, $jsonPayload)
             $result = [];
             $result['userID'] = $row['id'];
             $result['username'] = $row['username'];
+
             // If the password is correct...
             // Return the JSON success response (including user's id)
             returnSuccess('Login successful.', $result);
@@ -201,20 +205,11 @@ function createPost($dbConnection, $jsonPayload)
  * @param mysqli $dbConnection MySQL connection instance
  * @param object $jsonPayload Decoded JSON stdClass object
  */
-// TODO: Broken
 function getPost($dbConnection, $jsonPayload)
 {
     $postID = $jsonPayload['postID'];
 
     $post = getPostByID($dbConnection, $postID);
-
-    $post = [
-        'postID'   => $post['id'],
-        'userID'   => $post['userID'],
-        'bodyText' => $row['bodyText'],
-        'imageURL' => $row['imageURL'],
-        'tags'     => getPostTags($dbConnection, $row['id']),
-    ];
 
     returnSuccess('Posts found.', $post);
 }
@@ -414,18 +409,19 @@ function getPostByID($dbConnection, $postID)
     $query->bind_param('i', $postID);
     $query->execute();
 
-    $result = $query->get_result();
-    $post   = $result->fetch_assoc();
+    $row = $query->get_result()->fetch_assoc();
+
+    $query->close();
 
     $post = [
-        'postID'   => $post['id'],
-        'userID'   => $post['userID'],
+        'postID'   => $row['id'],
+        'userID'   => $row['userID'],
         'bodyText' => $row['bodyText'],
         'imageURL' => $row['imageURL'],
         'tags'     => getPostTags($dbConnection, $row['id']),
     ];
 
-    return($result->fetch_assoc());
+    return($post);
 }
 
 function getUsernameFromUserID($dbConnection, $userID)
