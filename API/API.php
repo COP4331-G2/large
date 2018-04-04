@@ -142,11 +142,14 @@ function createUser($dbConnection, $jsonPayload)
 
     // Check to see if the insertion was successful...
     if ($result) {
+        $userID = $query->insert_id;
         $query->close();
+
         // If successful, return JSON success response
-        returnSuccess('User created.');
+        returnSuccess('User created.', $userID);
     } else {
         $query->close();
+
         // If not successful, return JSON error response
         returnError('User not created: ' . $dbConnection->error);
     }
