@@ -194,6 +194,7 @@ function createPost($dbConnection, $jsonPayload)
  * @param mysqli $dbConnection MySQL connection instance
  * @param object $jsonPayload Decoded JSON stdClass object
  */
+// TODO: Broken
 function getPost($dbConnection, $jsonPayload)
 {
     $postID = $jsonPayload['postID'];
