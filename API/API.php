@@ -6,6 +6,9 @@ require 'Connection.php';
 // Establish a connection to the database
 $dbConnection = establishConnection();
 
+// Receive decoded JSON payload from client
+$jsonPayload = getJSONPayload();
+
 // White list of API callable functions
 $functionWhiteList = [
     'loginAttempt',
@@ -14,6 +17,7 @@ $functionWhiteList = [
     'createPost',
     'likePost',
     'unlikePost',
+    'getPost',
 
     // REMOVE BEFORE DEPLOY
     'testUpload',
@@ -57,7 +61,7 @@ function loginAttempt($dbConnection, $jsonPayload)
         if (password_verify($password, $row['password'])) {
             // If the password is correct...
             // Return the JSON success response (including user's id)
-            returnSuccess('Login successful.');
+            returnSuccess('Login successful.', $row['id']);
         } else {
             // If the password isn't correct...
             // Return a JSON error response
@@ -182,7 +186,30 @@ function createPost($dbConnection, $jsonPayload)
 }
 
 /**
- * Create a post from a user
+ * Get a single post by ID
+ *
+ * @param mysqli $dbConnection MySQL connection instance
+ * @param object $jsonPayload Decoded JSON stdClass object
+ */
+function getPost($dbConnection, $jsonPayload)
+{
+    $postID = $jsonPayload['postID'];
+
+    $post = getPostByID($dbConnection, $postID);
+
+    $post = [
+        'postID'   => $post['id'],
+        'userID'   => $post['userID'],
+        'bodyText' => $row['bodyText'],
+        'imageURL' => $row['imageURL'],
+        'tags'     => getPostTags($dbConnection, $row['id']),
+    ];
+
+    returnSuccess('Posts found.', $post);
+}
+
+/**
+ * Get the latest specified-amount of posts
  *
  * @param mysqli $dbConnection MySQL connection instance
  * @param object $jsonPayload Decoded JSON stdClass object
@@ -225,6 +252,16 @@ function likePost($dbConnection, $jsonPayload)
     $userID = $jsonPayload['userID'];
     $postID = $jsonPayload['postID'];
 
+    $query = $dbConnection->prepare("INSERT IGNORE INTO Users_Posts_Likes (userID, postID) VALUES (?, ?);");
+    $query->bind_param('ii', $userID, $postID);
+    $query->execute();
+    $result = $dbConnection->affected_rows;
+    $query->close();
+
+    if ($result <= 0) {
+        returnError('Previously liked post.');
+    }
+
     $query = $dbConnection->prepare("SELECT tagID FROM Posts_Tags WHERE postID = ?;");
     $query->bind_param('i', $postID);
     $query->execute();
@@ -247,26 +284,25 @@ function likePost($dbConnection, $jsonPayload)
         $query->close();
     }
 
-    $query = $dbConnection->prepare("INSERT INTO Users_Posts_Likes (userID, postID) VALUES (?, ?) ON DUPLICATE KEY UPDATE id = id;");
-    $query->bind_param('ii', $userID, $postID);
-    $query->execute();
-
-    $query->close();
-
     returnSuccess('Post liked.');
 }
 
-function unlikePost($dbConnect, $jsonPayload)
+function unlikePost($dbConnection, $jsonPayload)
 {
     $userID = $jsonPayload['userID'];
     $postID = $jsonPayload['postID'];
 
-    $query = $dbConnection->prepare("UPDATE Users_Tags_Likes SET strength = strength - 1 WHERE userID = ? AND tagID IN (SELECT tagID FROM Posts_Tags WHERE postID = ?);");
+    $query = $dbConnection->prepare("DELETE FROM Users_Posts_Likes WHERE userID = ? AND postID = ?;");
     $query->bind_param('ii', $userID, $postID);
     $query->execute();
+    $result = $dbConnection->affected_rows;
     $query->close();
 
-    $query = $dbConnection->prepare("DELETE FROM Users_Posts_Likes WHERE userID = ? AND postID = ?;");
+    if ($result <= 0) {
+        returnError('Post was not previously liked.');
+    }
+
+    $query = $dbConnection->prepare("UPDATE Users_Tags_Likes SET strength = strength - 1 WHERE userID = ? AND tagID IN (SELECT tagID FROM Posts_Tags WHERE postID = ?);");
     $query->bind_param('ii', $userID, $postID);
     $query->execute();
     $query->close();
@@ -356,6 +392,26 @@ function createPostsTagsRow($dbConnection, $postID, $tags)
         $query->execute();
         $query->close();
     }
+}
+
+function getPostByID($dbConnection, $postID)
+{
+    $query = $dbConnection->prepare("SELECT * FROM Posts WHERE id = ?");
+    $query->bind_param('i', $postID);
+    $query->execute();
+
+    $result = $query->get_result();
+    $post   = $result->fetch_assoc();
+
+    $post = [
+        'postID'   => $post['id'],
+        'userID'   => $post['userID'],
+        'bodyText' => $row['bodyText'],
+        'imageURL' => $row['imageURL'],
+        'tags'     => getPostTags($dbConnection, $row['id']),
+    ];
+
+    return($result->fetch_assoc());
 }
 
 /* ******************** */
