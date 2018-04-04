@@ -18,6 +18,7 @@ $functionWhiteList = [
     'createUser',
     'getPostsLatest',
     'createPost',
+    'likePost',
 
     // REMOVE BEFORE DEPLOY
     'testUpload',
@@ -224,6 +225,43 @@ function getPostsLatest($dbConnection, $jsonPayload)
     returnSuccess('Posts found.', $postResults);
 }
 
+// TODO: Add SQL checks throughout this function
+function likePost($dbConnection, $jsonPayload)
+{
+    $userID = $jsonPayload['userID'];
+    $postID = $jsonPayload['postID'];
+
+    $query = $dbConnection->prepare("SELECT tagID FROM Posts_Tags WHERE postID = ?;");
+    $query->bind_param('i', $postID);
+    $query->execute();
+
+    $result = $query->get_result();
+
+    $query->close();
+
+    $tags = [];
+
+    while ($row = $result->fetch_array(MYSQLI_NUM)) {
+        $tags[] = $row[0];
+    }
+
+    foreach ($tags as $tagID) {
+        $query = $dbConnection->prepare("INSERT INTO Users_Tags_Likes (userID, tagID) VALUES (?, ?) ON DUPLICATE KEY UPDATE strength = strength + 1;");
+        $query->bind_param('ii', $userID, $tagID);
+        $query->execute();
+
+        $query->close();
+    }
+
+    $query = $dbConnection->prepare("INSERT INTO Users_Posts_Likes (userID, postID) VALUES (?, ?) ON DUPLICATE KEY UPDATE id = id;");
+    $query->bind_param('ii', $userID, $postID);
+    $query->execute();
+
+    $query->close();
+
+    returnSuccess('Post liked.');
+}
+
 /* *************** */
 /* Functions Below */
 /* *************** */
@@ -263,7 +301,7 @@ function callVariableFunction($dbConnection, $jsonPayload, $functionWhiteList)
 
 function getPostTags($dbConnection, $postID)
 {
-    $query = $dbConnection->prepare("SELECT name FROM Tags WHERE id IN (SELECT tagID FROM Posts_Tags WHERE postID = ?);");
+    $query = $dbConnection->prepare("SELECT t.name FROM Tags AS t, Posts_Tags AS pt WHERE pt.postID = ? AND t.id = pt.tagID;");
     $query->bind_param('i', $postID);
     $query->execute();
 
@@ -304,6 +342,7 @@ function createPostsTagsRow($dbConnection, $postID, $tags)
         $query = $dbConnection->prepare("INSERT INTO Posts_Tags (postID, tagID) VALUES (?, ?)");
         $query->bind_param('ii', $postID, $tagID);
         $query->execute();
+        $query->close();
     }
 }
 
