@@ -235,6 +235,7 @@ function getPostsLatest($dbConnection, $jsonPayload)
         $postInformation = [
             'postID'   => $row['id'],
             'userID'   => $row['userID'],
+            'username' => getUsernameFromUserID($dbConnection, $userID),
             'bodyText' => $row['bodyText'],
             'imageURL' => $row['imageURL'],
             'tags'     => getPostTags($dbConnection, $row['id']),
@@ -412,6 +413,23 @@ function getPostByID($dbConnection, $postID)
     ];
 
     return($result->fetch_assoc());
+}
+
+function getUsernameFromUserID($dbConnection, $userID)
+{
+    $query = $dbConnection->prepare("SELECT username FROM Users WHERE id = ?");
+    $query->bind_param('i', $userID);
+    $query->execute();
+
+    $result = $query->get_result();
+
+    $row = $result->fetch_assoc();
+
+    $username = $row['username'];
+
+    $query->close();
+
+    return($username);
 }
 
 /* ******************** */
