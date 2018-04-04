@@ -3,12 +3,6 @@
 // Add file with connection-related functions
 require 'Connection.php';
 
-// Crete a session for the username
-session_start();
-
-// Receive decoded JSON payload from client
-$jsonPayload = getJSONPayload();
-
 // Establish a connection to the database
 $dbConnection = establishConnection();
 
@@ -19,6 +13,7 @@ $functionWhiteList = [
     'getPostsLatest',
     'createPost',
     'likePost',
+    'unlikePost',
 
     // REMOVE BEFORE DEPLOY
     'testUpload',
@@ -62,8 +57,7 @@ function loginAttempt($dbConnection, $jsonPayload)
         if (password_verify($password, $row['password'])) {
             // If the password is correct...
             // Return the JSON success response (including user's id)
-            $_SESSION['id'] = $row['id'];
-            returnSuccess('Login successful.', $_SESSION['id']);
+            returnSuccess('Login successful.');
         } else {
             // If the password isn't correct...
             // Return a JSON error response
@@ -262,6 +256,24 @@ function likePost($dbConnection, $jsonPayload)
     returnSuccess('Post liked.');
 }
 
+function unlikePost($dbConnect, $jsonPayload)
+{
+    $userID = $jsonPayload['userID'];
+    $postID = $jsonPayload['postID'];
+
+    $query = $dbConnection->prepare("UPDATE Users_Tags_Likes SET strength = strength - 1 WHERE userID = ? AND tagID IN (SELECT tagID FROM Posts_Tags WHERE postID = ?);");
+    $query->bind_param('ii', $userID, $postID);
+    $query->execute();
+    $query->close();
+
+    $query = $dbConnection->prepare("DELETE FROM Users_Posts_Likes WHERE userID = ? AND postID = ?;");
+    $query->bind_param('ii', $userID, $postID);
+    $query->execute();
+    $query->close();
+
+    returnSuccess('Post unliked.');
+}
+
 /* *************** */
 /* Functions Below */
 /* *************** */
@@ -375,6 +387,5 @@ function testUpload($dbConnection, $jsonPayload)
 
 // TODO: getPostsPersonal()
 // TODO: getPostsGroups()
-// TODO: likePost()
 // TODO: getPostByID()
 // TODO: suggestTags()
