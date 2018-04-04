@@ -150,7 +150,7 @@ function createUser($dbConnection, $jsonPayload)
         $query->execute();
 
         // Result from the query
-        $result = $query->get_result();
+        $result = mysqli_affected_rows($dbConnection);
 
         // Check to see if the insertion was successful...
         if ($result) {
@@ -161,7 +161,7 @@ function createUser($dbConnection, $jsonPayload)
         } else {
             // If not successful, return JSON error response
             $query->close();
-            returnError($dbConnection->error);
+            returnError('User not created: ' . $dbConnection->error);
         }
     }
 }
@@ -196,26 +196,6 @@ function logout()
   *Checks if unsername exist
   *
  */
-
-function authentication()
-{
-  //database call to check if the username exists
- // checks paasword input from both fields (could this be done on the frontend?)
-}
-
-/** Machine Learning function
-  *
- */
-function autoTag($dbConnection, $jsonPayload)
-{
-  // implement machine learning algorithm
-  // separate machine learning from create post? as a stand alone funct?
-  // image to text
-  //text to tags
-
-
-
-}
 
 /*
   function utilized to create postings in feed
@@ -255,35 +235,64 @@ function createPost($dbConnection, $jsonPayload)
   returnError($dbConnection->error);
   }
 
-
   // We don't need a relational table for posts and users
-
-
   // Call image tagger and populate relational table: Posts_Tags
 
 }
 
- /** Search by tags function
-   *
-  */
-function tagSearch($dbConnection, $jsonPayload)
+/*
+  function utilized to create postings in feed
+*/
+
+function likePost($dbConnection, $jsonPayload)
 {
-  //implement search logic
-  /*
-    4 different searches (similar calls, all within same function?):
-      personalized (Favorites)
-      latest
-      groups
-      my post
-  */
+  // Get from JSON: userID, body text,  image URL
+  $userID = $jsonPayload['userID'];
+  $tagID = trim($jsonPayload['tagID']);
+
+  // Add post to the database
+  $query = $dbConnection->prepare("INSERT INTO Users_Tags_Likes (UserID, TagID) VALUES (?, ?) ON DUPLICATE KEY UPDATE strength = strength + 1");
+  $query->bind_param('ii', $userID, $tagID);
+  $query->execute();
+
+  // Result from the query
+  $result = $query->get_result();
+
+  // Check to see if the insertion was successful...
+  if ($result) {
+  // If successful, return JSON success response
+  returnSuccess('Post liked.');
+  } else {
+  // If not successful, return JSON error response
+  returnError($dbConnection->error);
+  }
+
 }
 
-/*
- *  Settings function
-*/
-function settings($dbConnection, $jsonPayload)
+
+function getPost($dbConnection, $jsonPayload)
 {
-  // implement connections for settings
+  // Get from JSON: userID, body text,  image URL
+  $userID = $jsonPayload['userID'];
+  $tagID = trim($jsonPayload['tagID']);
+
+  // Add post to the database
+  $query = $dbConnection->prepare(" INSERT INTO Users_Tags_Likes (UserID, TagID) VALUES (?, ?) ON DUPLICATE KEY UPDATE strength = strength + 1");
+  $query->bind_param('ii', $userID, $tagID);
+  $query->execute();
+
+  // Result from the query
+  $result = $query->get_result();
+
+  // Check to see if the insertion was successful...
+  if ($result) {
+  // If successful, return JSON success response
+  returnSuccess('Post recieved.');
+  } else {
+  // If not successful, return JSON error response
+  returnError($dbConnection->error);
+  }
+
 
 
 }
@@ -314,5 +323,50 @@ function uploadImageHelper($image)
   {
     returnError('Image extension is not allow.');
   }
+
+}
+
+
+function authentication()
+{
+  //database call to check if the username exists
+ // checks paasword input from both fields (could this be done on the frontend?)
+}
+
+/** Machine Learning function
+  *
+ */
+function autoTag($dbConnection, $jsonPayload)
+{
+  // implement machine learning algorithm
+  // separate machine learning from create post? as a stand alone funct?
+  // image to text
+  //text to tags
+}
+
+
+
+ /** Search by tags function
+   *
+  */
+function tagSearch($dbConnection, $jsonPayload)
+{
+  //implement search logic
+  /*
+    4 different searches (similar calls, all within same function?):
+      personalized (Favorites)
+      latest
+      groups
+      my post
+  */
+}
+
+/*
+ *  Settings function
+*/
+function settings($dbConnection, $jsonPayload)
+{
+  // implement connections for settings
+
 
 }
