@@ -1,7 +1,7 @@
 // Constant value for API path (for ease of use)
-const API = "API/API.php";
-// const API = "http://34.205.31.49/small/web/API/API.php";
-// const API = "https://api.myjson.com/bins/119p5f";
+//const API = "API/API.php";
+//const API = "http://34.205.31.49/small/web/API/API.php";
+const API = "https://api.myjson.com/bins/119p5f";
 
 var currentUserID = "";
 
@@ -55,7 +55,6 @@ function login()
     try {
         // Send the XMLHttpRequest
         xhr.send(jsonPayload);
-        console.log("JSON Response: " + xhr.responseText);
 
         // Parse the JSON returned from the request
         var jsonObject = JSON.parse(xhr.responseText);
@@ -66,16 +65,9 @@ function login()
             return false;
         }
 
-        // Set current user data
-        currentUserID = jsonObject.results.id;
-        console.log("Current UserID: " + currentUserID);
-
         // Reset the HTML fields to blank
-        document.getElementById("loginName").value = "";
         document.getElementById("loginPassword").value = "";
-
-        // Hide the login HTML elements
-        hideOrShow("loginDiv", false);
+        
 
     } catch (e) {
         // If there is an error parsing the JSON, attempt to set the HTML login result message
@@ -219,6 +211,7 @@ function createAccount()
         document.getElementById("createFirstName").innerHTML = "";
         document.getElementById("creatEmail").innerHTML = "";
         document.getElementById("createLastName").innerHTML = "";
+
         //hide sign up
         hideOrShow("signupDiv", false);
 
