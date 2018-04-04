@@ -59,9 +59,12 @@ function loginAttempt($dbConnection, $jsonPayload)
 
         // Verify if the password is correct
         if (password_verify($password, $row['password'])) {
+            $result = [];
+            $result['userID'] = $row['id'];
+            $result['username'] = $row['username'];
             // If the password is correct...
             // Return the JSON success response (including user's id)
-            returnSuccess('Login successful.', $row['id']);
+            returnSuccess('Login successful.', $result);
         } else {
             // If the password isn't correct...
             // Return a JSON error response
@@ -145,8 +148,12 @@ function createUser($dbConnection, $jsonPayload)
         $userID = $query->insert_id;
         $query->close();
 
+        $result = [];
+        $result['userID'] = $userID;
+        $result['username'] = getUsernameFromUserID($dbConnection, $userID);
+
         // If successful, return JSON success response
-        returnSuccess('User created.', $userID);
+        returnSuccess('User created.', $result);
     } else {
         $query->close();
 
