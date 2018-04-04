@@ -1,10 +1,8 @@
 // Constant value for API path (for ease of use)
 //const API = "API/API.php";
-//const API = "http://34.205.31.49/small/web/API/API.php";
-const API = "https://api.myjson.com/bins/119p5f";
+const API = "http://www.musuapp.com/API/API.php";
 
 var currentUserID = "";
-
 var postList;                       //List provided by backend, usually really big
 var filteredPostList;               //List filtered by search bar, can be really big. If not filtered, is the same as post list.
 var indexLoaded;                    //Last index loaded by page on filtered post list
@@ -64,66 +62,17 @@ function login()
             document.getElementById("loginResult").innerHTML = jsonObject.error;
             return false;
         }
-
-        // Reset the HTML fields to blank
-        document.getElementById("loginPassword").value = "";
-        
-
+        else if (jsonObject.success)
+        {
+            window.location = 'http://www.musuapp.com/posts.html?currentUserID='+jsonObject.results+'&username='+jsonObject.results2;
+        }
+    
     } catch (e) {
         // If there is an error parsing the JSON, attempt to set the HTML login result message
         document.getElementById("loginResult").innerHTML = e.message;
     }
 
     return true;
-}
-
-function hideOrShow(elementId, showState) {
-    var componentToChange = document.getElementById(elementId);
-
-    // Set the visibility based on showState
-    if (!componentToChange) {
-        console.log("Element (" + elementId + ") is either not currently available or is not a valid id name");
-        return;
-    }
-
-    // Set the visibility based on showState
-    componentToChange.style.visibility = showState ? "visible" : "hidden";
-
-    // Set the display based on showState
-    componentToChange.style.display = showState ? "block" : "none";
-}
-
-function hideOrShowByClass(elementClass, showState) {
-    var nodeList = document.getElementsByClassName(elementClass);
-
-    if (!nodeList) {
-        console.log("Element (" + elementClass + ") is either not currently available or is not a valid id name");
-        return;
-    }
-
-    for (var i = 0; i < nodeList.length; i++) {
-        var node = nodeList[i];
-        node.style.visibility = showState ? "visible" : "hidden";
-        node.style.display = showState ? "block" : "none";
-    }
-}
-
-function CallServerSide(jsonPayload) {
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", API, true);
-    xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
-    try {
-        xhr.onreadystatechange = function() {
-
-            if (this.readyState === 4 && this.status === 200) {
-                var jsonObject = JSON.parse(xhr.responseText);
-                populatePosts();
-            }
-        };
-        xhr.send(jsonPayload);
-    } catch (err) {
-        console.log(err);
-    }
 }
 
 function createAccount()
@@ -186,7 +135,6 @@ function createAccount()
         };
 
     jsonPayload = JSON.stringify(jsonPayload);
-    console.log("JSON Payload: " + jsonPayload);
 
     //setup
     var xhr = new XMLHttpRequest();
@@ -199,9 +147,13 @@ function createAccount()
 
         var jsonObject = JSON.parse(xhr.responseText);
 
-        if (jsonObject.error) {
+        if (jsonObject.error || !jsonObject.success) {
             document.getElementById("createResult").innerHTML = jsonObject.error;
             return false;
+        }
+        else if (jsonObject.success)
+        {
+            window.location = 'http://www.musuapp.com/posts.html?currentUserID=' + jsonObject.results + '&username=' + jsonObject.results2;
         }
 
         //make forms blank
@@ -212,12 +164,9 @@ function createAccount()
         document.getElementById("creatEmail").innerHTML = "";
         document.getElementById("createLastName").innerHTML = "";
 
-        //hide sign up
-        hideOrShow("signupDiv", false);
-
     } catch (e) {
         // If there is an error parsing the JSON, attempt to set the HTML login result message
-        document.getElementById("loginResult").innerHTML = e.message;
+        document.getElementById("createResult").innerHTML = e.message;
     }
 
     return true;
@@ -231,14 +180,14 @@ function populatePosts()
 {
     var jsonPayload =
     {
-        function: "getContacts",
-        userID: currentUserID
+            function: "getPostsLatest",
+            numberOfPosts: 1000
     };
 
     jsonPayload = JSON.stringify(jsonPayload);
 
     var xhr = new XMLHttpRequest();
-    xhr.open("GET", API, true);
+    xhr.open("POST", API, true);
     xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
 
     try
@@ -247,14 +196,22 @@ function populatePosts()
         {
 
             if (this.readyState === 4 && this.status === 200)
-            {
+            {              
                 var jsonObject = JSON.parse(xhr.responseText);
-                postList = jsonObject.posts;
-                filteredPostList = jsonObject.posts;
-                indexLoaded = 0;
-                var tud = document.getElementById("postScroll");
-                tud.innerHTML = "";
-                buildPostData(filteredPostList.slice(0,10));
+                if (jsonObject.success)
+                {
+                    postList = jsonObject.results;
+                    filteredPostList = jsonObject.results;
+                    indexLoaded = 0;
+                    var tud = document.getElementById("postScroll");
+                    tud.innerHTML = "";
+                    buildPostData(filteredPostList.slice(0, 10));
+                }
+                else
+                {
+                    console.log(jsonObject.message);
+                    alert("Error when reading posts, please try again later");
+                }
             }
         };
 
@@ -267,7 +224,6 @@ function populatePosts()
 
 function buildPostData(posts)
 {
-    console.log(posts);
     var tud = document.getElementById("postScroll");
     var i;
     if(!posts)
@@ -289,11 +245,11 @@ function buildPostData(posts)
         tumbsup.id = posts[i].postID;
         tumbsup.addEventListener("onclick", likeButtonPress(tumbsup));
         verticalLine.className = "line-separator";
-        text.innerHTML = posts[i].postText;
+        text.innerHTML = posts[i].bodyText;
         tags.innerHTML = posts[i].tags;
-        username.innerHTML = posts[i].userName;
+        username.innerHTML = posts[i].username;
         var image = document.createElement('img');
-        image.src = posts[i].imageAddress;
+        image.src = posts[i].imageURL;
         image.className = "image";
         text.className = "postBodyText";
         tags.className = "tagsText";
@@ -315,7 +271,7 @@ function searchPosts()
 {
     var typedSearch = document.getElementById("searchText").value;
     filteredPostList = postList.filter(function (item) {
-        return (stringContains(item.tags, typedSearch) || stringContains(item.userName, typedSearch) || stringContains(item.postText, typedSearch));
+        return (stringContains(item.tags, typedSearch) || stringContains(item.username, typedSearch) || stringContains(item.bodyText, typedSearch));
     });
     indexLoaded = 0;
     var tud = document.getElementById("postScroll");
@@ -343,4 +299,21 @@ function likeButtonPress(button)
         button.className = "fa fa-thumbs-up";
     }*/
 
+}
+
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+function startPosts()
+{
+    currentUserID = getParameterByName('currentUserID');
+    document.getElementById("currentUserName").innerHTML = getParameterByName('username');
+    populatePosts();
 }
