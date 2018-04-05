@@ -162,7 +162,7 @@ function createUser($dbConnection, $jsonPayload)
  * Create a post from a user
  *
  * @json Payload : function, userID, [bodyText, imageURL, tags]
- * @json Response: [none]
+ * @json Response: postID
  *
  * @param mysqli $dbConnection MySQL connection instance
  * @param array $jsonPayload Decoded JSON object
@@ -196,8 +196,10 @@ function createPost($dbConnection, $jsonPayload)
     if ($result) {
         createPostsTagsRow($dbConnection, $postID, $tags);
 
+        $postInfo = ['postID' => $postID];
+
         // If successful...
-        returnSuccess('Post created.');
+        returnSuccess('Post created.', $postInfo);
     } else {
         // If not successful...
         returnError('Post not created: ' . $dbConnection->error);
