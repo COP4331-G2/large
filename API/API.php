@@ -305,6 +305,8 @@ function likePost($dbConnection, $jsonPayload)
 
     $query->close();
 
+    $likeInfo = ['tagsLikedCount' => $result->num_rows];
+
     $tags = [];
 
     while ($row = $result->fetch_assoc()) {
@@ -320,7 +322,7 @@ function likePost($dbConnection, $jsonPayload)
         $query->close();
     }
 
-    returnSuccess('Post liked.');
+    returnSuccess('Post liked.', $likeInfo);
 }
 
 function unlikePost($dbConnection, $jsonPayload)
@@ -348,9 +350,13 @@ function unlikePost($dbConnection, $jsonPayload)
     $query->bind_param('ii', $userID, $postID);
     $query->execute();
 
+    $result = $dbConnection->affected_rows;
+
     $query->close();
 
-    returnSuccess('Post unliked.');
+    $unlikeInfo = ['tagsUnlikedCount' => $result];
+
+    returnSuccess('Post unliked.', $unlikeInfo);
 }
 
 /* *************** */
