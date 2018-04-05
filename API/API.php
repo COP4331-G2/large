@@ -11,13 +11,13 @@ $jsonPayload = getJSONPayload();
 
 // White list of API-callable functions
 $functionWhiteList = [
-    'loginAttempt',
-    'createUser',
-    'getPostsLatest',
     'createPost',
-    'likePost',
-    'unlikePost',
+    'createUser',
     'getPost',
+    'getPostsLatest',
+    'likePost',
+    'loginAttempt',
+    'unlikePost',
 ];
 
 // Call the client-requested function
