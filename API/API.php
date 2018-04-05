@@ -219,11 +219,14 @@ function createPost($dbConnection, $jsonPayload)
  */
 function getPost($dbConnection, $jsonPayload)
 {
+    $userID = $jsonPayload['userID'];
     $postID = $jsonPayload['postID'];
 
-    checkForEmptyProperties([$postID]);
+    checkForEmptyProperties([$userID, $postID]);
 
     $post = getPostByID($dbConnection, $postID);
+
+    $post['isLiked'] = isPostLiked($dbConnection, $userID, $postID);
 
     returnSuccess('Posts found.', $post);
 }
