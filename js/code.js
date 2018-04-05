@@ -66,7 +66,7 @@ function login()
         {
             window.location = 'http://www.musuapp.com/posts.html?currentUserID='+jsonObject.results+'&username='+jsonObject.results2;
         }
-    
+
     } catch (e) {
         // If there is an error parsing the JSON, attempt to set the HTML login result message
         document.getElementById("loginResult").innerHTML = e.message;
@@ -181,7 +181,8 @@ function populatePosts()
     var jsonPayload =
     {
             function: "getPostsLatest",
-            numberOfPosts: 1000
+            numberOfPosts: 1000,
+            userID: currentUserID
     };
 
     jsonPayload = JSON.stringify(jsonPayload);
@@ -196,7 +197,7 @@ function populatePosts()
         {
 
             if (this.readyState === 4 && this.status === 200)
-            {              
+            {
                 var jsonObject = JSON.parse(xhr.responseText);
                 if (jsonObject.success)
                 {
