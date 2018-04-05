@@ -46,6 +46,8 @@ function loginAttempt($dbConnection, $jsonPayload)
     $username = strtolower(trim($jsonPayload['username']));
     $password = trim($jsonPayload['password']);
 
+    checkForEmptyProperties([$username, $password]);
+
     // This block uses prepared statements and parameterized queries to protect against SQL injection
     // MySQL query to check if the username exists in the database
     $statement = "SELECT * FROM Users WHERE username = ?";
@@ -101,25 +103,19 @@ function createUser($dbConnection, $jsonPayload)
     $emailAddress = trim($jsonPayload['emailAddress']);
     $isGroup      = 0;
 
+    // This purposefully doesn't include $isGroup because 0 will evaluate to false in empty()
+    // Instead, the database itself will ensure a default value of 0
+    checkForEmptyProperties([$username, $password, $firstName, $lastName, $emailAddress]);
+
     // Check for various error-inducing situations
     if (strlen($username) > 60) {
         returnError('Username cannot exceed 60 characters.');
-    } else if (strlen($username) <= 0) {
-        returnError('Username cannot be empty.');
-    } else if (strlen($password) <= 0) {
-        returnError('Password cannot be empty.');
     } else if (strlen($firstName) > 60) {
         returnError('First name cannot exceed 60 characters.');
-    } else if (strlen($firstName) <= 0) {
-        returnError('First name cannot be empty.');
     } else if (strlen($lastName) > 60) {
         returnError('Last name cannot exceed 60 characters.');
-    } else if (strlen($lastName) <= 0) {
-        returnError('Last name cannot be empty.');
     } else if (strlen($emailAddress) > 60) {
         returnError('Email address cannot exceed 60 characters.');
-    } else if (strlen($emailAddress) <= 0) {
-        returnError('Email address cannot be empty.');
     }
 
     // This block uses prepared statements and parameterized queries to protect against SQL injection
@@ -186,6 +182,9 @@ function createPost($dbConnection, $jsonPayload)
     $imageURL = trim($jsonPayload['imageURL']);
     $tags     = $jsonPayload['tags'];
 
+    // Posts are not required to have $bodyText, $imageURL, or $tags
+    checkForEmptyProperties([$userID]);
+
     // Add post to the database
     $statement = "INSERT INTO Posts (userID, bodyText, imageURL) VALUES (?, ?, ?)";
     $query = $dbConnection->prepare($statement);
@@ -222,6 +221,8 @@ function getPost($dbConnection, $jsonPayload)
 {
     $postID = $jsonPayload['postID'];
 
+    checkForEmptyProperties([$postID]);
+
     $post = getPostByID($dbConnection, $postID);
 
     returnSuccess('Posts found.', $post);
@@ -237,6 +238,8 @@ function getPostsLatest($dbConnection, $jsonPayload)
 {
     $userID        = $jsonPayload['userID'];
     $numberOfPosts = $jsonPayload['numberOfPosts'];
+
+    checkForEmptyProperties([$userID, $numberOfPosts]);
 
     $statement = "SELECT * FROM Posts ORDER BY id DESC LIMIT ?;";
     $query = $dbConnection->prepare($statement);
@@ -279,6 +282,8 @@ function likePost($dbConnection, $jsonPayload)
 {
     $userID = $jsonPayload['userID'];
     $postID = $jsonPayload['postID'];
+
+    checkForEmptyProperties([$userID, $postID]);
 
     $statement = "INSERT IGNORE INTO Users_Posts_Likes (userID, postID) VALUES (?, ?);";
     $query = $dbConnection->prepare($statement);
@@ -324,6 +329,8 @@ function unlikePost($dbConnection, $jsonPayload)
 {
     $userID = $jsonPayload['userID'];
     $postID = $jsonPayload['postID'];
+
+    checkForEmptyProperties([$userID, $postID]);
 
     $statement = "DELETE FROM Users_Posts_Likes WHERE userID = ? AND postID = ?";
     $query = $dbConnection->prepare($statement);
@@ -382,6 +389,15 @@ function callVariableFunction($dbConnection, $jsonPayload, $functionWhiteList)
     } else {
         // If the function is not callable, return a JSON error response
         returnError('JSON payload tried to call undefined PHP function ' . $function . '()');
+    }
+}
+
+function checkForEmptyProperties($properties)
+{
+    foreach ($properties as $property) {
+        if (empty($property)) {
+            returnError('Not all JSON properties are set.');
+        }
     }
 }
 
