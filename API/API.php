@@ -38,21 +38,18 @@ callVariableFunction($dbConnection, $jsonPayload, $functionWhiteList);
  */
 function loginAttempt($dbConnection, $jsonPayload)
 {
-    // Get the username and password from the JSON payload
     // Always store usernames in lowercase
     $username = strtolower(trim($jsonPayload['username']));
     $password = trim($jsonPayload['password']);
 
     checkForEmptyProperties([$username, $password]);
 
-    // This block uses prepared statements and parameterized queries to protect against SQL injection
     // MySQL query to check if the username exists in the database
     $statement = "SELECT * FROM Users WHERE username = ?";
     $query = $dbConnection->prepare($statement);
     $query->bind_param('s', $username);
     $query->execute();
 
-    // Result from the query
     $result = $query->get_result();
 
     $query->close();
@@ -70,16 +67,13 @@ function loginAttempt($dbConnection, $jsonPayload)
             $userInfo['username'] = $row['username'];
 
             // If the password is correct...
-            // Return the JSON success response (including user's id)
             returnSuccess('Login successful.', $userInfo);
         } else {
             // If the password isn't correct...
-            // Return a JSON error response
             returnError('Password incorrect.');
         }
     } else {
         // If the username doesn't exist...
-        // Return a JSON error response
         returnError('Username not found.');
     }
 }
@@ -92,7 +86,6 @@ function loginAttempt($dbConnection, $jsonPayload)
  */
 function createUser($dbConnection, $jsonPayload)
 {
-    // Get the new account information from the JSON payload
     $username     = strtolower(trim($jsonPayload['username']));
     $password     = trim($jsonPayload['password']);
     $firstName    = trim($jsonPayload['firstName']);
@@ -115,38 +108,34 @@ function createUser($dbConnection, $jsonPayload)
         returnError('Email address cannot exceed 60 characters.');
     }
 
-    // This block uses prepared statements and parameterized queries to protect against SQL injection
     // MySQL query to check if a username already exists in the database
     $statement = "SELECT * FROM Users WHERE username = ?";
     $query = $dbConnection->prepare($statement);
     $query->bind_param('s', $username);
     $query->execute();
 
-    // Result from the query
     $result = $query->get_result();
 
     $query->close();
 
-    // If a username already exists...
-    // Return a JSON error response
     if ($result->num_rows > 0) {
+        // If a username already exists...
         returnError('Username already exists.');
     }
 
     // Encrypt the password (using PHP defaults)
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-    // This block uses prepared statements and parameterized queries to protect against SQL injection
-    // MySQL query to add the username and password into the database
+    // MySQL query to add the new user information into the database
     $statement = "INSERT INTO Users (username, password, firstName, lastName, emailAddress, isGroup) VALUES (?, ?, ?, ?, ?, ?)";
     $query = $dbConnection->prepare($statement);
     $query->bind_param('sssssi', $username, $hashedPassword, $firstName, $lastName, $emailAddress, $isGroup);
     $query->execute();
 
-    // Result from the query
     $result = $query->affected_rows;
 
     if ($result) {
+        // Get the newly created user's database ID
         $userID = $query->insert_id;
     }
 
@@ -158,10 +147,10 @@ function createUser($dbConnection, $jsonPayload)
         $userInfo['userID'] = $userID;
         $userInfo['username'] = getUsernameFromUserID($dbConnection, $userID);
 
-        // If successful, return JSON success response
+        // If successful...
         returnSuccess('User created.', $userInfo);
     } else {
-        // If not successful, return JSON error response
+        // If not successful...
         returnError('User not created: ' . $dbConnection->error);
     }
 }
@@ -182,7 +171,7 @@ function createPost($dbConnection, $jsonPayload)
     // Posts are not required to have $bodyText, $imageURL, or $tags
     checkForEmptyProperties([$userID]);
 
-    // Add post to the database
+    // Add newly created post to the database
     $statement = "INSERT INTO Posts (userID, bodyText, imageURL) VALUES (?, ?, ?)";
     $query = $dbConnection->prepare($statement);
     $query->bind_param('iss', $userID, $bodyText, $imageURL);
@@ -191,6 +180,7 @@ function createPost($dbConnection, $jsonPayload)
     $result = $query->affected_rows;
 
     if ($result) {
+        // Get the newly created post's database ID
         $postID = $query->insert_id;
     }
 
@@ -200,10 +190,10 @@ function createPost($dbConnection, $jsonPayload)
     if ($result) {
         createPostsTagsRow($dbConnection, $postID, $tags);
 
-        // If successful, return JSON success response
+        // If successful...
         returnSuccess('Post created.');
     } else {
-        // If not successful, return JSON error response
+        // If not successful...
         returnError('Post not created: ' . $dbConnection->error);
     }
 }
