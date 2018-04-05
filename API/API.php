@@ -34,10 +34,11 @@ callVariableFunction($dbConnection, $jsonPayload, $functionWhiteList);
  * @json Response: userID, username
  *
  * @param mysqli $dbConnection MySQL connection instance
- * @param object $jsonPayload Decoded JSON stdClass object
+ * @param array $jsonPayload Decoded JSON object
  */
 function loginAttempt($dbConnection, $jsonPayload)
 {
+    var_dump($jsonPayload);
     // Always store usernames in lowercase
     $username = strtolower(trim($jsonPayload['username']));
     $password = trim($jsonPayload['password']);
@@ -82,7 +83,7 @@ function loginAttempt($dbConnection, $jsonPayload)
  * Create a new user account
  *
  * @param mysqli $dbConnection MySQL connection instance
- * @param object $jsonPayload Decoded JSON stdClass object
+ * @param array $jsonPayload Decoded JSON object
  */
 function createUser($dbConnection, $jsonPayload)
 {
@@ -159,7 +160,7 @@ function createUser($dbConnection, $jsonPayload)
  * Create a post from a user
  *
  * @param mysqli $dbConnection MySQL connection instance
- * @param object $jsonPayload Decoded JSON stdClass object
+ * @param array $jsonPayload Decoded JSON object
  */
 function createPost($dbConnection, $jsonPayload)
 {
@@ -202,7 +203,7 @@ function createPost($dbConnection, $jsonPayload)
  * Get a single post by ID
  *
  * @param mysqli $dbConnection MySQL connection instance
- * @param object $jsonPayload Decoded JSON stdClass object
+ * @param array $jsonPayload Decoded JSON object
  */
 function getPost($dbConnection, $jsonPayload)
 {
@@ -222,7 +223,7 @@ function getPost($dbConnection, $jsonPayload)
  * Get the latest specified-amount of posts
  *
  * @param mysqli $dbConnection MySQL connection instance
- * @param object $jsonPayload Decoded JSON stdClass object
+ * @param array $jsonPayload Decoded JSON object
  */
 function getPostsLatest($dbConnection, $jsonPayload)
 {
@@ -353,7 +354,7 @@ function unlikePost($dbConnection, $jsonPayload)
  * Call a variable function passed as a string from the client-side
  *
  * @param mysqli $dbConnection MySQL connection instance
- * @param object $jsonPayload Decoded JSON stdClass object
+ * @param array $jsonPayload Decoded JSON object
  */
 function callVariableFunction($dbConnection, $jsonPayload, $functionWhiteList)
 {
