@@ -81,6 +81,9 @@ function loginAttempt($dbConnection, $jsonPayload)
 /**
  * Create a new user account
  *
+ * @json Payload : function, username, password, firstName, lastName, emailAddress, [isGroup]
+ * @json Response: userID, username
+ *
  * @param mysqli $dbConnection MySQL connection instance
  * @param array $jsonPayload Decoded JSON object
  */
@@ -157,6 +160,9 @@ function createUser($dbConnection, $jsonPayload)
 
 /**
  * Create a post from a user
+ *
+ * @json Payload : function, userID, [bodyText, imageURL, tags]
+ * @json Response: [none]
  *
  * @param mysqli $dbConnection MySQL connection instance
  * @param array $jsonPayload Decoded JSON object
