@@ -38,7 +38,6 @@ callVariableFunction($dbConnection, $jsonPayload, $functionWhiteList);
  */
 function loginAttempt($dbConnection, $jsonPayload)
 {
-    var_dump($jsonPayload);
     // Always store usernames in lowercase
     $username = strtolower(trim($jsonPayload['username']));
     $password = trim($jsonPayload['password']);
