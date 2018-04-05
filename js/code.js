@@ -64,7 +64,7 @@ function login()
         }
         else if (jsonObject.success)
         {
-            window.location = 'http://www.musuapp.com/posts.html?currentUserID='+jsonObject.results+'&username='+jsonObject.results2;
+            window.location = 'http://www.musuapp.com/posts.html?currentUserID='+jsonObject.results.userID+'&username='+jsonObject.results.username;
         }
 
     } catch (e) {
@@ -153,7 +153,7 @@ function createAccount()
         }
         else if (jsonObject.success)
         {
-            window.location = 'http://www.musuapp.com/posts.html?currentUserID=' + jsonObject.results + '&username=' + jsonObject.results2;
+            window.location = 'http://www.musuapp.com/posts.html?currentUserID=' + jsonObject.results.userID + '&username=' + jsonObject.results.username;
         }
 
         //make forms blank
