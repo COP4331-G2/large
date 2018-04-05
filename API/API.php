@@ -18,9 +18,6 @@ $functionWhiteList = [
     'likePost',
     'unlikePost',
     'getPost',
-
-    // TODO: REMOVE BEFORE DEPLOY
-    'testUpload',
 ];
 
 // Call the client-requested function
@@ -509,34 +506,3 @@ function isPostLiked($dbConnection, $userID, $postID)
     // Return false otherwise (meaning the post is not liked by the user)
     return ($result->num_rows > 0);
 }
-
-/* ******************** */
-/* TEST Functions Below */
-/* ******************** */
-
-// DANGEROUS: ONLY FOR TESTING PURPOSES
-// REMOVE BEFORE DEPLOY
-// Make sure to add "return;" in returnSuccess()
-// And remove first "die;" statement in this function
-function testUpload($dbConnection, $jsonPayload)
-{
-    die;
-
-    for ($i = 1; $i <= 545; $i++) {
-        $imageURL = "http://res.cloudinary.com/cop4331g2/image/upload/v1522708347/image" . $i . ".jpg";
-
-        $jsonPayload = [
-            'imageURL' => $imageURL,
-            'userID' => 3,
-            'bodyText' => "Testing...1...2...3...",
-        ];
-
-        createPost($dbConnection, $jsonPayload);
-    }
-
-    die;
-}
-
-// TODO: getPostsPersonal()
-// TODO: getPostsGroups()
-// TODO: suggestTags()
