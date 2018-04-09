@@ -43,7 +43,7 @@
                         </div>
                     </div>
 
-                    <div class="col-sm-8">   
+                    <div class="col-sm-8" style="background-color:white">   
                         <div style="padding-bottom: 5px">
                             <input type="text" class="form-control mr-auto postSearch" id="searchText" placeholder="Search Posts" oninput="searchPosts()" />
                         </div>
@@ -67,7 +67,7 @@
 
         $('#postScroll').on('scroll', function ()
         {
-            if ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
+            if ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight - 20) {
                 loadNext();
             }
         })

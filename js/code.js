@@ -367,7 +367,7 @@ function getParameterByName(name, url) {
 function startPosts()
 {
     currentUserID = getParameterByName('currentUserID');
-    currentUserID = 1;
+    currentUserID = 2;
     document.getElementById("currentUserName").innerHTML = getParameterByName('username');
     populatePosts(1000);
 

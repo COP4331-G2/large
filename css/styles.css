@@ -7,7 +7,7 @@ body, html
 .bg
 {
     /* The image used */
-    background-image: url("https://media0.giphy.com/media/BHNfhgU63qrks/source.gif");
+    background-image: url("https://i.giphy.com/media/BHNfhgU63qrks/source.gif");
     height: 100%;
     background-position: center;
     background-repeat: no-repeat;
@@ -16,13 +16,13 @@ body, html
 }
 
 .bg2 {
-    /* The image used 
-    background-image: url("../images/background.gif");
+    /*The image used */
+    background-image: url("http://kaba35.com/wp-content/uploads/2015/11/Savin-NY-Website-Background-Web.jpg");
     height: 100%;
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
-    background-attachment: local;*/
+    background-attachment: local;
 }
 
 .likeButton 
