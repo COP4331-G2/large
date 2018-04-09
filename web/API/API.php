@@ -3,7 +3,7 @@
 // Add file with connection-related functions
 require 'Connection.php';
 
-// Crete a session for the username
+// Create a session for the current username
 session_start();
 
 // Receive decoded JSON payload from client
@@ -18,15 +18,17 @@ callVariableFunction($dbConnection, $jsonPayload);
 // Folder were all images will be save.
 $destinationFolder = "uploads/";
 
-/* *************** */
-/* Functions Below */
-/* *************** */
+/* *********************************************** */
+/*             Functions Below                     */
+/* *********************************************** */
 
 /**
- * Call a variable function passed as a string from the client-side
+ * Calls a variable function passed as a string from the client-side
  *
  * @param mysqli $dbConnection MySQL connection instance
  * @param object $jsonPayload Decoded JSON stdClass object
+ * input: function name
+ * output: calls specified function
  */
 function callVariableFunction($dbConnection, $jsonPayload)
 {
@@ -48,6 +50,9 @@ function callVariableFunction($dbConnection, $jsonPayload)
  *
  * @param mysqli $dbConnection MySQL connection instance
  * @param object $jsonPayload Decoded JSON stdClass object
+ * input : username and password
+ * output: verifies if passwords match; Checks if unsername exist
+ *
  */
 function loginAttempt($dbConnection, $jsonPayload)
 {
@@ -93,6 +98,8 @@ function loginAttempt($dbConnection, $jsonPayload)
  *
  * @param mysqli $dbConnection MySQL connection instance
  * @param object $jsonPayload Decoded JSON stdClass object
+ * input: username, password, firsName, lastName, address
+ * output: creates the user account if all fields are properly filled
  */
 function createUser($dbConnection, $jsonPayload)
 {
@@ -171,6 +178,8 @@ function createUser($dbConnection, $jsonPayload)
  *
  * @param mysqli $dbConnection MySQL connection instance
  * @param object $jsonPayload Decoded JSON stdClass object
+ * input: userID
+ * output: delete MySQL statements to delete contacts and user
  */
 function deleteUser($dbConnection, $jsonPayload)
 {
@@ -184,6 +193,7 @@ function deleteUser($dbConnection, $jsonPayload)
 
 /*
   Logout function
+
 */
 function logout()
 {
@@ -192,13 +202,13 @@ function logout()
   returnSuccess('User has logout');
 }
 
-/** Verify if passwords match
-  *Checks if unsername exist
-  *
- */
 
-/*
-  function utilized to create postings in feed
+/**
+  * function utilized to create postings in feed
+  * @param mysqli $dbConnection MySQL connection instance
+  * @param object $jsonPayload Decoded JSON stdClass object
+  * input: userID, post body text, imageURL
+  * output: Inserts information into Database
 */
 
 function createPost($dbConnection, $jsonPayload)
@@ -240,8 +250,12 @@ function createPost($dbConnection, $jsonPayload)
 
 }
 
-/*
-  function utilized to create postings in feed
+/**
+  * function utilized to create postings in feed
+  * @param mysqli $dbConnection MySQL connection instance
+  * @param object $jsonPayload Decoded JSON stdClass object
+  * input: userID, tagID
+  * output: inserts information into database, or updates strength count
 */
 
 function likePost($dbConnection, $jsonPayload)
@@ -269,7 +283,13 @@ function likePost($dbConnection, $jsonPayload)
 
 }
 
-
+/**
+ *   Upload image helper function
+ * @param mysqli $dbConnection MySQL connection instance
+ * @param object $jsonPayload Decoded JSON stdClass object
+ * input: userID, tagID
+ * output: inserts information into database, or updates strength count
+ */
 function getPost($dbConnection, $jsonPayload)
 {
   // Get from JSON: userID, body text,  image URL
@@ -297,8 +317,12 @@ function getPost($dbConnection, $jsonPayload)
 
 }
 
-/*
+/**
  *   Upload image helper function
+ * @param mysqli $dbConnection MySQL connection instance
+ * @param object $jsonPayload Decoded JSON stdClass object
+ * input: imageURL
+ * output: creates a proper image URL
  */
 function uploadImageHelper($image)
 {
@@ -326,7 +350,14 @@ function uploadImageHelper($image)
 
 }
 
-
+/** Authentication function
+  * MAY HAVE
+  * @param mysqli $dbConnection MySQL connection instance
+  * @param object $jsonPayload Decoded JSON stdClass object
+  * input: username, password
+  * output: checks of the user's information is valid
+  *
+ */
 function authentication()
 {
   //database call to check if the username exists
@@ -334,6 +365,11 @@ function authentication()
 }
 
 /** Machine Learning function
+  * SHOULD HAVE (Impressive feature to present to the class)
+  * @param mysqli $dbConnection MySQL connection instance
+  * @param object $jsonPayload Decoded JSON stdClass object
+  * input: tagID, postID, imageURL
+  * output: automatically tags images
   *
  */
 function autoTag($dbConnection, $jsonPayload)
@@ -344,10 +380,11 @@ function autoTag($dbConnection, $jsonPayload)
   //text to tags
 }
 
-
-
  /** Search by tags function
-   *
+   * @param mysqli $dbConnection MySQL connection instance
+   * @param object $jsonPayload Decoded JSON stdClass object
+   * input: postID, tagID
+   * output: searches for post associated with tag specified
   */
 function tagSearch($dbConnection, $jsonPayload)
 {
@@ -361,8 +398,12 @@ function tagSearch($dbConnection, $jsonPayload)
   */
 }
 
-/*
+/**
  *  Settings function
+ * @param mysqli $dbConnection MySQL connection instance
+ * @param object $jsonPayload Decoded JSON stdClass object
+ * input: settings
+ * output: ability to change settings
 */
 function settings($dbConnection, $jsonPayload)
 {
