@@ -1,12 +1,12 @@
 <?php
 
-// Add file with connection-related functions
+// Included connection-related functions
 require 'Connection.php';
 
-// Establish a connection to the database
+// Established connection to the database
 $dbConnection = establishConnection();
 
-// Receive decoded JSON payload from client
+// Received decoded JSON payload from client
 $jsonPayload = getJSONPayload();
 
 // White list of API-callable functions
@@ -38,7 +38,7 @@ callVariableFunction($dbConnection, $jsonPayload, $functionWhiteList);
  */
 function loginAttempt($dbConnection, $jsonPayload)
 {
-    // Always store usernames in lowercase
+    // Always store username in lowercase
     $username = strtolower(trim($jsonPayload['username']));
     $password = trim($jsonPayload['password']);
 
@@ -57,13 +57,14 @@ function loginAttempt($dbConnection, $jsonPayload)
     // Verify if the username exists
     if ($result->num_rows > 0) {
         // If the username exists...
+
         // Get the other coloumn information for the user account
         $row = $result->fetch_assoc();
 
         // Verify if the password is correct
         if (password_verify($password, $row['password'])) {
             $userInfo = [];
-            $userInfo['userID'] = $row['id'];
+            $userInfo['userID']   = $row['id'];
             $userInfo['username'] = $row['username'];
 
             // If the password is correct...
@@ -100,7 +101,7 @@ function createUser($dbConnection, $jsonPayload)
     // Instead, the database itself will ensure a default value of 0
     checkForEmptyProperties([$username, $password, $firstName, $lastName, $emailAddress]);
 
-    // Check for various error-inducing situations
+    // Check for various error-inducing inputs
     if (strlen($username) > 60) {
         returnError('Username cannot exceed 60 characters.');
     } else if (strlen($firstName) > 60) {
@@ -147,7 +148,7 @@ function createUser($dbConnection, $jsonPayload)
     // Check to see if the insertion was successful...
     if ($result) {
         $userInfo = [];
-        $userInfo['userID'] = $userID;
+        $userInfo['userID']   = $userID;
         $userInfo['username'] = getUsernameFromUserID($dbConnection, $userID);
 
         // If successful...
@@ -159,7 +160,7 @@ function createUser($dbConnection, $jsonPayload)
 }
 
 /**
- * Create a post from a user
+ * Create a user post
  *
  * @json Payload : function, userID, [bodyText, imageURL, tags]
  * @json Response: postID
@@ -174,7 +175,13 @@ function createPost($dbConnection, $jsonPayload)
     $imageURL = trim($jsonPayload['imageURL']);
     $tags     = $jsonPayload['tags'];
 
-    // Posts are not required to have $bodyText, $imageURL, or $tags
+    // Trim whitespace from all tags
+    // The strange syntax allows the updated values to escape the scope of the foreach loop
+    foreach ($tags as $key => $field) {
+        $tags[$key] = trim($tags[$key]);
+    }
+
+    // Posts are not actually required to have $bodyText, $imageURL, or $tags
     checkForEmptyProperties([$userID]);
 
     // Add newly created post to the database
@@ -194,8 +201,10 @@ function createPost($dbConnection, $jsonPayload)
 
     // Check to see if the insertion was successful...
     if ($result) {
-        createPostsTagsRow($dbConnection, $postID, $tags);
+        // Create the relational rows for each post/tag
+        createPostsTagsRows($dbConnection, $postID, $tags);
 
+        // Append the newly created post's database ID to the JSON response
         $postInfo = ['postID' => $postID];
 
         // If successful...
@@ -207,7 +216,10 @@ function createPost($dbConnection, $jsonPayload)
 }
 
 /**
- * Get a single post by ID
+ * Get database information for a single post by its ID
+ *
+ * @json Payload : function, userID, postID
+ * @json Response: postID, userID, username, [bodyText, imageURL, tags], isLiked
  *
  * @param mysqli $dbConnection MySQL connection instance
  * @param array $jsonPayload Decoded JSON object
@@ -221,13 +233,27 @@ function getPost($dbConnection, $jsonPayload)
 
     $post = getPostByID($dbConnection, $postID);
 
-    $post['isLiked'] = isPostLiked($dbConnection, $userID, $postID);
+    // Check to see if the post was found...
+    if ($post) {
+        // Append whether or not the post is liked by the user to the JSON response
+        $post['isLiked'] = isPostLiked($dbConnection, $userID, $postID);
 
-    returnSuccess('Posts found.', $post);
+        // Append the post creator's username
+        $post['username'] = getUsernameFromUserID($dbConnection, $post['userID']);
+
+        // If the post was found...
+        returnSuccess('Posts found.', $post);
+    } else {
+        // If the post was not found...
+        returnError("Post not found.");
+    }
 }
 
 /**
- * Get the latest specified-amount of posts
+ * Get the specified amount of latest posts
+ *
+ * @json Payload : function, userID, numberOfPosts
+ * @json Response: (multiple) postID, userID, username, [bodyText, imageURL, tags], isLiked
  *
  * @param mysqli $dbConnection MySQL connection instance
  * @param array $jsonPayload Decoded JSON object
@@ -239,7 +265,7 @@ function getPostsLatest($dbConnection, $jsonPayload)
 
     checkForEmptyProperties([$userID, $numberOfPosts]);
 
-    $statement = "SELECT * FROM Posts ORDER BY id DESC LIMIT ?;";
+    $statement = "SELECT * FROM Posts ORDER BY id DESC LIMIT ?";
     $query = $dbConnection->prepare($statement);
     $query->bind_param('i', $numberOfPosts);
     $query->execute();
@@ -248,7 +274,7 @@ function getPostsLatest($dbConnection, $jsonPayload)
 
     $query->close();
 
-    // Verify posts were found
+    // Verify post(s) were found
     if ($result->num_rows <= 0) {
         returnError('No posts found: ' . $dbConnection->error);
     }
@@ -276,6 +302,15 @@ function getPostsLatest($dbConnection, $jsonPayload)
     returnSuccess('Post(s) found.', $postResults);
 }
 
+/**
+ * Like a post
+ *
+ * @json Payload : function, userID, postID
+ * @json Response: tagsLikedCount
+ *
+ * @param mysqli $dbConnection MySQL connection instance
+ * @param array $jsonPayload Decoded JSON object
+ */
 function likePost($dbConnection, $jsonPayload)
 {
     $userID = $jsonPayload['userID'];
@@ -283,7 +318,8 @@ function likePost($dbConnection, $jsonPayload)
 
     checkForEmptyProperties([$userID, $postID]);
 
-    $statement = "INSERT IGNORE INTO Users_Posts_Likes (userID, postID) VALUES (?, ?);";
+    // Create the relationship row for the userID and the postID
+    $statement = "INSERT IGNORE INTO Users_Posts_Likes (userID, postID) VALUES (?, ?)";
     $query = $dbConnection->prepare($statement);
     $query->bind_param('ii', $userID, $postID);
     $query->execute();
@@ -292,11 +328,13 @@ function likePost($dbConnection, $jsonPayload)
 
     $query->close();
 
+    // If the post had already been liked...
     if ($result <= 0) {
         returnError('Previously liked post.');
     }
 
-    $statement = "SELECT tagID FROM Posts_Tags WHERE postID = ?;";
+    // Get the IDs of each tag for this post
+    $statement = "SELECT tagID FROM Posts_Tags WHERE postID = ?";
     $query = $dbConnection->prepare($statement);
     $query->bind_param('i', $postID);
     $query->execute();
@@ -305,14 +343,18 @@ function likePost($dbConnection, $jsonPayload)
 
     $query->close();
 
+    // Track how many tags were liked as a result of this post being liked
     $likeInfo = ['tagsLikedCount' => $result->num_rows];
 
+    // Store all of the IDs for each tag related to this post
     $tags = [];
 
     while ($row = $result->fetch_assoc()) {
         $tags[] = $row['tagID'];
     }
 
+    // Create the relationship row(s) for each tag liked as a result of this post being liked
+    // Or increase the strength count if the tag(s) has/have already been liked by this user
     foreach ($tags as $tagID) {
         $statement = "INSERT INTO Users_Tags_Likes (userID, tagID) VALUES (?, ?) ON DUPLICATE KEY UPDATE strength = strength + 1";
         $query = $dbConnection->prepare($statement);
@@ -325,6 +367,15 @@ function likePost($dbConnection, $jsonPayload)
     returnSuccess('Post liked.', $likeInfo);
 }
 
+/**
+ * Unlike a post
+ *
+ * @json Payload : function, userID, postID
+ * @json Response: tagsUnlikedCount
+ *
+ * @param mysqli $dbConnection MySQL connection instance
+ * @param array $jsonPayload Decoded JSON object
+ */
 function unlikePost($dbConnection, $jsonPayload)
 {
     $userID = $jsonPayload['userID'];
@@ -332,6 +383,7 @@ function unlikePost($dbConnection, $jsonPayload)
 
     checkForEmptyProperties([$userID, $postID]);
 
+    // Delete the relationship row for the userID and the postID
     $statement = "DELETE FROM Users_Posts_Likes WHERE userID = ? AND postID = ?";
     $query = $dbConnection->prepare($statement);
     $query->bind_param('ii', $userID, $postID);
@@ -341,10 +393,13 @@ function unlikePost($dbConnection, $jsonPayload)
 
     $query->close();
 
+    // If the post had not already been liked...
     if ($result <= 0) {
         returnError('Post was not previously liked.');
     }
 
+    // Delete the relationship row(s) for each tag unliked as a result of this post being unliked
+    // Or decrease the strength count if the tag(s) has/have already been liked by this user
     $statement = "UPDATE Users_Tags_Likes SET strength = strength - 1 WHERE userID = ? AND tagID IN (SELECT tagID FROM Posts_Tags WHERE postID = ?)";
     $query = $dbConnection->prepare($statement);
     $query->bind_param('ii', $userID, $postID);
@@ -364,21 +419,21 @@ function unlikePost($dbConnection, $jsonPayload)
 /* *************** */
 
 /**
- * Call a variable function passed as a string from the client-side
+ * Call a variable function passed as a string from the client
  *
  * @param mysqli $dbConnection MySQL connection instance
  * @param array $jsonPayload Decoded JSON object
+ * @param array $functionWhiteList An array of white-listed API functions
  */
 function callVariableFunction($dbConnection, $jsonPayload, $functionWhiteList)
 {
-    // Get function name (as string) from the JSON payload
+    // Get function name (as a string) from the JSON payload
     $function = $jsonPayload['function'];
 
-    // Ensure that the function is in the white list (and use strict)
+    // Ensure that the function is in the white list (using strict type comparison)
     $funcIndex = array_search($function, $functionWhiteList, true);
 
-    // Use the functionWhiteList version, not the user-supplied version
-    // This is for security reasons
+    // Use the functionWhiteList version, not the user-supplied version (for security reasons)
     if ($funcIndex !== false && $funcIndex !== null) {
         $function = $functionWhiteList[$funcIndex];
     } else {
@@ -388,7 +443,7 @@ function callVariableFunction($dbConnection, $jsonPayload, $functionWhiteList)
 
     // Ensure that the function exists and is callable
     if (is_callable($function)) {
-        // Use the JSON payload 'function' string field to call a PHP function
+        // Use the 'function' string field to call a PHP function (this uses the magic of unicorn blood)
         $function($dbConnection, $jsonPayload);
     } else {
         // If the function is not callable, return a JSON error response
@@ -396,17 +451,29 @@ function callVariableFunction($dbConnection, $jsonPayload, $functionWhiteList)
     }
 }
 
+/**
+ * Ensure that all of the array properties are not empty
+ *
+ * @param array $properties An array of properties
+ */
 function checkForEmptyProperties($properties)
 {
     foreach ($properties as $property) {
         if (empty($property)) {
-            returnError('Not all JSON properties are set.');
+            returnError('Not all JSON properties are set for this endpoint call.');
         }
     }
 }
 
+/**
+ * Get all of the tag names from a post
+ *
+ * @param mysqli $dbConnection MySQL connection instance
+ * @param integer $postID The database ID of a post
+ */
 function getPostTags($dbConnection, $postID)
 {
+    // Use a post ID to get all associated tag names
     $statement = "SELECT t.name FROM Tags AS t, Posts_Tags AS pt WHERE pt.postID = ? AND t.id = pt.tagID";
     $query = $dbConnection->prepare($statement);
     $query->bind_param('i', $postID);
@@ -418,6 +485,7 @@ function getPostTags($dbConnection, $postID)
 
     $tagResults = [];
 
+    // Build an array of tag names
     while ($row = $result->fetch_assoc()) {
         $tagResults[] = $row['name'];
     }
@@ -425,9 +493,18 @@ function getPostTags($dbConnection, $postID)
     return $tagResults;
 }
 
-function createPostsTagsRow($dbConnection, $postID, $tags)
+/**
+ * Create relationship row(s) for a post and tag(s)
+ *
+ * @param mysqli $dbConnection MySQL connection instance
+ * @param integer $postID The database ID of a post
+ * @param array $tags A string array of tag names
+ */
+function createPostsTagsRows($dbConnection, $postID, $tags)
 {
+    // Do this for each tag given
     foreach ($tags as $tag) {
+        // Select (if exists) information for a tag by its name
         $statement = "SELECT * FROM Tags WHERE name = ?";
         $query = $dbConnection->prepare($statement);
         $query->bind_param('s', $tag);
@@ -437,19 +514,24 @@ function createPostsTagsRow($dbConnection, $postID, $tags)
 
         $query->close();
 
+        // Check to see if the tag already exists...
         if ($result->num_rows > 0) {
+            // If it does, then fetch the tagID
             $tagID = $result->fetch_assoc()['id'];
         } else {
+            // If it doesn't, then create the new tag in the database
             $statement = "INSERT INTO Tags (name) VALUES (?)";
             $query = $dbConnection->prepare($statement);
             $query->bind_param('s', $tag);
             $query->execute();
 
+            // Save the newly created tag's ID
             $tagID = $query->insert_id;
 
             $query->close();
         }
 
+        // Create the relationship row for the postID and the tagID
         $statement = "INSERT INTO Posts_Tags (postID, tagID) VALUES (?, ?)";
         $query = $dbConnection->prepare($statement);
         $query->bind_param('ii', $postID, $tagID);
@@ -459,8 +541,15 @@ function createPostsTagsRow($dbConnection, $postID, $tags)
     }
 }
 
+/**
+ * Get a post's information using its ID
+ *
+ * @param mysqli $dbConnection MySQL connection instance
+ * @param integer $postID The database ID of a post
+ */
 function getPostByID($dbConnection, $postID)
 {
+    // Get the post's information using its ID
     $statement = "SELECT * FROM Posts WHERE id = ?";
     $query = $dbConnection->prepare($statement);
     $query->bind_param('i', $postID);
@@ -475,15 +564,24 @@ function getPostByID($dbConnection, $postID)
         'userID'   => $row['userID'],
         'bodyText' => $row['bodyText'],
         'imageURL' => $row['imageURL'],
+
+        // This will be an array of strings containing tag names
         'tags'     => getPostTags($dbConnection, $row['id']),
     ];
 
     return $post;
 }
 
+/**
+ * Get a user's username using its ID
+ *
+ * @param mysqli $dbConnection MySQL connection instance
+ * @param integer $userID The database ID of a user
+ */
 function getUsernameFromUserID($dbConnection, $userID)
 {
-    $statement = "SELECT username FROM Users WHERE id = ?;";
+    // Get the user's username using its ID
+    $statement = "SELECT username FROM Users WHERE id = ?";
     $query = $dbConnection->prepare($statement);
     $query->bind_param('i', $userID);
     $query->execute();
@@ -495,6 +593,13 @@ function getUsernameFromUserID($dbConnection, $userID)
     return $username;
 }
 
+/**
+ * Determine if a post is liked by a user
+ *
+ * @param mysqli $dbConnection MySQL connection instance
+ * @param integer $userID The database ID of a user
+ * @param integer $postID The database ID of a post
+ */
 function isPostLiked($dbConnection, $userID, $postID)
 {
     $statement = "SELECT * FROM Users_Posts_Likes WHERE userID = ? AND postID = ?";
@@ -506,7 +611,9 @@ function isPostLiked($dbConnection, $userID, $postID)
 
     $query->close();
 
-    // Return true if a row was found (meaning the post is liked by the user)
-    // Return false otherwise (meaning the post is not liked by the user)
-    return ($result->num_rows > 0);
+    // True if a row was found (meaning the post is liked by the user)
+    // False otherwise (meaning the post is not liked by the user)
+    $isLiked = ($result->num_rows > 0);
+
+    return $isLiked;
 }
