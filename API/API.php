@@ -23,9 +23,9 @@ $functionWhiteList = [
 // Call the client-requested function
 callVariableFunction($dbConnection, $jsonPayload, $functionWhiteList);
 
-/* *************** */
-/* Endpoints Below */
-/* *************** */
+/* ************************************************************* */
+/*                     Endpoints Below                           */
+/* ************************************************************* */
 
 /**
  * Verify username/password information and (perhaps) login to a user's account
@@ -414,9 +414,59 @@ function unlikePost($dbConnection, $jsonPayload)
     returnSuccess('Post unliked.', $unlikeInfo);
 }
 
-/* *************** */
-/* Functions Below */
-/* *************** */
+/** Machine Learning function
+  * SHOULD HAVE (Impressive feature to present to the class)
+  * @json Payload : function, tagID, postID, imageURL
+  * @json Response: autoTag
+  *
+  * @param mysqli $dbConnection MySQL connection instance
+  * @param object $jsonPayload Decoded JSON stdClass object
+  *
+ */
+function suggestTags($dbConnection, $jsonPayload)
+{
+  // implement machine learning algorithm
+  // separate machine learning from create post? as a stand alone funct?
+  // image to text
+  //text to tags
+}
+
+/**
+ *  Settings function
+ * SHOULD HAVE
+ *
+ * @json Payload : function, userName, password
+ * @json Response: editUser
+ *
+ * @param mysqli $dbConnection MySQL connection instance
+ * @param object $jsonPayload Decoded JSON stdClass object
+ *
+*/
+function editUser($dbConnection, $jsonPayload)
+{
+  // implement connections for settings
+
+
+}
+
+/** Authentication function
+  * MAY HAVE
+  * @json Payload : function, userID, password
+  * @json Response: userID, password
+  *
+  * @param mysqli $dbConnection MySQL connection instance
+  * @param object $jsonPayload Decoded JSON stdClass object
+  *
+ */
+function authenticateUser()
+{
+  //database call to check if the username exists
+ // checks paasword input from both fields (could this be done on the frontend?)
+}
+
+/* **************************************************** */
+/*                  Functions Below                     */
+/* **************************************************** */
 
 /**
  * Call a variable function passed as a string from the client
@@ -650,4 +700,27 @@ function decreaseStrengthCount($dbConnection, $userID, $strengthDecrease)
     $query->execute();
 
     $query->close();
+}
+
+/** Authentication helper  function
+  * MAY HAVE
+  * @param mysqli $dbConnection MySQL connection instance
+  * @param object $jsonPayload Decoded JSON stdClass object
+  *
+ */
+function generateAuthCode()
+{
+  //helper function to authenticate users
+
+}
+
+/** Authentication helper function
+  * MAY HAVE
+  * @param mysqli $dbConnection MySQL connection instance
+  * @param object $jsonPayload Decoded JSON stdClass object
+  *
+ */
+function verifyAuthCode()
+{
+  //verifies if username and password is valid
 }
