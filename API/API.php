@@ -15,6 +15,7 @@ $functionWhiteList = [
     'createUser',
     'getPost',
     'getPostsLatest',
+    'getPostsGroups',
     'likePost',
     'loginAttempt',
     'unlikePost',
@@ -23,9 +24,9 @@ $functionWhiteList = [
 // Call the client-requested function
 callVariableFunction($dbConnection, $jsonPayload, $functionWhiteList);
 
-/* *************** */
-/* Endpoints Below */
-/* *************** */
+/* ************************************************************* */
+/*                     Endpoints Below                           */
+/* ************************************************************* */
 
 /**
  * Verify username/password information and (perhaps) login to a user's account
@@ -303,6 +304,59 @@ function getPostsLatest($dbConnection, $jsonPayload)
 }
 
 /**
+ * Get the specified amount of latest posts created by groups
+ *
+ * @json Payload : function, userID, numberOfPosts
+ * @json Response: (multiple) postID, userID, username, [bodyText, imageURL, tags], isLiked
+ *
+ * @param mysqli $dbConnection MySQL connection instance
+ * @param array $jsonPayload Decoded JSON object
+ */
+function getPostsGroups($dbConnection, $jsonPayload)
+{
+    $userID        = $jsonPayload['userID'];
+    $numberOfPosts = $jsonPayload['numberOfPosts'];
+
+    checkForEmptyProperties([$userID, $numberOfPosts]);
+
+    $statement = "SELECT p.* FROM Posts AS p, Users AS u WHERE p.userID = u.id AND u.isGroup = 1 ORDER BY id DESC LIMIT ?";
+    $query = $dbConnection->prepare($statement);
+    $query->bind_param('i', $numberOfPosts);
+    $query->execute();
+
+    $result = $query->get_result();
+
+    $query->close();
+
+    // Verify post(s) were found
+    if ($result->num_rows <= 0) {
+        returnError('No posts found: ' . $dbConnection->error);
+    }
+
+    $postResults = [];
+
+    // NOTE: $userID is the ID of the actual user fetching the posts
+    //       $row['userID'] is the ID of each user that created the post(s) being fetched
+    while ($row = $result->fetch_assoc()) {
+        $postID = $row['id'];
+
+        $postInformation = [
+            'postID'   => $postID,
+            'userID'   => $row['userID'],
+            'username' => getUsernameFromUserID($dbConnection, $row['userID']),
+            'bodyText' => $row['bodyText'],
+            'imageURL' => $row['imageURL'],
+            'tags'     => getPostTags($dbConnection, $postID),
+            'isLiked'  => isPostLiked($dbConnection, $userID, $postID),
+        ];
+
+        $postResults[] = $postInformation;
+    }
+
+    returnSuccess('Post(s) found.', $postResults);
+}
+
+/**
  * Like a post
  *
  * @json Payload : function, userID, postID
@@ -344,7 +398,9 @@ function likePost($dbConnection, $jsonPayload)
     $query->close();
 
     // Track how many tags were liked as a result of this post being liked
-    $likeInfo = ['tagsLikedCount' => $result->num_rows];
+    $tagsLikedCount = $result->num_rows;
+
+    $likeInfo = ['tagsLikedCount' => $tagsLikedCount];
 
     // Store all of the IDs for each tag related to this post
     $tags = [];
@@ -363,6 +419,8 @@ function likePost($dbConnection, $jsonPayload)
 
         $query->close();
     }
+
+    increaseStrengthCount($dbConnection, $userID, $tagsLikedCount);
 
     returnSuccess('Post liked.', $likeInfo);
 }
@@ -405,18 +463,71 @@ function unlikePost($dbConnection, $jsonPayload)
     $query->bind_param('ii', $userID, $postID);
     $query->execute();
 
-    $result = $dbConnection->affected_rows;
+    // Track how many tags were unliked as a result of this post being unliked
+    $tagsUnlikedCount = $dbConnection->affected_rows;
 
     $query->close();
 
-    $unlikeInfo = ['tagsUnlikedCount' => $result];
+    $unlikeInfo = ['tagsUnlikedCount' => $tagsUnlikedCount];
+
+    decreaseStrengthCount($dbConnection, $userID, $tagsUnlikedCount);
 
     returnSuccess('Post unliked.', $unlikeInfo);
 }
 
-/* *************** */
-/* Functions Below */
-/* *************** */
+/** Machine Learning function
+  * SHOULD HAVE (Impressive feature to present to the class)
+  * @json Payload : function, tagID, postID, imageURL
+  * @json Response: autoTag
+  *
+  * @param mysqli $dbConnection MySQL connection instance
+  * @param object $jsonPayload Decoded JSON stdClass object
+  *
+ */
+function suggestTags($dbConnection, $jsonPayload)
+{
+  // implement machine learning algorithm
+  // separate machine learning from create post? as a stand alone funct?
+  // image to text
+  //text to tags
+}
+
+/**
+ *  Settings function
+ * SHOULD HAVE
+ *
+ * @json Payload : function, userName, password
+ * @json Response: editUser
+ *
+ * @param mysqli $dbConnection MySQL connection instance
+ * @param object $jsonPayload Decoded JSON stdClass object
+ *
+*/
+function editUser($dbConnection, $jsonPayload)
+{
+  // implement connections for settings
+
+
+}
+
+/** Authentication function
+  * MAY HAVE
+  * @json Payload : function, userID, password
+  * @json Response: userID, password
+  *
+  * @param mysqli $dbConnection MySQL connection instance
+  * @param object $jsonPayload Decoded JSON stdClass object
+  *
+ */
+function authenticateUser()
+{
+  //database call to check if the username exists
+ // checks paasword input from both fields (could this be done on the frontend?)
+}
+
+/* **************************************************** */
+/*                  Functions Below                     */
+/* **************************************************** */
 
 /**
  * Call a variable function passed as a string from the client
@@ -629,7 +740,7 @@ function increaseStrengthCount($dbConnection, $userID, $strengthIncrease)
 {
     $statement = "UPDATE Users SET strengthCount = strengthCount + ? WHERE id = ?";
     $query = $dbConnection->prepare($statement);
-    $query->bind_param('ii', $strengthIncrease, $postID);
+    $query->bind_param('ii', $strengthIncrease, $userID);
     $query->execute();
 
     $query->close();
@@ -646,8 +757,31 @@ function decreaseStrengthCount($dbConnection, $userID, $strengthDecrease)
 {
     $statement = "UPDATE Users SET strengthCount = strengthCount - ? WHERE id = ?";
     $query = $dbConnection->prepare($statement);
-    $query->bind_param('ii', $strengthDecrease, $postID);
+    $query->bind_param('ii', $strengthDecrease, $userID);
     $query->execute();
 
     $query->close();
+}
+
+/** Authentication helper  function
+  * MAY HAVE
+  * @param mysqli $dbConnection MySQL connection instance
+  * @param object $jsonPayload Decoded JSON stdClass object
+  *
+ */
+function generateAuthCode()
+{
+  //helper function to authenticate users
+
+}
+
+/** Authentication helper function
+  * MAY HAVE
+  * @param mysqli $dbConnection MySQL connection instance
+  * @param object $jsonPayload Decoded JSON stdClass object
+  *
+ */
+function verifyAuthCode()
+{
+  //verifies if username and password is valid
 }
