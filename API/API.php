@@ -344,7 +344,9 @@ function likePost($dbConnection, $jsonPayload)
     $query->close();
 
     // Track how many tags were liked as a result of this post being liked
-    $likeInfo = ['tagsLikedCount' => $result->num_rows];
+    $tagsLikedCount = $result->num_rows;
+
+    $likeInfo = ['tagsLikedCount' => $tagsLikedCount];
 
     // Store all of the IDs for each tag related to this post
     $tags = [];
@@ -363,6 +365,8 @@ function likePost($dbConnection, $jsonPayload)
 
         $query->close();
     }
+
+    increaseStrengthCount($dbConnection, $userID, $tagsLikedCount);
 
     returnSuccess('Post liked.', $likeInfo);
 }
@@ -405,11 +409,14 @@ function unlikePost($dbConnection, $jsonPayload)
     $query->bind_param('ii', $userID, $postID);
     $query->execute();
 
-    $result = $dbConnection->affected_rows;
+    // Track how many tags were unliked as a result of this post being unliked
+    $tagsUnlikedCount = $dbConnection->affected_rows;
 
     $query->close();
 
-    $unlikeInfo = ['tagsUnlikedCount' => $result];
+    $unlikeInfo = ['tagsUnlikedCount' => $tagsUnlikedCount];
+
+    decreaseStrengthCount($dbConnection, $userID, $tagsUnlikedCount);
 
     returnSuccess('Post unliked.', $unlikeInfo);
 }
@@ -679,7 +686,7 @@ function increaseStrengthCount($dbConnection, $userID, $strengthIncrease)
 {
     $statement = "UPDATE Users SET strengthCount = strengthCount + ? WHERE id = ?";
     $query = $dbConnection->prepare($statement);
-    $query->bind_param('ii', $strengthIncrease, $postID);
+    $query->bind_param('ii', $strengthIncrease, $userID);
     $query->execute();
 
     $query->close();
@@ -696,7 +703,7 @@ function decreaseStrengthCount($dbConnection, $userID, $strengthDecrease)
 {
     $statement = "UPDATE Users SET strengthCount = strengthCount - ? WHERE id = ?";
     $query = $dbConnection->prepare($statement);
-    $query->bind_param('ii', $strengthDecrease, $postID);
+    $query->bind_param('ii', $strengthDecrease, $userID);
     $query->execute();
 
     $query->close();
