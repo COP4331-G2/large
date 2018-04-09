@@ -2,7 +2,7 @@
 //const API = "API/API.php";
 const API = "http://www.musuapp.com/API/API.php";
 
-var currentUserID = "";
+var currentUserID;
 var postList;                       //List provided by backend, usually really big
 var filteredPostList;               //List filtered by search bar, can be really big. If not filtered, is the same as post list.
 var indexLoaded;                    //Last index loaded by page on filtered post list
@@ -176,14 +176,14 @@ function stringContains(stringToCheck, substring) {
     return stringToCheck.toString().toLowerCase().indexOf(substring.toLowerCase()) !== -1;
 }
 
-function populatePosts()
+function populatePosts(number)
 {
     var jsonPayload =
     {
             function: "getPostsLatest",
-            numberOfPosts: 1000,
+            numberOfPosts: number,
             userID: currentUserID
-    };
+    };    
 
     jsonPayload = JSON.stringify(jsonPayload);
 
@@ -242,9 +242,78 @@ function buildPostData(posts)
         var tumbsupdiv = document.createElement('div');
         tumbsupdiv.className = "buttsup";
         var tumbsup = document.createElement('button');
-        tumbsup.className = "fa fa-thumbs-up";
+        if (posts[i].isLiked) 
+        {
+            tumbsup.className = "btn btn-secondary mr-2 my-2 my-sm-0 unlikeButton";
+            tumbsup.innerHTML = "Unlike";
+        }
+        else
+        {
+            tumbsup.className = "btn btn-primary mr-2 my-2 my-sm-0 likeButton";
+            tumbsup.innerHTML = "Like";
+        }
         tumbsup.id = posts[i].postID;
-        tumbsup.addEventListener("onclick", likeButtonPress(tumbsup));
+        tumbsup.onclick = function ()
+        {
+            if (this.innerHTML === "Like")
+            {
+                this.className = "btn btn-secondary mr-2 my-2 my-sm-0 unlikeButton";
+                this.innerHTML = "Unlike";
+                var jsonPayload =
+                    {
+                        function: "likePost",
+                        userID: currentUserID,
+                        postID: this.id
+                    };
+
+
+                jsonPayload = JSON.stringify(jsonPayload);
+
+                //setup
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", API, true);
+                xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+
+                try {
+                    //send the xml request
+                    xhr.send(jsonPayload);
+                }
+                catch(e)
+                {
+                    console.log(e.message);
+                }
+         
+            }
+            else
+            {
+                this.className = "btn btn-primary mr-2 my-2 my-sm-0 likeButton";
+                this.innerHTML = "Like";
+
+                var jsonPayload =
+                    {
+                        function: "unlikePost",
+                        userID: currentUserID,
+                        postID: this.id
+                    };
+
+
+                jsonPayload = JSON.stringify(jsonPayload);
+
+                //setup
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", API, true);
+                xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+
+                try {
+                    //send the xml request
+                    xhr.send(jsonPayload);
+                }
+                catch (e) {
+                    console.log(e.message);
+                }
+
+            }
+        };
         verticalLine.className = "line-separator";
         text.innerHTML = posts[i].bodyText;
         tags.innerHTML = posts[i].tags;
@@ -285,23 +354,6 @@ function loadNext()
     buildPostData(filteredPostList.slice(indexLoaded, indexLoaded + 10));
 }
 
-function likeButtonPress(button)
-{
-
-    // button.classList.toggle("fa fa-thumbs-up");
-
-    //button.className = "fa fa-thumbs-down";
-    /*if(button.className == "fa fa-thumbs-up")
-    {
-        button.className = "fa fa-thumbs-down";
-    }
-    else if(button.className == "fa fa-thumbs-down")
-    {
-        button.className = "fa fa-thumbs-up";
-    }*/
-
-}
-
 function getParameterByName(name, url) {
     if (!url) url = window.location.href;
     name = name.replace(/[\[\]]/g, "\\$&");
@@ -315,6 +367,8 @@ function getParameterByName(name, url) {
 function startPosts()
 {
     currentUserID = getParameterByName('currentUserID');
+    currentUserID = 1;
     document.getElementById("currentUserName").innerHTML = getParameterByName('username');
-    populatePosts();
+    populatePosts(1000);
+
 }

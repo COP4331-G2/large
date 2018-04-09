@@ -15,6 +15,27 @@ body, html
     background-attachment: local;
 }
 
+.bg2 {
+    /* The image used 
+    background-image: url("../images/background.gif");
+    height: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: local;*/
+}
+
+.likeButton 
+{
+    font-family: 'Roboto', sans-serif;
+    font-size: 12px; 
+}
+
+.unlikeButton {
+    font-family: 'Roboto', sans-serif;
+    font-size: 12px;
+}
+
 .buttsup
 {
     margin-left: auto;
