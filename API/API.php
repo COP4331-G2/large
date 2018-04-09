@@ -15,6 +15,7 @@ $functionWhiteList = [
     'createUser',
     'getPost',
     'getPostsLatest',
+    'getPostsGroups',
     'likePost',
     'loginAttempt',
     'unlikePost',
@@ -266,6 +267,59 @@ function getPostsLatest($dbConnection, $jsonPayload)
     checkForEmptyProperties([$userID, $numberOfPosts]);
 
     $statement = "SELECT * FROM Posts ORDER BY id DESC LIMIT ?";
+    $query = $dbConnection->prepare($statement);
+    $query->bind_param('i', $numberOfPosts);
+    $query->execute();
+
+    $result = $query->get_result();
+
+    $query->close();
+
+    // Verify post(s) were found
+    if ($result->num_rows <= 0) {
+        returnError('No posts found: ' . $dbConnection->error);
+    }
+
+    $postResults = [];
+
+    // NOTE: $userID is the ID of the actual user fetching the posts
+    //       $row['userID'] is the ID of each user that created the post(s) being fetched
+    while ($row = $result->fetch_assoc()) {
+        $postID = $row['id'];
+
+        $postInformation = [
+            'postID'   => $postID,
+            'userID'   => $row['userID'],
+            'username' => getUsernameFromUserID($dbConnection, $row['userID']),
+            'bodyText' => $row['bodyText'],
+            'imageURL' => $row['imageURL'],
+            'tags'     => getPostTags($dbConnection, $postID),
+            'isLiked'  => isPostLiked($dbConnection, $userID, $postID),
+        ];
+
+        $postResults[] = $postInformation;
+    }
+
+    returnSuccess('Post(s) found.', $postResults);
+}
+
+/**
+ * Get the specified amount of latest posts created by groups
+ *
+ * @json Payload : function, userID, numberOfPosts
+ * @json Response: (multiple) postID, userID, username, [bodyText, imageURL, tags], isLiked
+ *
+ * @param mysqli $dbConnection MySQL connection instance
+ * @param array $jsonPayload Decoded JSON object
+ */
+function getPostsGroups($dbConnection, $jsonPayload)
+{
+    $userID        = $jsonPayload['userID'];
+    $numberOfPosts = $jsonPayload['numberOfPosts'];
+
+    checkForEmptyProperties([$userID, $numberOfPosts]);
+
+    $statement = "SELECT p.* FROM Posts AS p, Users AS u WHERE p.userID = u.id AND u.isGroup = 1 ORDER BY id DESC LIMIT ?";
     $query = $dbConnection->prepare($statement);
     $query->bind_param('i', $numberOfPosts);
     $query->execute();
