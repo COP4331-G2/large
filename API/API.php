@@ -617,3 +617,37 @@ function isPostLiked($dbConnection, $userID, $postID)
 
     return $isLiked;
 }
+
+/**
+ * Increase the total strength count for a user
+ *
+ * @param mysqli $dbConnection MySQL connection instance
+ * @param integer $userID The database ID of a user
+ * @param integer $strengthIncrease The amount to add to the user's total strength count
+ */
+function increaseStrengthCount($dbConnection, $userID, $strengthIncrease)
+{
+    $statement = "UPDATE Users SET strengthCount = strengthCount + ? WHERE id = ?";
+    $query = $dbConnection->prepare($statement);
+    $query->bind_param('ii', $strengthIncrease, $postID);
+    $query->execute();
+
+    $query->close();
+}
+
+/**
+ * Decrease the total strength count for a user
+ *
+ * @param mysqli $dbConnection MySQL connection instance
+ * @param integer $userID The database ID of a user
+ * @param integer $strengthDecrease The amount to subtract from the user's total strength count
+ */
+function decreaseStrengthCount($dbConnection, $userID, $strengthDecrease)
+{
+    $statement = "UPDATE Users SET strengthCount = strengthCount - ? WHERE id = ?";
+    $query = $dbConnection->prepare($statement);
+    $query->bind_param('ii', $strengthDecrease, $postID);
+    $query->execute();
+
+    $query->close();
+}
