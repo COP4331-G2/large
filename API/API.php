@@ -531,12 +531,13 @@ function updateUser($dbConnection, $jsonPayload)
         $password = password_hash($password, PASSWORD_DEFAULT);
     }
 
+    // This MySQL statement will only update each column if the new value is not an empty string
     $statement =
         "UPDATE Users SET
-            username = CASE WHEN ? = '' THEN username ELSE ? END,
-            password = CASE WHEN ? = '' THEN password ELSE ? END,
-            firstName = CASE WHEN ? = '' THEN firstName ELSE ? END,
-            lastName = CASE WHEN ? = '' THEN lastName ELSE ? END,
+            username     = CASE WHEN ? = '' THEN username     ELSE ? END,
+            password     = CASE WHEN ? = '' THEN password     ELSE ? END,
+            firstName    = CASE WHEN ? = '' THEN firstName    ELSE ? END,
+            lastName     = CASE WHEN ? = '' THEN lastName     ELSE ? END,
             emailAddress = CASE WHEN ? = '' THEN emailAddress ELSE ? END
         WHERE id = ?";
     $query = $dbConnection->prepare($statement);
