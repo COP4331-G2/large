@@ -19,6 +19,7 @@ $functionWhiteList = [
     'likePost',
     'loginAttempt',
     'unlikePost',
+    'updateUser',
 ];
 
 // Call the client-requested function
@@ -493,21 +494,65 @@ function suggestTags($dbConnection, $jsonPayload)
 }
 
 /**
- *  Settings function
- * SHOULD HAVE
+ * Update a user's personal account information
  *
- * @json Payload : function, userName, password
- * @json Response: editUser
+ * @json Payload : function, userID, [username, password, firstName, lastName, emailAddress]
+ * @json Response: userID, username
  *
  * @param mysqli $dbConnection MySQL connection instance
  * @param object $jsonPayload Decoded JSON stdClass object
  *
 */
-function editUser($dbConnection, $jsonPayload)
+function updateUser($dbConnection, $jsonPayload)
 {
-  // implement connections for settings
+    $userID       = $jsonPayload['userID'];
+    $username     = strtolower(trim($jsonPayload['username']));
+    $password     = trim($jsonPayload['password']);
+    $firstName    = trim($jsonPayload['firstName']);
+    $lastName     = trim($jsonPayload['lastName']);
+    $emailAddress = trim($jsonPayload['emailAddress']);
 
+    checkForEmptyProperties([$userID]);
 
+    // Check for various error-inducing inputs
+    if (strlen($username) > 60) {
+        returnError('Username cannot exceed 60 characters.');
+    } else if (strlen($firstName) > 60) {
+        returnError('First name cannot exceed 60 characters.');
+    } else if (strlen($lastName) > 60) {
+        returnError('Last name cannot exceed 60 characters.');
+    } else if (strlen($emailAddress) > 60) {
+        returnError('Email address cannot exceed 60 characters.');
+    }
+
+    // If a new password is provided...
+    if (!empty($password)) {
+        // Encrypt the password (using PHP defaults)
+        $password = password_hash($password, PASSWORD_DEFAULT);
+    }
+
+    $statement =
+        "UPDATE Users SET
+            username = CASE WHEN ? = '' THEN username ELSE ? END,
+            password = CASE WHEN ? = '' THEN password ELSE ? END,
+            firstName = CASE WHEN ? = '' THEN firstName ELSE ? END,
+            lastName = CASE WHEN ? = '' THEN lastName ELSE ? END,
+            emailAddress = CASE WHEN ? = '' THEN emailAddress ELSE ? END
+        WHERE id = ?";
+    $query = $dbConnection->prepare($statement);
+    $query->bind_param('ssssssssssi', $username, $username, $password, $password, $firstName, $firstName, $lastName, $lastName, $emailAddress, $emailAddress, $userID);
+    $query->execute();
+
+    $result = $dbConnection->affected_rows;
+
+    $query->close();
+
+    // Check to see if the information was updated...
+    if ($result > 0) {
+        returnSuccess('User information updated.');
+    } else {
+        returnError('User information not updated.');
+    }
 }
 
 /** Authentication function
