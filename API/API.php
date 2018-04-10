@@ -497,7 +497,7 @@ function suggestTags($dbConnection, $jsonPayload)
  * Update a user's personal account information
  *
  * @json Payload : function, userID, [username, password, firstName, lastName, emailAddress]
- * @json Response: userID, username
+ * @json Response: [none]
  *
  * @param mysqli $dbConnection MySQL connection instance
  * @param object $jsonPayload Decoded JSON stdClass object
