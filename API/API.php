@@ -263,7 +263,54 @@ function getPost($dbConnection, $jsonPayload)
  */
 function getPostsPersonal($dbConnection, $jsonPayload)
 {
-    // ALGORITHM
+    $userID        = $jsonPayload['userID'];
+    $numberOfPosts = $jsonPayload['numberOfPosts'];
+
+    checkForEmptyProperties([$userID, $numberOfPosts]);
+
+    $statement =
+        "SELECT id, userID, bodyText, imageURL,
+        (SELECT GROUP_CONCAT(t.name) FROM Tags AS t, Posts_Tags AS pt WHERE pt.postID = Posts.id AND t.id = pt.tagID) AS tags,
+        (SELECT username FROM Users WHERE id = Posts.userID) AS username,
+        IFNULL((SELECT SUM(strength) FROM Users_Tags_Likes WHERE userID = ? AND tagID IN (SELECT tagID FROM Posts_Tags WHERE postID = Posts.id)), 0) AS strength,
+        CASE WHEN (SELECT id FROM Users_Posts_Likes WHERE userID = ? AND postID = Posts.id) IS NOT NULL THEN 1 ELSE 0 END AS isLiked
+        FROM Posts ORDER BY id DESC LIMIT ?";
+
+    $query = $dbConnection->prepare($statement);
+    $query->bind_param('iii', $userID, $userID, $numberOfPosts);
+    $query->execute();
+
+    $result = $query->get_result();
+
+    $query->close();
+
+    // Verify post(s) were found
+    if ($result->num_rows <= 0) {
+        returnError('No posts found: ' . $dbConnection->error);
+    }
+
+    $postResults = [];
+
+    // NOTE: $userID is the ID of the actual user fetching the posts
+    //       $row['userID'] is the ID of each user that created the post(s) being fetched
+    while ($row = $result->fetch_assoc()) {
+        $postID = $row['id'];
+
+        $postInformation = [
+            'postID'   => $postID,
+            'userID'   => $row['userID'],
+            'username' => $row['username'],
+            'bodyText' => $row['bodyText'],
+            'imageURL' => $row['imageURL'],
+            'tags'     => preg_split('/,/', $row['tags'], null, PREG_SPLIT_NO_EMPTY),
+            'isLiked'  => ($row['isLiked'] == TRUE),
+            'strength' => (int) $row['strength'],
+        ];
+
+        $postResults[] = $postInformation;
+    }
+
+    returnSuccess('Post(s) found.', $postResults);
 }
 
 /**
