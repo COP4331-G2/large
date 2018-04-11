@@ -252,6 +252,20 @@ function getPost($dbConnection, $jsonPayload)
 }
 
 /**
+ * Get the most relevant posts for a particular user (based on tag likes)
+ *
+ * @json Payload : function, userID, numberOfPosts
+ * @json Response: (multiple) postID, userID, username, [bodyText, imageURL, tags], isLiked
+ *
+ * @param mysqli $dbConnection MySQL connection instance
+ * @param array $jsonPayload Decoded JSON object
+ */
+function getPostsPersonal($dbConnection, $jsonPayload)
+{
+    // ALGORITHM
+}
+
+/**
  * Get the specified amount of latest posts
  *
  * @json Payload : function, userID, numberOfPosts
