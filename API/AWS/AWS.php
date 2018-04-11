@@ -13,44 +13,51 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-**/
+ **/
 
 // Include the SDK using the Composer autoloader
 require 'vendor/autoload.php';
 
+// Open secrets file
+$credentialsFile = fopen('../aws_credentials', 'r');
 
-/*
-$s3 = new Aws\S3\S3Client([
-    'version' => 'latest',
-    'region'  => 'us-west-2',
-	
-]);
-*/
+$credentials = fgets($credentialsFile);
+
+// Close secrets file
+fclose($credentialsFile);
+
+// Create an array (delimited by a comma) from the retrieved string
+$credentials = explode(',', $credentials);
+$key         = trim($credentials[0]);
+$secret      = trim($credentials[1]);
 
 $comprehend = new Aws\Comprehend\ComprehendClient([
-    'version' => 'latest',
-    'region'  => 'us-west-2',
-	
+    'version'     => 'latest',
+    'region'      => 'us-west-2',
+    'credentials' => [
+        'key'     => $key,
+        'secret'  => $secret,
+    ],
 ]);
 
 function comprehend($body)
 {
-	
-	$result = $comprehend->detectKeyPhrases([
-		'LanguageCode' => 'en', // REQUIRED
-		'Text' => '$body', // REQUIRED
-	]);
+    global $comprehend;
 
-	$tagArray = [];
+    $result = $comprehend->detectEntities([
+        'LanguageCode' => 'en', // REQUIRED
+        'Text'         => $body, // REQUIRED
+    ]);
 
-	foreach($result['KeyPhrases'] as $keyPhrase) {
-		$tagArray[] = $keyPhrase['Text'];
-	}
-	/*
-	print(":::");
-	var_dump($tagArray);
-	*/
-	
-	return $tagArray;
+    $tagArray = [];
 
+    foreach ($result['Entities'] as $entities) {
+        $tagArray[] = $entities['Text'];
+    }
+    /*
+    print(":::");
+    var_dump($tagArray);
+     */
+
+    return $tagArray;
 }

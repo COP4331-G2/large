@@ -1,5 +1,8 @@
 <?php
 
+// For mlTest
+include 'AWS/AWS.php';
+
 // Included connection-related functions
 require 'Connection.php';
 
@@ -21,6 +24,9 @@ $functionWhiteList = [
     'loginAttempt',
     'unlikePost',
     'updateUser',
+
+    // For mlTest
+    'mlTest',
 ];
 
 // Call the client-requested function
@@ -904,4 +910,13 @@ function generateAuthCode()
 function verifyAuthCode()
 {
   //verifies if username and password is valid
+}
+
+function mlTest($dbConnection, $jsonPayload)
+{
+    $text = $jsonPayload['text'];
+
+    $tagArray = comprehend($text);
+
+    returnSuccess('mlTest', $tagArray);
 }
