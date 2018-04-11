@@ -14,6 +14,7 @@ $functionWhiteList = [
     'createPost',
     'createUser',
     'getPost',
+    'getPostsPersonal',
     'getPostsLatest',
     'getPostsGroups',
     'likePost',
@@ -281,9 +282,15 @@ function getPostsLatest($dbConnection, $jsonPayload)
 
     checkForEmptyProperties([$userID, $numberOfPosts]);
 
-    $statement = "SELECT * FROM Posts ORDER BY id DESC LIMIT ?";
+    $statement =
+        "SELECT id, userID, bodyText, imageURL,
+        (SELECT GROUP_CONCAT(t.name) FROM Tags AS t, Posts_Tags AS pt WHERE pt.postID = Posts.id AND t.id = pt.tagID) AS tags,
+        (SELECT username FROM Users WHERE id = Posts.userID) AS username,
+        CASE WHEN (SELECT id FROM Users_Posts_Likes WHERE userID = ? AND postID = Posts.id) IS NOT NULL THEN 1 ELSE 0 END AS isLiked
+        FROM Posts ORDER BY id DESC LIMIT ?";
+
     $query = $dbConnection->prepare($statement);
-    $query->bind_param('i', $numberOfPosts);
+    $query->bind_param('ii', $userID, $numberOfPosts);
     $query->execute();
 
     $result = $query->get_result();
@@ -305,11 +312,11 @@ function getPostsLatest($dbConnection, $jsonPayload)
         $postInformation = [
             'postID'   => $postID,
             'userID'   => $row['userID'],
-            'username' => getUsernameFromUserID($dbConnection, $row['userID']),
+            'username' => $row['username'],
             'bodyText' => $row['bodyText'],
             'imageURL' => $row['imageURL'],
-            'tags'     => getPostTags($dbConnection, $postID),
-            'isLiked'  => isPostLiked($dbConnection, $userID, $postID),
+            'tags'     => preg_split('/,/', $row['tags'], null, PREG_SPLIT_NO_EMPTY),
+            'isLiked'  => ($row['isLiked'] == TRUE),
         ];
 
         $postResults[] = $postInformation;
@@ -334,9 +341,15 @@ function getPostsGroups($dbConnection, $jsonPayload)
 
     checkForEmptyProperties([$userID, $numberOfPosts]);
 
-    $statement = "SELECT p.* FROM Posts AS p, Users AS u WHERE p.userID = u.id AND u.isGroup = 1 ORDER BY id DESC LIMIT ?";
+    $statement =
+        "SELECT p.id, p.userID, p.bodyText, p.imageURL,
+        (SELECT GROUP_CONCAT(t.name) FROM Tags AS t, Posts_Tags AS pt WHERE pt.postID = p.id AND t.id = pt.tagID) AS tags,
+        (SELECT username FROM Users WHERE id = p.userID) AS username,
+        CASE WHEN (SELECT id FROM Users_Posts_Likes WHERE userID = ? AND postID = p.id) IS NOT NULL THEN 1 ELSE 0 END AS isLiked
+        FROM Posts AS p, Users AS u WHERE p.userID = u.id AND u.isGroup = 1 ORDER BY id DESC LIMIT ?";
+
     $query = $dbConnection->prepare($statement);
-    $query->bind_param('i', $numberOfPosts);
+    $query->bind_param('ii', $userID, $numberOfPosts);
     $query->execute();
 
     $result = $query->get_result();
@@ -358,11 +371,11 @@ function getPostsGroups($dbConnection, $jsonPayload)
         $postInformation = [
             'postID'   => $postID,
             'userID'   => $row['userID'],
-            'username' => getUsernameFromUserID($dbConnection, $row['userID']),
+            'username' => $row['username'],
             'bodyText' => $row['bodyText'],
             'imageURL' => $row['imageURL'],
-            'tags'     => getPostTags($dbConnection, $postID),
-            'isLiked'  => isPostLiked($dbConnection, $userID, $postID),
+            'tags'     => preg_split('/,/', $row['tags'], null, PREG_SPLIT_NO_EMPTY),
+            'isLiked'  => ($row['isLiked'] == TRUE),
         ];
 
         $postResults[] = $postInformation;
