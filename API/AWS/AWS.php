@@ -23,20 +23,14 @@ require 'vendor/autoload.php';
 $s3 = new Aws\S3\S3Client([
     'version' => 'latest',
     'region'  => 'us-west-2',
-	'credentials' => [
-        'key'    => 'AKIAI5WUEZZCJRGSXTXQ',
-        'secret' => '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'
-    ]
+	
 ]);
 */
 
 $comprehend = new Aws\Comprehend\ComprehendClient([
     'version' => 'latest',
     'region'  => 'us-west-2',
-	'credentials' => [
-        'key'    => 'AKIAI5WUEZZCJRGSXTXQ',
-        'secret' => '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'
-    ]
+	
 ]);
 
 function comprehend($body)
