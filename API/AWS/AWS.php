@@ -18,9 +18,15 @@
 // Include the SDK using the Composer autoloader
 require 'vendor/autoload.php';
 
-// Open secrets file
+// Open credentials file
 $credentialsFile = fopen('../aws_credentials', 'r');
 
+if (!$credentialsFile) {
+    echo "ERROR: Could not open AWS credentials\n";
+    die;
+}
+
+// Read credentials file
 $credentials = fgets($credentialsFile);
 
 // Close secrets file
@@ -54,10 +60,6 @@ function comprehend($body)
     foreach ($result['Entities'] as $entities) {
         $tagArray[] = $entities['Text'];
     }
-    /*
-    print(":::");
-    var_dump($tagArray);
-     */
 
     return $tagArray;
 }
