@@ -1,9 +1,9 @@
 <?php
 
-// For mlTest
+// Include AWS API
 include 'AWS/AWS.php';
 
-// Included connection-related functions
+// Include connection-related functions
 require 'Connection.php';
 
 // Established connection to the database
@@ -24,9 +24,7 @@ $functionWhiteList = [
     'loginAttempt',
     'unlikePost',
     'updateUser',
-
-    // For mlTest
-    'mlTest',
+    'suggestTags',
 ];
 
 // Call the client-requested function
@@ -556,21 +554,25 @@ function unlikePost($dbConnection, $jsonPayload)
     returnSuccess('Post unliked.', $unlikeInfo);
 }
 
-/** Machine Learning function
-  * SHOULD HAVE (Impressive feature to present to the class)
-  * @json Payload : function, tagID, postID, imageURL
-  * @json Response: autoTag
+/**
+  * Use AWS API to suggest tags for a post
+  *
+  * @json Payload : function, [bodyText, imageURL]
+  * @json Response: tags
   *
   * @param mysqli $dbConnection MySQL connection instance
   * @param object $jsonPayload Decoded JSON stdClass object
   *
- */
+  */
 function suggestTags($dbConnection, $jsonPayload)
 {
-  // implement machine learning algorithm
-  // separate machine learning from create post? as a stand alone funct?
-  // image to text
-  //text to tags
+    $bodyText = $jsonPayload['bodyText'];
+    $imageURL = $jsonPayload['imageURL'];
+
+    // Use AWS API to suggest tags
+    $tagArray = comprehend($bodyText);
+
+    returnSuccess('Successfully suggested tags.', $tagArray);
 }
 
 /**
@@ -582,7 +584,7 @@ function suggestTags($dbConnection, $jsonPayload)
  * @param mysqli $dbConnection MySQL connection instance
  * @param object $jsonPayload Decoded JSON stdClass object
  *
-*/
+ */
 function updateUser($dbConnection, $jsonPayload)
 {
     $userID       = $jsonPayload['userID'];
@@ -634,21 +636,6 @@ function updateUser($dbConnection, $jsonPayload)
     } else {
         returnError('User information not updated.');
     }
-}
-
-/** Authentication function
-  * MAY HAVE
-  * @json Payload : function, userID, password
-  * @json Response: userID, password
-  *
-  * @param mysqli $dbConnection MySQL connection instance
-  * @param object $jsonPayload Decoded JSON stdClass object
-  *
- */
-function authenticateUser()
-{
-  //database call to check if the username exists
- // checks paasword input from both fields (could this be done on the frontend?)
 }
 
 /* **************************************************** */
@@ -887,36 +874,4 @@ function decreaseStrengthCount($dbConnection, $userID, $strengthDecrease)
     $query->execute();
 
     $query->close();
-}
-
-/** Authentication helper  function
-  * MAY HAVE
-  * @param mysqli $dbConnection MySQL connection instance
-  * @param object $jsonPayload Decoded JSON stdClass object
-  *
- */
-function generateAuthCode()
-{
-  //helper function to authenticate users
-
-}
-
-/** Authentication helper function
-  * MAY HAVE
-  * @param mysqli $dbConnection MySQL connection instance
-  * @param object $jsonPayload Decoded JSON stdClass object
-  *
- */
-function verifyAuthCode()
-{
-  //verifies if username and password is valid
-}
-
-function mlTest($dbConnection, $jsonPayload)
-{
-    $text = $jsonPayload['text'];
-
-    $tagArray = comprehend($text);
-
-    returnSuccess('mlTest', $tagArray);
 }
