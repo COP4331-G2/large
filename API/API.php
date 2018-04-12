@@ -17,14 +17,14 @@ $functionWhiteList = [
     'createPost',
     'createUser',
     'getPost',
-    'getPostsPersonal',
-    'getPostsLatest',
     'getPostsGroups',
+    'getPostsLatest',
+    'getPostsPersonal',
     'likePost',
     'loginAttempt',
+    'suggestTags',
     'unlikePost',
     'updateUser',
-    'suggestTags',
 ];
 
 // Call the client-requested function
@@ -233,6 +233,8 @@ function createPost($dbConnection, $jsonPayload)
  */
 function getPost($dbConnection, $jsonPayload)
 {
+    // TODO: This need to used an optimized query statement (as in getPostsLatest)
+
     $userID = $jsonPayload['userID'];
     $postID = $jsonPayload['postID'];
 
@@ -252,7 +254,7 @@ function getPost($dbConnection, $jsonPayload)
         returnSuccess('Posts found.', $post);
     } else {
         // If the post was not found...
-        returnError("Post not found.");
+        returnError('Post not found.');
     }
 }
 
@@ -587,6 +589,8 @@ function suggestTags($dbConnection, $jsonPayload)
  */
 function updateUser($dbConnection, $jsonPayload)
 {
+    // TODO: Ensure that username is not already taken!
+
     $userID       = $jsonPayload['userID'];
     $username     = strtolower(trim($jsonPayload['username']));
     $password     = trim($jsonPayload['password']);
