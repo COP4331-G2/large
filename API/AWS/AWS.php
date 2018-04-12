@@ -58,8 +58,8 @@ function rekognition($imageURL)
         'Image' => [
             'Bytes' => $imageURL,
         ],
-        'MaxLabels' => 100,
-        'MinConfidence' => 70,
+        'MaxLabels' => 20,
+        'MinConfidence' => 80,
     ]);
 
     $tagArray = [];
