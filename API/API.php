@@ -557,7 +557,7 @@ function unlikePost($dbConnection, $jsonPayload)
 }
 
 /**
-  * Use AWS API to suggest tags for a post
+  * Use AWS API to suggest tags for a post (using either bodyText, imageURL, or both)
   *
   * @json Payload : function, [bodyText, imageURL]
   * @json Response: tags
@@ -571,8 +571,21 @@ function suggestTags($dbConnection, $jsonPayload)
     $bodyText = $jsonPayload['bodyText'];
     $imageURL = $jsonPayload['imageURL'];
 
+    $tagArrayComprehend  = [];
+    $tagArrayRekognition = [];
+
     // Use AWS API to suggest tags
-    $tagArray = comprehend($bodyText);
+    if (!empty($bodyText)) {
+        $tagArrayComprehend = comprehend($bodyText);
+    }
+
+    if (!empty($imageURL)) {
+        $image = file_get_contents($imageURL);
+
+        $tagArrayRekognition = rekognition($image);
+    }
+
+    $tagArray = array_merge($tagArrayComprehend, $tagArrayRekognition);
 
     returnSuccess('Successfully suggested tags.', $tagArray);
 }

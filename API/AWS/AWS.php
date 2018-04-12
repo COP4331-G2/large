@@ -32,27 +32,52 @@ $credentials = fgets($credentialsFile);
 // Close secrets file
 fclose($credentialsFile);
 
-// Create an array (delimited by a comma) from the retrieved string
+// Create an array from the retrieved string
 $credentials = explode(',', $credentials);
 $key         = trim($credentials[0]);
 $secret      = trim($credentials[1]);
 
-$comprehend = new Aws\Comprehend\ComprehendClient([
+$options = [
     'version'     => 'latest',
     'region'      => 'us-west-2',
     'credentials' => [
         'key'     => $key,
         'secret'  => $secret,
     ],
-]);
+];
 
-function comprehend($body)
+$comprehend = new Aws\Comprehend\ComprehendClient($options);
+
+$rekognition = new Aws\Rekognition\RekognitionClient($options);
+
+function rekognition($imageURL)
+{
+    global $rekognition;
+
+    $result = $rekognition->detectLabels([
+        'Image' => [
+            'Bytes' => $imageURL,
+        ],
+        'MaxLabels' => 100,
+        'MinConfidence' => 70,
+    ]);
+
+    $tagArray = [];
+
+    foreach ($result['Labels'] as $labels) {
+        $tagArray[] = $labels['Name'];
+    }
+
+    return $tagArray;
+}
+
+function comprehend($bodyText)
 {
     global $comprehend;
 
     $result = $comprehend->detectEntities([
         'LanguageCode' => 'en', // REQUIRED
-        'Text'         => $body, // REQUIRED
+        'Text'         => $bodyText, // REQUIRED
     ]);
 
     $tagArray = [];
