@@ -240,15 +240,32 @@ function getPost($dbConnection, $jsonPayload)
 
     checkForEmptyProperties([$userID, $postID]);
 
-    $post = getPostByID($dbConnection, $postID);
+    $statement =
+        "SELECT id, userID, bodyText, imageURL,
+        (SELECT GROUP_CONCAT(t.name) FROM Tags AS t, Posts_Tags AS pt WHERE pt.postID = Posts.id AND t.id = pt.tagID) AS tags,
+        (SELECT username FROM Users WHERE id = Posts.userID) AS username,
+        CASE WHEN (SELECT id FROM Users_Posts_Likes WHERE userID = ? AND postID = Posts.id) IS NOT NULL THEN 1 ELSE 0 END AS isLiked
+        FROM Posts WHERE id = ?";
+
+    $query = $dbConnection->prepare($statement);
+    $query->bind_param('ii', $userID, $postID);
+    $query->execute();
+
+    $row = $query->get_result()->fetch_assoc();
+
+    $query->close();
 
     // Check to see if the post was found...
-    if ($post) {
-        // Append whether or not the post is liked by the user to the JSON response
-        $post['isLiked'] = isPostLiked($dbConnection, $userID, $postID);
-
-        // Append the post creator's username
-        $post['username'] = getUsernameFromUserID($dbConnection, $post['userID']);
+    if ($row) {
+        $post = [
+            'postID'   => $postID,
+            'userID'   => $row['userID'],
+            'username' => $row['username'],
+            'bodyText' => $row['bodyText'],
+            'imageURL' => $row['imageURL'],
+            'tags'     => preg_split('/,/', $row['tags'], null, PREG_SPLIT_NO_EMPTY),
+            'isLiked'  => ($row['isLiked'] == TRUE),
+        ];
 
         // If the post was found...
         returnSuccess('Posts found.', $post);
@@ -801,37 +818,6 @@ function createPostsTagsRows($dbConnection, $postID, $tags)
 
         $query->close();
     }
-}
-
-/**
- * Get a post's information using its ID
- *
- * @param mysqli $dbConnection MySQL connection instance
- * @param integer $postID The database ID of a post
- */
-function getPostByID($dbConnection, $postID)
-{
-    // Get the post's information using its ID
-    $statement = "SELECT * FROM Posts WHERE id = ?";
-    $query = $dbConnection->prepare($statement);
-    $query->bind_param('i', $postID);
-    $query->execute();
-
-    $row = $query->get_result()->fetch_assoc();
-
-    $query->close();
-
-    $post = [
-        'postID'   => $row['id'],
-        'userID'   => $row['userID'],
-        'bodyText' => $row['bodyText'],
-        'imageURL' => $row['imageURL'],
-
-        // This will be an array of strings containing tag names
-        'tags'     => getPostTags($dbConnection, $row['id']),
-    ];
-
-    return $post;
 }
 
 /**
