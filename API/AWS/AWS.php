@@ -18,41 +18,44 @@
 // Include the SDK using the Composer autoloader
 require 'vendor/autoload.php';
 
-// Open credentials file
-$credentialsFile = fopen('../aws_credentials', 'r');
+function getOptions()
+{
+    // Open credentials file
+    $credentialsFile = fopen('../aws_credentials', 'r');
 
-if (!$credentialsFile) {
-    echo "ERROR: Could not open AWS credentials\n";
-    die;
+    // If credentials file fails to open: die with error
+    if (!$credentialsFile) {
+        echo "ERROR: Could not open AWS credentials\n";
+        die;
+    }
+
+    // Read credentials file
+    $credentials = fgets($credentialsFile);
+
+    // Close credentials file
+    fclose($credentialsFile);
+
+    // Create an array from the retrieved string
+    $credentials = explode(',', $credentials);
+
+    $key         = trim($credentials[0]);
+    $secret      = trim($credentials[1]);
+
+    $options = [
+        'version'     => 'latest',
+        'region'      => 'us-west-2',
+        'credentials' => [
+            'key'     => $key,
+            'secret'  => $secret,
+        ],
+    ];
+
+    return $options;
 }
-
-// Read credentials file
-$credentials = fgets($credentialsFile);
-
-// Close secrets file
-fclose($credentialsFile);
-
-// Create an array from the retrieved string
-$credentials = explode(',', $credentials);
-$key         = trim($credentials[0]);
-$secret      = trim($credentials[1]);
-
-$options = [
-    'version'     => 'latest',
-    'region'      => 'us-west-2',
-    'credentials' => [
-        'key'     => $key,
-        'secret'  => $secret,
-    ],
-];
-
-$comprehend = new Aws\Comprehend\ComprehendClient($options);
-
-$rekognition = new Aws\Rekognition\RekognitionClient($options);
 
 function rekognition($imageURL)
 {
-    global $rekognition;
+    $rekognition = new Aws\Rekognition\RekognitionClient(getOptions());
 
     $result = $rekognition->detectLabels([
         'Image' => [
@@ -73,7 +76,7 @@ function rekognition($imageURL)
 
 function comprehend($bodyText)
 {
-    global $comprehend;
+    $comprehend = new Aws\Comprehend\ComprehendClient(getOptions());
 
     $result = $comprehend->detectEntities([
         'LanguageCode' => 'en', // REQUIRED
