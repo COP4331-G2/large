@@ -1,4 +1,5 @@
-
+const cloudinaryAPI = "";
+const cloudinaryAPIKEY = "";
 const API = "http://www.musuapp.com/API/API.php";
 
 var currentUserID;
@@ -49,11 +50,12 @@ function populatePosts(number)
                 }
             }
         };
-
         xhr.send(jsonPayload);
+
     } catch (err)
     {
         console.log(err);
+        alert("Error when reading posts, please try again later");
     }
 }
 
@@ -185,7 +187,7 @@ function searchPosts()
 
 function loadNext()
 {
-    buildPostData(filteredPostList.slice(indexLoaded, indexLoaded + 10));
+    buildPostData(filteredPostList.slice(indexLoaded, indexLoaded + 20));
 }
 
 function getParameterByName(name, url) {
@@ -205,6 +207,7 @@ function startPosts()
     populatePosts(1000);
 
 }
+
 function settings()
 {
     //@json Payload : function, userID, [username, password, firstName, lastName, emailAddress]
@@ -263,8 +266,54 @@ function settings()
     return true;
 }
 
+function suggestTags()
+{
+    var _bodyText = document.getElementById("").innerText;
+    var _imageURL = document.getElementById("").src;
 
+    var jsonPayload =
+        {
+            function: "suggestTags",
+            bodyText: _bodyText,
+            imageURL: _imageURL
+        };
 
+    jsonPayload = JSON.stringify(jsonPayload);
 
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", API, true);
+    xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+
+    try
+    {
+        xhr.onreadystatechange = function () {
+
+            if (this.readyState === 4 && this.status === 200)
+            {
+                var jsonObject = JSON.parse(xhr.responseText);
+                if (jsonObject.success)
+                {
+                    var tags = jsonObject.results;
+
+                    //populate tags onto text label
+                }
+                else
+                {
+                    console.log(jsonObject.message);
+                    alert("Error when suggesting tags, please try again later");
+                }
+            }
+        };
+
+        xhr.send(jsonPayload);
+    } catch (err)
+    {
+        console.log(err);
+        alert("Error when suggesting tags, please try again later");
+    }
+}
+
+function uploadImage()
+{
 
 }

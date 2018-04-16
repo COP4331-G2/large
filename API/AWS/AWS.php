@@ -68,7 +68,7 @@ function rekognition($image)
     $tagArray = [];
 
     foreach ($result['Labels'] as $labels) {
-        $tagArray[] = $labels['Name'];
+        $tagArray[] = strtolower($labels['Name']);
     }
 
     return $tagArray;
@@ -86,7 +86,7 @@ function comprehend($bodyText)
     $tagArray = [];
 
     foreach ($result['Entities'] as $entities) {
-        $tagArray[] = $entities['Text'];
+        $tagArray[] = strtolower($entities['Text']);
     }
 
     return $tagArray;

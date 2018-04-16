@@ -607,7 +607,7 @@ function suggestTags($dbConnection, $jsonPayload)
 
             // Ensure that the image isn't larger than 5 MB (AWS Rekognition limit)
             if (strlen($image) > (5 * 1024 * 1024)) {
-                returnError('Image must be less than 5 MB');
+                returnError('Image cannot be larger than 5 MB.');
             }
 
             $suggestedTagsFromImage = rekognition($image);
@@ -762,6 +762,9 @@ function createPostsTagsRows($dbConnection, $postID, $tags)
 {
     // Do this for each tag given
     foreach ($tags as $tag) {
+        // Ensure that each tag is stored as a lowercase string in the database
+        $tag = strtolower($tag);
+
         // Select (if exists) information for a tag by its name
         $statement = "SELECT * FROM Tags WHERE name = ?";
         $query = $dbConnection->prepare($statement);
