@@ -294,12 +294,12 @@ function getPostsPersonal($dbConnection, $jsonPayload)
         "SELECT id, userID, bodyText, imageURL,
         (SELECT GROUP_CONCAT(t.name) FROM Tags AS t, Posts_Tags AS pt WHERE pt.postID = Posts.id AND t.id = pt.tagID) AS tags,
         (SELECT username FROM Users WHERE id = Posts.userID) AS username,
-        IFNULL((SELECT SUM(strength) FROM Users_Tags_Likes WHERE userID = ? AND tagID IN (SELECT tagID FROM Posts_Tags WHERE postID = Posts.id)), 0) AS strength,
+        IFNULL((SELECT SUM(strength) FROM Users_Tags_Likes WHERE userID = ? AND tagID IN (SELECT tagID FROM Posts_Tags WHERE postID = Posts.id)), 0) / (SELECT strengthCount FROM Users WHERE id = ?) AS strength,
         CASE WHEN (SELECT id FROM Users_Posts_Likes WHERE userID = ? AND postID = Posts.id) IS NOT NULL THEN 1 ELSE 0 END AS isLiked
         FROM Posts ORDER BY id DESC LIMIT ?";
 
     $query = $dbConnection->prepare($statement);
-    $query->bind_param('iii', $userID, $userID, $numberOfPosts);
+    $query->bind_param('iiii', $userID, $userID, $userID, $numberOfPosts);
     $query->execute();
 
     $result = $query->get_result();
@@ -326,11 +326,28 @@ function getPostsPersonal($dbConnection, $jsonPayload)
             'imageURL' => $row['imageURL'],
             'tags'     => preg_split('/,/', $row['tags'], null, PREG_SPLIT_NO_EMPTY),
             'isLiked'  => ($row['isLiked'] == TRUE),
-            'strength' => (int) $row['strength'],
+            'strength' => (double) $row['strength'],
         ];
 
         $postResults[] = $postInformation;
     }
+
+    $bucketSize = round($numberOfPosts / 5);
+    $lastBucketSize = $numberOfPosts - ($bucketSize * 4);
+
+    for ($i = 0; $i < 5; $i++) {
+        for ($j = 0; $j < $bucketSize; $j++) {
+            if ((($i * $bucketSize) + $j) >= $numberOfPosts) {
+                break 2;
+            }
+
+            $postResults[($i * $bucketSize) + $j]['weight'] = ($postResults[($i * $bucketSize) + $j]['strength']) * (5 - $i);
+        }
+    }
+
+    usort($postResults, function ($post1, $post2) {
+        return $post2['weight'] <=> $post1['weight'];
+    });
 
     returnSuccess('Post(s) found.', $postResults);
 }
