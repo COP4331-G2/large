@@ -1,10 +1,10 @@
 <?php
 
 // Include AWS API
-include 'AWS/AWS.php';
+require_once 'AWS/AWS.php';
 
 // Include connection-related functions
-require 'Connection.php';
+require_once 'Connection.php';
 
 // Established connection to the database
 $dbConnection = establishConnection();
@@ -571,23 +571,30 @@ function suggestTags($dbConnection, $jsonPayload)
     $bodyText = $jsonPayload['bodyText'];
     $imageURL = $jsonPayload['imageURL'];
 
-    $tagArrayComprehend  = [];
-    $tagArrayRekognition = [];
+    $suggestedTagsFromText  = [];
+    $suggestedTagsFromImage = [];
 
-    // Use AWS API to suggest tags
+    // Use AWS API (Comprehend) to suggest tags from bodyText
     if (!empty($bodyText)) {
-        $tagArrayComprehend = comprehend($bodyText);
+        $suggestedTagsFromText = comprehend($bodyText);
     }
 
+    // Use AWS API (Rekognition) to suggest tags from imageURL
     if (!empty($imageURL)) {
-        $image = file_get_contents($imageURL);
+        try {
+            $image = file_get_contents($imageURL);
 
-        $tagArrayRekognition = rekognition($image);
+            if ($image !== false) {
+                $suggestedTagsFromImage = rekognition($image);
+            }
+        } catch (Exception $e) {
+            returnError('Could not open image from URL');
+        }
     }
 
-    $tagArray = array_merge($tagArrayComprehend, $tagArrayRekognition);
+    $suggestedTags = array_merge($suggestedTagsFromText , $suggestedTagsFromImage );
 
-    returnSuccess('Successfully suggested tags.', $tagArray);
+    returnSuccess('Successfully suggested tags.', $suggestedTags);
 }
 
 /**
