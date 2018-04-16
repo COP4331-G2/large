@@ -53,13 +53,13 @@ function getOptions()
     return $options;
 }
 
-function rekognition($imageURL)
+function rekognition($image)
 {
     $rekognition = new Aws\Rekognition\RekognitionClient(getOptions());
 
     $result = $rekognition->detectLabels([
         'Image' => [
-            'Bytes' => $imageURL,
+            'Bytes' => $image,
         ],
         'MaxLabels' => 20,
         'MinConfidence' => 80,
