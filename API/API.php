@@ -592,7 +592,8 @@ function suggestTags($dbConnection, $jsonPayload)
         }
     }
 
-    $suggestedTags = array_merge($suggestedTagsFromText , $suggestedTagsFromImage );
+    // Merge the suggested tags from both methods
+    $suggestedTags = array_merge($suggestedTagsFromText, $suggestedTagsFromImage);
 
     returnSuccess('Successfully suggested tags.', $suggestedTags);
 }
