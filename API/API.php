@@ -255,6 +255,7 @@ function getPost($dbConnection, $jsonPayload)
 
     // Check to see if the post was found...
     if ($row) {
+        // NOTE: $row['userID'] is the ID of the user that created the post being fetched
         $post = [
             'postID'   => $postID,
             'userID'   => $row['userID'],
