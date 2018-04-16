@@ -610,8 +610,6 @@ function suggestTags($dbConnection, $jsonPayload)
  */
 function updateUser($dbConnection, $jsonPayload)
 {
-    // TODO: Ensure that username is not already taken!
-
     $userID       = $jsonPayload['userID'];
     $username     = strtolower(trim($jsonPayload['username']));
     $password     = trim($jsonPayload['password']);
@@ -630,6 +628,21 @@ function updateUser($dbConnection, $jsonPayload)
         returnError('Last name cannot exceed 60 characters.');
     } else if (strlen($emailAddress) > 60) {
         returnError('Email address cannot exceed 60 characters.');
+    }
+
+    // MySQL query to check if a username already exists in the database
+    $statement = "SELECT * FROM Users WHERE username = ?";
+    $query = $dbConnection->prepare($statement);
+    $query->bind_param('s', $username);
+    $query->execute();
+
+    $result = $query->get_result();
+
+    $query->close();
+
+    if ($result->num_rows > 0) {
+        // If a username already exists...
+        returnError('Username already exists.');
     }
 
     // If a new password is provided...
