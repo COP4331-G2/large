@@ -1,4 +1,5 @@
-
+const cloudinaryAPI = "";
+const cloudinaryAPIKEY = "";
 const API = "http://www.musuapp.com/API/API.php";
 
 var currentUserID;
@@ -49,11 +50,12 @@ function populatePosts(number)
                 }
             }
         };
-
         xhr.send(jsonPayload);
+
     } catch (err)
     {
         console.log(err);
+        alert("Error when reading posts, please try again later");
     }
 }
 
@@ -185,7 +187,7 @@ function searchPosts()
 
 function loadNext()
 {
-    buildPostData(filteredPostList.slice(indexLoaded, indexLoaded + 10));
+    buildPostData(filteredPostList.slice(indexLoaded, indexLoaded + 20));
 }
 
 function getParameterByName(name, url) {
@@ -203,5 +205,115 @@ function startPosts()
     currentUserID = getParameterByName('currentUserID');
     document.getElementById("currentUserName").innerHTML = getParameterByName('username');
     populatePosts(1000);
+
+}
+
+function settings()
+{
+    //@json Payload : function, userID, [username, password, firstName, lastName, emailAddress]
+    // Get the username and password from the HTML fields
+    currentUserID = getParameterByName('currentUserID');
+    var newusername = document.getElementById("username").value;
+    var newfirstname = document.getElementById("firstname").value;
+    var newlastname = document.getElementById("lastname").value;
+    var newpassword = document.getElementById("password").value;
+    var newemail = document.getElementById("emailAdress").value;
+
+
+    // Setup the JSON payload to send to the API
+    var jsonPayload = {
+        function: "updateUser",
+        userID: currentUserID,
+        username: newusername,
+        password: newpassword,
+        firstName: newfirstname,
+        lastName: newlastname,
+        emailAddress: newemail
+    };
+    jsonPayload = JSON.stringify(jsonPayload);
+    console.log("JSON Payload: " + jsonPayload);
+
+    // Setup the HMLHttpRequest
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", API, false);
+    xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+
+    // Attempt to send info and catch any error message
+    try {
+        // Send the XMLHttpRequest
+        xhr.send(jsonPayload);
+
+        // Parse the JSON returned from the request
+        var jsonObject = JSON.parse(xhr.responseText);
+
+        if (jsonObject.success) {
+
+        }
+        else
+        {
+
+        document.getElementById("loginResult").innerHTML = jsonObject.error;
+
+        return false;
+        }
+
+    
+
+    } catch (e) {
+
+    }
+
+    return true;
+}
+
+function suggestTags()
+{
+    var _bodyText = document.getElementById("").innerText;
+    var _imageURL = document.getElementById("").src;
+
+    var jsonPayload =
+        {
+            function: "suggestTags",
+            bodyText: _bodyText,
+            imageURL: _imageURL
+        };
+
+    jsonPayload = JSON.stringify(jsonPayload);
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", API, true);
+    xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+
+    try
+    {
+        xhr.onreadystatechange = function () {
+
+            if (this.readyState === 4 && this.status === 200)
+            {
+                var jsonObject = JSON.parse(xhr.responseText);
+                if (jsonObject.success)
+                {
+                    var tags = jsonObject.results;
+
+                    //populate tags onto text label
+                }
+                else
+                {
+                    console.log(jsonObject.message);
+                    alert("Error when suggesting tags, please try again later");
+                }
+            }
+        };
+
+        xhr.send(jsonPayload);
+    } catch (err)
+    {
+        console.log(err);
+        alert("Error when suggesting tags, please try again later");
+    }
+}
+
+function uploadImage()
+{
 
 }
