@@ -12,7 +12,7 @@ $dbConnection = establishConnection();
 // Received decoded JSON payload from client
 $jsonPayload = getJSONPayload();
 
-// White list of API-callable functions
+// White list of API endpoints (callable functions)
 $functionWhiteList = [
     'createPost',
     'createUser',
@@ -752,34 +752,6 @@ function checkForEmptyProperties($properties)
 }
 
 /**
- * Get all of the tag names from a post
- *
- * @param mysqli $dbConnection MySQL connection instance
- * @param integer $postID The database ID of a post
- */
-function getPostTags($dbConnection, $postID)
-{
-    // Use a post ID to get all associated tag names
-    $statement = "SELECT t.name FROM Tags AS t, Posts_Tags AS pt WHERE pt.postID = ? AND t.id = pt.tagID";
-    $query = $dbConnection->prepare($statement);
-    $query->bind_param('i', $postID);
-    $query->execute();
-
-    $result = $query->get_result();
-
-    $query->close();
-
-    $tagResults = [];
-
-    // Build an array of tag names
-    while ($row = $result->fetch_assoc()) {
-        $tagResults[] = $row['name'];
-    }
-
-    return $tagResults;
-}
-
-/**
  * Create relationship row(s) for a post and tag(s)
  *
  * @param mysqli $dbConnection MySQL connection instance
@@ -846,31 +818,6 @@ function getUsernameFromUserID($dbConnection, $userID)
     $query->close();
 
     return $username;
-}
-
-/**
- * Determine if a post is liked by a user
- *
- * @param mysqli $dbConnection MySQL connection instance
- * @param integer $userID The database ID of a user
- * @param integer $postID The database ID of a post
- */
-function isPostLiked($dbConnection, $userID, $postID)
-{
-    $statement = "SELECT * FROM Users_Posts_Likes WHERE userID = ? AND postID = ?";
-    $query = $dbConnection->prepare($statement);
-    $query->bind_param('ii', $userID, $postID);
-    $query->execute();
-
-    $result = $query->get_result();
-
-    $query->close();
-
-    // True if a row was found (meaning the post is liked by the user)
-    // False otherwise (meaning the post is not liked by the user)
-    $isLiked = ($result->num_rows > 0);
-
-    return $isLiked;
 }
 
 /**
