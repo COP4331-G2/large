@@ -600,11 +600,19 @@ function suggestTags($dbConnection, $jsonPayload)
         try {
             $image = file_get_contents($imageURL);
 
-            if ($image !== false) {
-                $suggestedTagsFromImage = rekognition($image);
+            // Ensure that opening the image didn't result in failure
+            if ($image === false) {
+                returnError('Failed to open image');
             }
+
+            // Ensure that the image isn't larger than 5 MB (AWS Rekognition limit)
+            if (strlen($image) > (5 * 1024 * 1024)) {
+                returnError('Image must be less than 5 MB');
+            }
+
+            $suggestedTagsFromImage = rekognition($image);
         } catch (Exception $e) {
-            returnError('Could not open image from URL');
+            returnError('Could not open image from URL (file not found)');
         }
     }
 
