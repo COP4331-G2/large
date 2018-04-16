@@ -233,8 +233,6 @@ function createPost($dbConnection, $jsonPayload)
  */
 function getPost($dbConnection, $jsonPayload)
 {
-    // TODO: This need to used an optimized query statement (as in getPostsLatest)
-
     $userID = $jsonPayload['userID'];
     $postID = $jsonPayload['postID'];
 
