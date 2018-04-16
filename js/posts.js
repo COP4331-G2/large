@@ -15,7 +15,7 @@ function populatePosts(number)
 {
     var jsonPayload =
     {
-            function: "getPostsLatest",
+            function: "getPostsPersonal",
             numberOfPosts: number,
             userID: currentUserID
     };    
