@@ -332,8 +332,16 @@ function getPostsPersonal($dbConnection, $jsonPayload)
         $postResults[] = $postInformation;
     }
 
+    // Ensure that numberOfPosts is how many posts actually received
+    $numberOfPosts = count($postResults);
+
     // The size of each "bucket"
     $bucketSize = round($numberOfPosts / 5);
+
+    // Ensure that the "bucket" size is at least 1
+    if ($bucketSize <= 0) {
+        $bucketSize = 1;
+    }
 
     // The starting "bucket" rank
     $bucketRank = 5;
