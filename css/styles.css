@@ -147,23 +147,13 @@ body, html
     left: 0; /* On mouse-over, make the elements appear as they should */
 }
 
-/* The about link: 20px from the top with a green background */
-#about {
-    top: 20px;
-    background-color: #4CAF50;
-}
 
-#blog {
-    top: 80px;
+#createPostButton {
+    top: 120px;
     background-color: #2196F3; /* Blue */
 }
 
-#projects {
-    top: 140px;
+#openSettingsButton {
+    top: 120px;
     background-color: #f44336; /* Red */
-}
-
-#contact {
-    top: 200px;
-    background-color: #555 /* Light Black */
 }

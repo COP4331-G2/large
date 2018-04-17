@@ -25,11 +25,48 @@
         <form class="form-inline mr-sm-2 my-2 my-lg-0 ml-auto">       
             <div id="loggedinDiv" >
                 <span class="navbar-text">Logged in as&nbsp;</span><span class="navbar-text text-info mr-2" id="currentUserName">username</span>
-                <button type="button" class="btn btn-danger ml-2" id="logoutButton" onclick=""><i class="fas fa-sign-out-alt mr-1"></i>Logout</button>
+                <button type="button" class="btn btn-danger ml-2" id="logoutButton" onclick="logout();"><i class="fas fa-sign-out-alt mr-1"></i>Logout</button>
             </div>
         </form>
     </nav>
-    
+    <div class="container">
+        <!-- The Modal -->
+        <div class="modal fade" id="createPostModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <h4 class="modal-title">Create Post</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <!-- Modal body -->
+                    <div class="modal-body">
+                        <div class="card">
+                            <div class="card-body">
+                                <form>
+                                    <div class="form-row">
+                                        <div class="form-group col-md-8">
+                                            <label for="postText">Post Text</label>
+                                            <textarea rows="3" cols="50" class="form-control" id="postText" placeholder="Enter text here..."></textarea>
+                                            <br>
+                                            <label for="postTags">Tags</label>
+                                            <input type="text" class="form-control" id="postTags" placeholder="Enter your tags separated by commas">
+                                            <br>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modal footer -->
+                    <div class="modal-footer">
+                        <span id="createResult" class="text-danger mr-auto"> </span>
+                        <button type="button" class="btn btn-secondary" id="createUserButton" onclick="doCreateAccount();">Create Account</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div id="accessUIDiv" >
         <div class="container-fluid">
             <div class="card center-block">
@@ -37,9 +74,8 @@
                     <div class="col-sm-2" >
                         <div id="mySidenav" class="sidenav">
                             <!--<a href="#" id="about">About</a> -->
-                            <a href="#" id="blog"><span class="glyphicon">&#x270f;</span></a> 
-                            <a href="#" id="projects"><span class="glyphicon">&#9881;</span></a>
-                          
+                            <a href="#" id="createPostButton" data-toggle="modal" data-target="#createPostModal"><span class="glyphicon" >&#x270f;</span></a> 
+                            <a href="#" id="openSettingsButton"><span class="glyphicon">&#9881;</span></a>
                         </div>
                     </div>
 

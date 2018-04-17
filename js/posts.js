@@ -248,11 +248,13 @@ function settings()
 
         if (jsonObject.success) {
 
+            //do something
+
         }
         else
         {
 
-        document.getElementById("loginResult").innerHTML = jsonObject.error;
+       // document.getElementById("loginResult").innerHTML = jsonObject.error;
 
         return false;
         }
@@ -260,7 +262,7 @@ function settings()
     
 
     } catch (e) {
-
+        console.log(e.message);
     }
 
     return true;
@@ -316,4 +318,9 @@ function suggestTags()
 function uploadImage()
 {
 
+}
+
+function logout()
+{
+    window.location = 'http://www.musuapp.com';
 }
