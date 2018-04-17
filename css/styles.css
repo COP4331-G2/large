@@ -136,24 +136,46 @@ body, html
     left: -80px; /* Position them outside of the screen */
     transition: 0.3s; /* Add transition on hover */
     padding: 15px; /* 15px padding */
-    width: 100px; /* Set a specific width */
+    width: 110px; /* Set a specific width */
     text-decoration: none; /* Remove underline */
     font-size: 20px; /* Increase font size */
+    text-align:right;
     color: white; /* White text color */
-    border-radius: 0 5px 5px 0; /* Rounded corners on the top right and bottom right side */
+    border-radius: 0 6px 6px 0; /* Rounded corners on the top right and bottom right side */
 }
 
 #mySidenav a:hover {
-    left: 0; /* On mouse-over, make the elements appear as they should */
+    left: -30px; /* On mouse-over, make the elements appear as they should */
 }
 
 
 #createPostButton {
-    top: 120px;
+    top:70px;
     background-color: #2196F3; /* Blue */
 }
 
 #openSettingsButton {
-    top: 120px;
+    top: 130px;
     background-color: #f44336; /* Red */
+}
+
+#dropbox {
+    border: 4px dashed #ccc;
+    padding-left: 8px;
+}
+
+.my-form {
+    margin-top: 10px;
+}
+ss-bar {
+    width: 200px;
+    position: relative;
+    height: 8px;
+    margin-top: 4px;
+}
+
+.progress-bar .progress {
+    height: 8px;
+    background-color: #ff0000;
+    width: 0;
 }
