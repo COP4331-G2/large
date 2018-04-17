@@ -54,21 +54,6 @@
                                             <br>
                                             <label for="postTags">Tags</label>
                                             <input type="text" class="form-control" id="postTags" placeholder="Enter your tags separated by commas">
-                                            <br>
-                                            <div id="dropbox">
-                                                <div class="form_line">
-                                                    <h4>Upload multiple files with the file dialog or by dragging and dropping images onto the dashed region</h4>
-                                                    <div class="form_controls">
-                                                        <div class="upload_button_holder">
-                                                            <input type="file" id="fileElem" multiple accept="image/*" style="display:none" onchange="handleFiles(this.files)">
-                                                            <a href="#" id="fileSelect">Select some files</a>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="progress-bar" id="progress-bar">
-                                                    <div class="progress" id="progress"></div>
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
                                 </form>
@@ -78,7 +63,7 @@
                     <!-- Modal footer -->
                     <div class="modal-footer">
                         <span id="createResult" class="text-danger mr-auto"> </span>
-                        <button type="button" class="btn btn-secondary" id="createUserButton" onclick="createPost();">Create Post</button>
+                        <button type="button" class="btn btn-secondary" id="createPostButton" onclick="createPost();">Create Post</button>
                     </div>
                 </div>
             </div>
@@ -91,7 +76,7 @@
                     <div class="col-sm-2" >
                         <div id="mySidenav" class="sidenav">
                             <!--<a href="#" id="about">About</a> -->
-                            <a href="#" id="createPostButton" data-toggle="modal" data-target="#createPostModal" onclick="openModal();"><span class="glyphicon" >&#x270f;</span></a> 
+                            <a href="#" id="createPostButton" data-toggle="modal" data-target="#createPostModal"><span class="glyphicon" >&#x270f;</span></a> 
 
                             <a href="#" id="openSettingsButton"><span class="glyphicon">&#9881;</span></a>
                         </div>

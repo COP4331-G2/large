@@ -1,6 +1,6 @@
-const cloudinaryAPI = "";
-const cloudinaryAPIKEY = "";
+const unsignedUploadPreset = 'gppxllz4';
 const API = "http://www.musuapp.com/API/API.php";
+var cloudinaryURL = `https://api.cloudinary.com/v1_1/cop4331g2/upload`;
 
 var currentUserID;
 var postList;                       //List provided by backend, usually really big
@@ -44,11 +44,7 @@ function populatePosts(number)
                     tud.innerHTML = "";
                     buildPostData(filteredPostList.slice(0, 10));
                 }
-                else
-                {
-                    console.log(jsonObject.message);
-                    alert("Error when reading posts, please try again later");
-                }
+                console.log(jsonObject.message);
             }
         };
         xhr.send(jsonPayload);
@@ -206,7 +202,6 @@ function startPosts()
     currentUserID = getParameterByName('currentUserID');
     document.getElementById("currentUserName").innerHTML = getParameterByName('username');
     populatePosts(1000);
-
 }
 
 function settings()
@@ -295,11 +290,9 @@ function suggestTags()
 
                     //populate tags onto text label
                 }
-                else
-                {
-                    console.log(jsonObject.message);
-                    alert("Error when suggesting tags, please try again later");
-                }
+
+
+                console.log(jsonObject.message);
             }
         };
 
@@ -315,6 +308,26 @@ function createPost()
 {
     var _bodyText = document.getElementById("postText").value;
     var _tags = document.getElementById("postTags").value.split(",");
+    var _picFile = document.getElementById("postImage").files[0];
+    var _imageURL;
+
+    var xhr1 = new XMLHttpRequest();
+    var fd = new FormData();
+    xhr1.open('POST', cloudinaryURL, false);
+    xhr1.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+    xhr1.onreadystatechange = function (e)
+    {
+        if (xhr1.readyState === 4 && xhr1.status === 200)
+        {
+            var response = JSON.parse(xhr1.responseText);
+            _imageURL = response.secure_url;
+        }
+    };
+
+    fd.append('upload_preset', unsignedUploadPreset);
+    fd.append('file', _picFile);
+    xhr1.send(fd);
 
     var jsonPayload =
         {
@@ -328,126 +341,40 @@ function createPost()
     jsonPayload = JSON.stringify(jsonPayload);
 
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", API, true);
+    xhr.open("POST", API, false);
     xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
 
-    try {
-        xhr.onreadystatechange = function () {
+    try
+    {
+        xhr.onreadystatechange = function ()
+        {
 
-            if (this.readyState === 4 && this.status === 200) {
+            if (this.readyState === 4 && this.status === 200)
+            {
                 var jsonObject = JSON.parse(xhr.responseText);
+
                 if (jsonObject.success)
                 {
-                    var tags = jsonObject.results;
+                    var _bodyText = document.getElementById("postText").value = "";
+                    var _tags = document.getElementById("postTags").value = "";
+                    var _picFile = document.getElementById("postImage").files[0];
+                    $("#createPostModal").modal('hide');
+                    startPosts();
+                }
 
-                    //do stuff show success 
-                }
-                else {
-                    console.log(jsonObject.message);
-                    alert("Error when suggesting tags, please try again later");
-                }
-            }
-            else
-            {
-                alert("Error when suggesting tags, please try again later");
+                console.log(jsonObject.message);
             }
         };
 
         xhr.send(jsonPayload);
-    } catch (err) {
+    }
+    catch (err)
+    {
         console.log(err);
-        alert("Error when suggesting tags, please try again later");
+        alert("Error when creating post, please try again later");
     }
 }
 
 function logout() {
     window.location = 'http://www.musuapp.com';
 }
-
-const cloudName = 'cop4331g2';
-const unsignedUploadPreset = 'gppxllz4';
-
-function openModal()
-{
-    var fileSelect = document.getElementById("fileSelect"),
-        fileElem = document.getElementById("fileElem");
-
-    fileSelect.addEventListener("click", function (e) {
-        if (fileElem) {
-            fileElem.click();
-        }
-        e.preventDefault(); // prevent navigation to "#"
-    }, false);
-
-    dropbox = document.getElementById("dropbox");
-    dropbox.addEventListener("dragenter", dragenter, false);
-    dropbox.addEventListener("dragover", dragover, false);
-    dropbox.addEventListener("drop", drop, false);
-}
-
-function dragenter(e) {
-    e.stopPropagation();
-    e.preventDefault();
-}
-
-function dragover(e) {
-    e.stopPropagation();
-    e.preventDefault();
-}
-
-function drop(e) {
-    e.stopPropagation();
-    e.preventDefault();
-
-    var dt = e.dataTransfer;
-    var files = dt.files;
-
-    handleFiles(files);
-}
-
-function uploadFile(file) {
-    var url = `https://api.cloudinary.com/v1_1/${cloudName}/upload`;
-    var xhr = new XMLHttpRequest();
-    var fd = new FormData();
-    xhr.open('POST', url, true);
-    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-
-    // Reset the upload progress bar
-    document.getElementById('progress').style.width = 0;
-
-    // Update progress (can be used to show progress indicator)
-    xhr.upload.addEventListener("progress", function (e)
-    {
-        var progress = Math.round((e.loaded * 100.0) / e.total);
-        document.getElementById('progress').style.width = progress + "%";
-
-        console.log(`fileuploadprogress data.loaded: ${e.loaded},
-        data.total: ${e.total}`);
-    });
-
-    xhr.onreadystatechange = function (e) {
-        if (xhr.readyState == 4 && xhr.status == 200) {
-            // File uploaded successfully
-            var response = JSON.parse(xhr.responseText);
-            var url = response.secure_url;
-            // Create a thumbnail of the uploaded image, with 150px width
-            var tokens = url.split('/');
-            tokens.splice(-2, 0, 'w_150,c_scale');
-            var img = new Image(); // HTML5 Constructor
-            img.src = tokens.join('/');
-            img.alt = response.public_id;
-            document.getElementById('gallery').appendChild(img);
-        }
-    };
-
-    fd.append('upload_preset', unsignedUploadPreset);
-    fd.append('tags', 'browser_upload'); // Optional - add tag for image admin in Cloudinary
-    fd.append('file', file);
-    xhr.send(fd);
-}
-
-var handleFiles = function (files) {
-    for (var i = 0; i < files.length; i++) {
-        uploadFile(files[i]); // call the function to upload the file
-    }
-};
