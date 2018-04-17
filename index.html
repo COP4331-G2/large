@@ -15,16 +15,6 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="col-sm-2"><a class="navbar-brand mt-0" href="#">無数<hr class="mx-0 my-0"> <span style="font-size: 12px">Musū</span> </a></div>
-        <!-- div for Search and Add Contacts buttons
-            ->Hidden on homepage, visible on logged in
-            ->ID: loggedInButtonsDiv              -->
-        <div id="loggedInButtonsDiv">
-            <form class="form-inline mr-sm-2 my-2 my-lg-0"></form>
-        </div>
-        <!-- UL class to seperate button spacing on navbar -->
-        <!-- Div for navbar buttons
-            ->Visible on homepage, hidden while logged in
-            ->ID: loginDiv  -->
         <form class="form-inline mr-sm-2 my-2 my-lg-0 ml-auto">
             <div id="loginDiv">
                 <input class="form-control mr-sm-2 mr-sm-2" id="loginName" type="text" placeholder="Username" aria-label="Username">
@@ -36,9 +26,6 @@
                     <i class="fas fa-user-plus mr-1"></i>Sign Up
                 </button>
             </div>
-            <!-- div for logout button and "Logged in as" text
-            ->Hidden on homepage, always shown while logged in
-            ->id = loggedInDiv  -->
         </form>
     </nav>
     <div class="container">
@@ -55,11 +42,6 @@
                     <div class="modal-body">
                         <div class="card">
                             <div class="card-body">
-                                <!-- Form for creating a new account/new user. Form IDs:
-                                                ->Username input field: createUser
-                                                ->Password input field: createPassword
-                                                ->Password confirmation: confirmPassowrd
-                                                ->Button for Sign Up Submission: signUpButton -->
                                 <form>
                                     <div class="form-row">
                                         <div class="form-group col-md-6">
@@ -124,9 +106,6 @@
             </div>
         </div>
     </div>
-    <!-- Div for the homepage Welcome
-        ->Shown when on homepage
-        ->ID: homepageWelcomeDiv  -->
     <div id="landingPageDiv" class="container-fluid bg">
         <div class="row mh-50" style="height: 400px">
             <div class="col-md-4"></div>
@@ -157,7 +136,7 @@
     </script>
     <script>
         var input = document.getElementById("createLastName");
-    input.addEventListener("keyup", function(event) {
+        input.addEventListener("keyup", function(event) {
         event.preventDefault();
         // 13 = Enter key
         if (event.keyCode === 13) {
@@ -173,7 +152,6 @@
         }
     }
         
-
     function clearErrors() {
         document.getElementById("loginResult").innerHTML = "";
         document.getElementById("createResult").innerHTML = "";
@@ -191,7 +169,6 @@
         // 27 = Escape key
         if (event.keyCode === 27) {
             $("#signupModal").modal('hide');
-            $("#addContactModal").modal('hide');
             $("#loginErrorModal").modal('hide');
             clearErrors();
         }

@@ -1,13 +1,14 @@
-const cloudinaryAPI = "";
-const cloudinaryAPIKEY = "";
+const unsignedUploadPreset = 'gppxllz4';
 const API = "http://www.musuapp.com/API/API.php";
+var cloudinaryURL = `https://api.cloudinary.com/v1_1/cop4331g2/upload`;
 
 var currentUserID;
 var postList;                       //List provided by backend, usually really big
 var filteredPostList;               //List filtered by search bar, can be really big. If not filtered, is the same as post list.
 var indexLoaded;                    //Last index loaded by page on filtered post list
 
-function stringContains(stringToCheck, substring) {
+function stringContains(stringToCheck, substring)
+{
     return stringToCheck.toString().toLowerCase().indexOf(substring.toLowerCase()) !== -1;
 }
 
@@ -43,11 +44,7 @@ function populatePosts(number)
                     tud.innerHTML = "";
                     buildPostData(filteredPostList.slice(0, 10));
                 }
-                else
-                {
-                    console.log(jsonObject.message);
-                    alert("Error when reading posts, please try again later");
-                }
+                console.log(jsonObject.message);
             }
         };
         xhr.send(jsonPayload);
@@ -205,7 +202,6 @@ function startPosts()
     currentUserID = getParameterByName('currentUserID');
     document.getElementById("currentUserName").innerHTML = getParameterByName('username');
     populatePosts(1000);
-
 }
 
 function settings()
@@ -248,19 +244,16 @@ function settings()
 
         if (jsonObject.success) {
 
+            //do something
+
         }
         else
         {
-
-        document.getElementById("loginResult").innerHTML = jsonObject.error;
-
-        return false;
+            return false;
         }
-
-    
-
-    } catch (e) {
-
+    } catch (e)
+    {
+        console.log(e.message);
     }
 
     return true;
@@ -268,8 +261,8 @@ function settings()
 
 function suggestTags()
 {
-    var _bodyText = document.getElementById("").innerText;
-    var _imageURL = document.getElementById("").src;
+    var _bodyText = document.getElementById("postText").innerText;
+    var _imageURL = uploadImage();
 
     var jsonPayload =
         {
@@ -297,11 +290,9 @@ function suggestTags()
 
                     //populate tags onto text label
                 }
-                else
-                {
-                    console.log(jsonObject.message);
-                    alert("Error when suggesting tags, please try again later");
-                }
+
+
+                console.log(jsonObject.message);
             }
         };
 
@@ -313,7 +304,77 @@ function suggestTags()
     }
 }
 
-function uploadImage()
+function createPost()
 {
+    var _bodyText = document.getElementById("postText").value;
+    var _tags = document.getElementById("postTags").value.split(",");
+    var _picFile = document.getElementById("postImage").files[0];
+    var _imageURL;
 
+    var xhr1 = new XMLHttpRequest();
+    var fd = new FormData();
+    xhr1.open('POST', cloudinaryURL, false);
+    xhr1.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+    xhr1.onreadystatechange = function (e)
+    {
+        if (xhr1.readyState === 4 && xhr1.status === 200)
+        {
+            var response = JSON.parse(xhr1.responseText);
+            _imageURL = response.secure_url;
+        }
+    };
+
+    fd.append('upload_preset', unsignedUploadPreset);
+    fd.append('file', _picFile);
+    xhr1.send(fd);
+
+    var jsonPayload =
+        {
+            function: "createPost",
+            userID: currentUserID,
+            bodyText: _bodyText,
+            imageURL: _imageURL,
+            tags: _tags
+        };
+
+    jsonPayload = JSON.stringify(jsonPayload);
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", API, false);
+    xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+
+    try
+    {
+        xhr.onreadystatechange = function ()
+        {
+
+            if (this.readyState === 4 && this.status === 200)
+            {
+                var jsonObject = JSON.parse(xhr.responseText);
+
+                if (jsonObject.success)
+                {
+                    var _bodyText = document.getElementById("postText").value = "";
+                    var _tags = document.getElementById("postTags").value = "";
+                    var _picFile = document.getElementById("postImage").files[0];
+                    $("#createPostModal").modal('hide');
+                    startPosts();
+                }
+
+                console.log(jsonObject.message);
+            }
+        };
+
+        xhr.send(jsonPayload);
+    }
+    catch (err)
+    {
+        console.log(err);
+        alert("Error when creating post, please try again later");
+    }
+}
+
+function logout() {
+    window.location = 'http://www.musuapp.com';
 }
