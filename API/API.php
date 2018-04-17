@@ -349,7 +349,7 @@ function getPostsPersonal($dbConnection, $jsonPayload)
     // Calculate the weight for each post
     for ($i = 0; $i < $postCount; $i++) {
         // Decrement the rank at the calculated intervals
-        if ($i % $bucketSize == 0 && $i != 0) {
+        if ($i % $bucketSize == 0 && $bucketRank > 1 && $i != 0) {
             $bucketRank--;
         }
 
