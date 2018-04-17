@@ -332,30 +332,32 @@ function getPostsPersonal($dbConnection, $jsonPayload)
         $postResults[] = $postInformation;
     }
 
-    // Ensure that numberOfPosts is how many posts actually received
-    $numberOfPosts = count($postResults);
+    // Count the number of received posts
+    $postCount = count($postResults);
 
-    // The size of each "bucket"
-    $bucketSize = round($numberOfPosts / 5);
+    // Calculate the size of each "bucket"
+    $bucketSize = round($postCount / 5);
 
     // Ensure that the "bucket" size is at least 1
     if ($bucketSize <= 0) {
         $bucketSize = 1;
     }
 
-    // The starting "bucket" rank
+    // The starting "bucket" rank (should go from 5 to 1)
     $bucketRank = 5;
 
-    // Calculate the weight for each post based on (strength * bucketRank)
-    for ($i = 0; $i < $numberOfPosts; $i++) {
+    // Calculate the weight for each post
+    for ($i = 0; $i < $postCount; $i++) {
+        // Decrement the rank at the calculated intervals
         if ($i % $bucketSize == 0 && $i != 0) {
             $bucketRank--;
         }
 
+        // Calculate the weight for the post based on (strength * bucketRank)
         $postResults[$i]['weight'] = $postResults[$i]['strength'] * $bucketRank;
     }
 
-    // Sort the "buckets" by the weight
+    // Sort the posts by their weights
     usort($postResults, function ($post1, $post2) {
         return $post2['weight'] <=> $post1['weight'];
     });
