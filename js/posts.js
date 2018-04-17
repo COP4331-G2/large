@@ -1,6 +1,6 @@
-const unsignedUploadPreset = 'gppxllz4';
+const unsignedUploadPreset = "gppxllz4";
 const API = "http://www.musuapp.com/API/API.php";
-var cloudinaryURL = `https://api.cloudinary.com/v1_1/cop4331g2/upload`;
+var cloudinaryURL = "https://api.cloudinary.com/v1_1/cop4331g2/upload";
 
 var currentUserID;
 var postList;                       //List provided by backend, usually really big
