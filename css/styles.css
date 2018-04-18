@@ -44,11 +44,10 @@ body, html
     width: 95%;
 }
 
-.scrollertable 
-{
+.scrollertable {
     overflow-y: auto;
-    overflow-x:auto;
-    height: 80%;
+    overflow-x: auto;
+    height: 97%;
     margin: auto;
     display: block;
     margin-left: auto;

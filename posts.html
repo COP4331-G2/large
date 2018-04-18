@@ -31,7 +31,7 @@
     </nav>
     <div class="container">
         <!-- The Modal -->
-        <div class="modal fade" id="createPostModal">
+        <div class="modal fade" id="createPostModal" onh>
             <div class="modal-dialog">
                 <div class="modal-content">
                     <!-- Modal Header -->
@@ -64,6 +64,7 @@
                     <div class="modal-footer">
                         <span id="createResult" class="text-danger mr-auto"> </span>
                         <button type="button" class="btn btn-secondary" id="createPostButton" onclick="createPost();">Create Post</button>
+                        <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="clearErrors();">Cancel</button>
                     </div>
                 </div>
             </div>
@@ -118,7 +119,7 @@
         <div class="container-fluid">
             <div class="card center-block">
                 <div class="card-body row bg2">
-                    <div class="col-sm-2" >
+                    <div class="col-sm-3" >
                         <div id="mySidenav" class="sidenav">
                             <!--<a href="#" id="about">About</a> -->
                             <a href="#" id="createPostButton" data-toggle="modal" data-target="#createPostModal"><span class="glyphicon" >&#x270f;</span></a> 
@@ -127,19 +128,16 @@
                         </div>
                     </div>
 
-                    <div class="col-sm-8" style="background-color:white">   
+                    <div class="col-sm-6" style="background-color:white;">   
                         <div style="padding-bottom: 5px">
                             <input type="text" class="form-control mr-auto postSearch" id="searchText" placeholder="Search Posts" oninput="searchPosts();" />
                         </div>
                         <div class="scrollertable" id="postScroll">
                             <!-- This is where posts go -->
                         </div>
-                        <div class="scrollertable" id="postScroll">                            
-                            <!-- This is where posts go -->
-                        </div>
                     </div> 
 
-                    <div class="col-sm-2">
+                    <div class="col-sm-3">
                         <!-- This is where right column goes -->
                     </div>
                 </div>
@@ -160,8 +158,18 @@
             // 27 = Escape key
             if (event.keyCode === 27) {
                 $("#createPostModal").modal('hide');
+                document.getElementById("postText").value = "";
+                document.getElementById("postTags").value = "";
+                document.getElementById("postImage").value = null;
             }
         });
+
+        function clearErrors() {
+
+            document.getElementById("postText").value = "";
+            document.getElementById("postTags").value = "";
+            document.getElementById("postImage").value = null;
+        }
         
     </script>
 </body>

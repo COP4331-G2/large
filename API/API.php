@@ -169,7 +169,7 @@ function createUser($dbConnection, $jsonPayload)
 /**
  * Create a user post
  *
- * @json Payload : function, userID, [bodyText, imageURL, tags]
+ * @json Payload : function, userID, imageURL, [bodyText, tags]
  * @json Response: postID
  *
  * @param mysqli $dbConnection MySQL connection instance
@@ -188,8 +188,8 @@ function createPost($dbConnection, $jsonPayload)
         $tags[$key] = trim($tags[$key]);
     }
 
-    // Posts are not actually required to have $bodyText, $imageURL, or $tags
-    checkForEmptyProperties([$userID]);
+    // Posts are not actually required to have $bodyText or $tags
+    checkForEmptyProperties([$userID, $imageURL]);
 
     // Add newly created post to the database
     $statement = "INSERT INTO Posts (userID, bodyText, imageURL) VALUES (?, ?, ?)";

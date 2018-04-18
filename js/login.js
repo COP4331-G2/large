@@ -31,6 +31,17 @@ function login() {
         return "tetris";
     }
 
+    if (password === null || password === "" || password === 'undefined')
+    {
+        document.getElementById("loginResult").innerHTML = "Password can not be empty";
+        return false;
+    }
+
+    if (username === null || username === "" || username === 'undefined') {
+        document.getElementById("loginResult").innerHTML = "Username can not be empty";
+        return false;
+    }
+
     // Setup the JSON payload to send to the API
     var jsonPayload = {
         function: "loginAttempt",
