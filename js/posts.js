@@ -311,9 +311,9 @@ function createPost()
     var _picFile = document.getElementById("postImage").files[0];
     var _imageURL;
 
-    if ((_bodyText === "" || _bodyText === null) && (_tags === "" || _tags === null) && _picFile === null)
+    if (_picFile === null || +_picFile === 'undefined')
     {
-        alert("Your post can not be empty!");
+        alert("You must upload an image!");
         return;
     }
 
