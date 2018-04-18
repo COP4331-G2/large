@@ -307,28 +307,35 @@ function suggestTags()
 function createPost()
 {
     var _bodyText = document.getElementById("postText").value;
-    var _tags = document.getElementById("postTags").value.split(",");
+    var _tags = document.getElementById("postTags").value.replace(" ,",",").replace(", ", ",").split(",");
     var _picFile = document.getElementById("postImage").files[0];
     var _imageURL;
 
-    var xhr1 = new XMLHttpRequest();
-    var fd = new FormData();
-    xhr1.open('POST', cloudinaryURL, false);
-    xhr1.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-
-    xhr1.onreadystatechange = function (e)
+    if ((_bodyText === "" || _bodyText === null) && (_tags === "" || _tags === null) && _picFile === null)
     {
-        if (xhr1.readyState === 4 && xhr1.status === 200)
-        {
-            var response = JSON.parse(xhr1.responseText);
-            _imageURL = response.secure_url;
-        }
-    };
+        alert("Your post can not be empty!");
+        return;
+    }
 
-    fd.append('upload_preset', unsignedUploadPreset);
-    fd.append('file', _picFile);
-    xhr1.send(fd);
+    if (_picFile !== null)
+    {
+        var xhr1 = new XMLHttpRequest();
+        var fd = new FormData();
+        xhr1.open('POST', cloudinaryURL, false);
+        xhr1.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 
+        xhr1.onreadystatechange = function (e) {
+            if (xhr1.readyState === 4 && xhr1.status === 200) {
+                var response = JSON.parse(xhr1.responseText);
+                _imageURL = response.secure_url;
+            }
+        };
+
+        fd.append('upload_preset', unsignedUploadPreset);
+        fd.append('file', _picFile);
+        xhr1.send(fd);
+    }
+   
     var jsonPayload =
         {
             function: "createPost",
@@ -355,9 +362,9 @@ function createPost()
 
                 if (jsonObject.success)
                 {
-                    var _bodyText = document.getElementById("postText").value = "";
-                    var _tags = document.getElementById("postTags").value = "";
-                    var _picFile = document.getElementById("postImage").files[0];
+                    document.getElementById("postText").value = "";
+                    document.getElementById("postTags").value = "";
+                    document.getElementById("postImage").files = null;
                     $("#createPostModal").modal('hide');
                     startPosts();
                 }
