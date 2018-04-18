@@ -103,6 +103,7 @@
                     <!-- Modal footer -->
                     <div class="modal-footer">
                         <span id="createResult" class="text-danger mr-auto"> </span>
+                        <button id="changeThemeButton" type="button" class="btn btn-primary" onclick="changeBlockrainTheme();">Change Theme</button>
                         <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="clearErrors();">Close</button>
                     </div>
                 </div>
@@ -162,20 +163,23 @@
     }
 
     function doLogin() {
-        result = login();
+        var result = login();
 
         console.log(result);
 
         if (result === false) {
             document.getElementById("loginErrorModalTitle").innerHTML = "Login Error";
             document.getElementById("game").style.display = "none";
+            document.getElementById("changeThemeButton").style.display = "none";
             $("#loginErrorModal").modal('show');
         } else if (result === "failwhale") {
             document.getElementById("loginErrorModalTitle").innerHTML = "Fail Whale";
             document.getElementById("game").style.display = "none";
+            document.getElementById("changeThemeButton").style.display = "none";
             $("#loginErrorModal").modal('show');
         } else if (result === "tetris") {
             document.getElementById("loginErrorModalTitle").innerHTML = "BLOCKRAIN";
+            document.getElementById("changeThemeButton").style.display = "block";
             document.getElementById("game").style="width:250px; height:500px;";
             $("#loginErrorModal").modal('show');
             $(".game").blockrain();
@@ -184,6 +188,18 @@
         }
     }
     </script>
+
+    <script>
+    function changeBlockrainTheme() {
+        var themes = ["candy", "modern", "retro", "vim", "monochrome", "gameboy", "aerolab"];
+
+        var currentTheme = themes.indexOf($(".game").blockrain('theme'));
+        var newTheme = themes[(currentTheme + 1) % themes.length];
+
+        $(".game").blockrain('theme', newTheme);
+    }
+    </script>
+
     <script>
     document.addEventListener("keyup", function(event) {
         event.preventDefault();
