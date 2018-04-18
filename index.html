@@ -170,6 +170,10 @@
             document.getElementById("loginErrorModalTitle").innerHTML = "Login Error";
             document.getElementById("game").style.display = "none";
             $("#loginErrorModal").modal('show');
+        } else if (result === "failwhale") {
+            document.getElementById("loginErrorModalTitle").innerHTML = "Fail Whale";
+            document.getElementById("game").style.display = "none";
+            $("#loginErrorModal").modal('show');
         } else if (result === "tetris") {
             document.getElementById("loginErrorModalTitle").innerHTML = "BLOCKRAIN";
             document.getElementById("game").style="width:250px; height:500px;";
