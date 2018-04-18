@@ -10,6 +10,8 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="blockrain/blockrain.css">
+    <script src="blockrain/blockrain.jquery.min.js"></script>
 </head>
 
 <body>
@@ -86,7 +88,7 @@
                 <div class="modal-content">
                     <!-- Modal Header -->
                     <div class="modal-header">
-                        <h4 class="modal-title">Login Error</h4>
+                        <h4 id="loginErrorModalTitle" class="modal-title">Login Error</h4>
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
                     <!-- Modal body -->
@@ -94,6 +96,7 @@
                         <div class="card">
                             <div class="card-body">
                                 <span id="loginResult">&nbsp;</span>
+                                <center><div id="game" class="game"></div></center>
                             </div>
                         </div>
                     </div>
@@ -116,6 +119,7 @@
             </div>
         </div>
     </div>
+
     <script>
     var input = document.getElementById("loginName");
     input.addEventListener("keyup", function(event) {
@@ -151,15 +155,28 @@
             clearErrors();
         }
     }
-        
+
     function clearErrors() {
         document.getElementById("loginResult").innerHTML = "";
         document.getElementById("createResult").innerHTML = "";
     }
 
     function doLogin() {
-        if (!login()) {
+        result = login();
+
+        console.log(result);
+
+        if (result === false) {
+            document.getElementById("loginErrorModalTitle").innerHTML = "Login Error";
+            document.getElementById("game").style.display = "none";
             $("#loginErrorModal").modal('show');
+        } else if (result === "tetris") {
+            document.getElementById("loginErrorModalTitle").innerHTML = "BLOCKRAIN";
+            document.getElementById("game").style="width:250px; height:500px;";
+            $("#loginErrorModal").modal('show');
+            $(".game").blockrain();
+            $(".game").blockrain('theme', 'gameboy');
+            $(".game").blockrain('start');
         }
     }
     </script>

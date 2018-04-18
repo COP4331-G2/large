@@ -27,6 +27,8 @@ function login() {
     if (username === "failwhale") {
         document.getElementById("loginResult").innerHTML = failwhale;
         return false;
+    } if (username === "tetris") {
+        return "tetris";
     }
 
     // Setup the JSON payload to send to the API
