@@ -16,6 +16,7 @@ $jsonPayload = getJSONPayload();
 $functionWhiteList = [
     'createPost',
     'createUser',
+    'deletePost',
     'getPost',
     'getPostsGroups',
     'getPostsLatest',
@@ -163,6 +164,52 @@ function createUser($dbConnection, $jsonPayload)
     } else {
         // If not successful...
         returnError('User not created: ' . $dbConnection->error);
+    }
+}
+
+/**
+ * Delete a user post
+ *
+ * @json Payload : function, postID
+ * @json Response: [none]
+ *
+ * @param mysqli $dbConnection MySQL connection instance
+ * @param array $jsonPayload Decoded JSON object
+ */
+function deletePost($dbConnection, $jsonPayload)
+{
+    $postID = $jsonPayload['postID'];
+
+    checkForEmptyProperties([$postID]);
+
+    /* STORED PROCEDURE
+        DELIMITER ;;
+        CREATE DEFINER=`root`@`%` PROCEDURE `deletePost`(inputPostID INT)
+            BEGIN
+                DELETE FROM Posts_Tags WHERE postID = inputPostID;
+                DELETE FROM Users_Posts_Likes WHERE postID = inputPostID;
+                DELETE FROM Posts WHERE id = inputPostID;
+            END;;
+        DELIMITER ;
+     */
+
+    // Delete post from the database (ensuring that we also delete relations)
+    $statement = "CALL deletePost(?)";
+    $query = $dbConnection->prepare($statement);
+    $query->bind_param('i', $postID);
+    $query->execute();
+
+    $result = $query->affected_rows;
+
+    $query->close();
+
+    // Check to see if the deletion was successful
+    if ($result) {
+        // If successful...
+        returnSuccess('Post deleted.');
+    } else {
+        // If not successful...
+        returnError('Post not deleted: ' . $dbConnection->error);
     }
 }
 
