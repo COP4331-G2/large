@@ -69,6 +69,51 @@
             </div>
         </div>
     </div>
+
+    <!--MODAL CONTAINER FOR SETTINGS -->
+       <div class="container">
+        <!-- The Modal -->
+        <div class="modal fade" id="SettingsModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <h4 class="modal-title">SETTINGS</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <!-- Modal body -->
+                    <div class="modal-body">
+                        <div class="card">
+                            <div class="card-body">
+                                <form>
+                                    <div class="form-row my-form">
+                                        <div class="form-group col-md-12">
+                                            <!--<label for="userImage">Image</label>
+                                            <input type="file" class="form-control" id="userImage" accept="image/*">-->
+                                            <label for="userName">UserName</label> 
+                                            <input type="text" class="form-control" id="username" placeholder="Enter User Name here..">
+                                            <label for="firstName">Firstname</label>
+                                            <input type="text" class="form-control" id="firstName" placeholder="Enter First Name here..">
+                                            <label for="lastName">Lastname</label>
+                                            <input type="text" class="form-control" id="lastName" placeholder="Enter Last Name here..">
+                                            <label for="emailAddress">Email</label>
+                                            <input type="text" class="form-control" id="emailAddress" placeholder="Enter Email here..">
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modal footer -->
+                    <div class="modal-footer">
+                        <span id="createResult" class="text-danger mr-auto"> </span>
+                        <button type="button" class="btn btn-secondary" id="openSettingsButton" onclick="settings();">UPDATE</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--END OF MODAL CONTAINER FOR SETTINGS -->
     <div id="accessUIDiv" >
         <div class="container-fluid">
             <div class="card center-block">
@@ -78,7 +123,7 @@
                             <!--<a href="#" id="about">About</a> -->
                             <a href="#" id="createPostButton" data-toggle="modal" data-target="#createPostModal"><span class="glyphicon" >&#x270f;</span></a> 
 
-                            <a href="#" id="openSettingsButton"><span class="glyphicon">&#9881;</span></a>
+                            <a href="#" id="openSettingsButton" data-toggle="modal" data-target="#SettingsModal"><span class="glyphicon">&#9881;</span></a>
                         </div>
                     </div>
 
