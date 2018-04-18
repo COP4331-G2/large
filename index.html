@@ -73,6 +73,7 @@
                     <!-- Modal footer -->
                     <div class="modal-footer">
                         <span id="createResult" class="text-danger mr-auto"> </span>
+                        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#termsModal">Terms and Conditions</button>
                         <button type="button" class="btn btn-secondary" id="createUserButton" onclick="doCreateAccount();">Create Account</button>
                         <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="clearErrors();">Cancel</button>
                     </div>
@@ -104,6 +105,31 @@
                         <span id="createResult" class="text-danger mr-auto"> </span>
                         <button id="changeThemeButton" type="button" class="btn btn-primary" onclick="changeBlockrainTheme();">Change Theme</button>
                         <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="clearErrors();">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <!-- The Modal -->
+        <div class="modal fade" id="termsModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <h4 id="termsHeader" class="modal-title">Terms and Conditions</h4>
+                    </div>
+                    <!-- Modal body -->
+                    <div class="modal-body">
+                        <div class="card">
+                            <div class="card-body">
+                               We will only sell your data if the price is right, but not to Russia. 
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modal footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
@@ -206,6 +232,7 @@
         if (event.keyCode === 27) {
             $("#signupModal").modal('hide');
             $("#loginErrorModal").modal('hide');
+            $("#termsModal").modal('hide');
             clearErrors();
         }
     });
