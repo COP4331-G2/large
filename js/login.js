@@ -26,7 +26,9 @@ function login() {
     // Fail Whale (easter egg)
     if (username === "failwhale") {
         document.getElementById("loginResult").innerHTML = failwhale;
-        return false;
+        return "failwhale";
+    } if (username === "tetris") {
+        return "tetris";
     }
 
     // Setup the JSON payload to send to the API
