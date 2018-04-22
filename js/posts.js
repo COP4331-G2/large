@@ -44,7 +44,6 @@ function populatePosts(number)
                     tud.innerHTML = "";
                     buildPostData(filteredPostList.slice(0, 10));
                 }
-                console.log(jsonObject.message);
             }
         };
         xhr.send(jsonPayload);
@@ -149,7 +148,7 @@ function buildPostData(posts)
         };
         verticalLine.className = "line-separator";
         text.innerHTML = posts[i].bodyText;
-        tags.innerHTML = posts[i].tags;
+        tags.innerHTML = posts[i].tags.join(', ');
         username.innerHTML = posts[i].username;
         var image = document.createElement('img');
         image.src = posts[i].imageURL;
@@ -262,7 +261,32 @@ function settings()
 function suggestTags()
 {
     var _bodyText = document.getElementById("postText").innerText;
-    var _imageURL = uploadImage();
+    var _picFile = document.getElementById("postImage").files[0];
+    var _imageURL;
+
+    if (_picFile === null || _picFile === 'undefined') {
+        alert("You must select an image!");
+        return;
+    }
+
+    if (_picFile !== null) {
+        var xhr1 = new XMLHttpRequest();
+        var fd = new FormData();
+        xhr1.open('POST', cloudinaryURL, false);
+        xhr1.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+        xhr1.onreadystatechange = function (e) {
+            if (xhr1.readyState === 4 && xhr1.status === 200) {
+                var response = JSON.parse(xhr1.responseText);
+                _imageURL = response.secure_url;
+            }
+        };
+
+        fd.append('upload_preset', unsignedUploadPreset);
+        fd.append('file', _picFile);
+        xhr1.send(fd);
+    }
+    
 
     var jsonPayload =
         {
@@ -271,10 +295,12 @@ function suggestTags()
             imageURL: _imageURL
         };
 
+    console.log(jsonPayload);
+
     jsonPayload = JSON.stringify(jsonPayload);
 
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", API, true);
+    xhr.open("POST", API, false);
     xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
 
     try
@@ -284,22 +310,34 @@ function suggestTags()
             if (this.readyState === 4 && this.status === 200)
             {
                 var jsonObject = JSON.parse(xhr.responseText);
-                if (jsonObject.success)
+
+               if (jsonObject.success)
                 {
-                    var tags = jsonObject.results;
+                   var tags = jsonObject.results;
 
-                    //populate tags onto text label
+                   var _tags = document.getElementById("postTags").value.replace(" ,", ",").replace(", ", ",").split(",");                  
+
+                    for (var i = 0; i < tags.length; i++)
+                    {
+                        if (!_tags.includes(tags[i]))
+                        {
+                            _tags.push(tags[i]);
+                        }
+                   }
+
+                    _tags.clean("");
+
+                    _tags.clean(undefined);
+
+                    document.getElementById("postTags").value = _tags.join(', ');
                 }
-
-
-                console.log(jsonObject.message);
             }
         };
 
         xhr.send(jsonPayload);
     } catch (err)
     {
-        console.log(err);
+        console.log(err.message);
         alert("Error when suggesting tags, please try again later");
     }
 }
@@ -311,7 +349,7 @@ function createPost()
     var _picFile = document.getElementById("postImage").files[0];
     var _imageURL;
 
-    if (_picFile === null || +_picFile === 'undefined')
+    if (_picFile === null || _picFile === 'undefined')
     {
         alert("You must upload an image!");
         return;
@@ -334,6 +372,10 @@ function createPost()
         fd.append('upload_preset', unsignedUploadPreset);
         fd.append('file', _picFile);
         xhr1.send(fd);
+    }
+    else
+    {
+        return;
     }
    
     var jsonPayload =
@@ -385,3 +427,13 @@ function createPost()
 function logout() {
     window.location = 'http://www.musuapp.com';
 }
+
+Array.prototype.clean = function (deleteValue) {
+    for (var i = 0; i < this.length; i++) {
+        if (this[i] === deleteValue) {
+            this.splice(i, 1);
+            i--;
+        }
+    }
+    return this;
+};

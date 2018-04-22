@@ -47,7 +47,7 @@ body, html
 .scrollertable {
     overflow-y: auto;
     overflow-x: auto;
-    height: 97%;
+    height: 87%;
     margin: auto;
     display: block;
     margin-left: auto;
@@ -124,7 +124,7 @@ body, html
     margin-left: auto;
     margin-right: auto;
     font-family: 'Roboto', sans-serif;
-    font-size: 16px; /* Increase font size */
+    font-size: 1px; /* Increase font size */
     color: black;
     font-weight: 400;
     width: 95%;
