@@ -263,7 +263,7 @@ function settings()
 
 function suggestTags()
 {
-    var _bodyText = document.getElementById("postText").innerText;
+    var _bodyText = document.getElementById("postText").value;
     var _picFile = document.getElementById("postImage").files[0];
     var _imageURL;
 
