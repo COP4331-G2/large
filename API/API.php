@@ -237,7 +237,7 @@ function createUser($dbConnection, $jsonPayload)
 /**
  * Delete a user post
  *
- * @json Payload : function, userID, postID
+ * @json Payload : function, userID, postID, token
  * @json Response: [none]
  *
  * @param mysqli $dbConnection MySQL connection instance
@@ -247,8 +247,13 @@ function deletePost($dbConnection, $jsonPayload)
 {
     $userID = $jsonPayload['userID'];
     $postID = $jsonPayload['postID'];
+    $token  = $jsonPayload['token'];
 
-    checkForEmptyProperties([$postID]);
+    checkForEmptyProperties([$postID, $token]);
+
+    if (!verifyToken($dbConnection, $userID, $token)) {
+        returnError('User token failed verification.');
+    }
 
     /* STORED PROCEDURE
         DELIMITER ;;
@@ -286,7 +291,7 @@ function deletePost($dbConnection, $jsonPayload)
 /**
  * Create a user post
  *
- * @json Payload : function, userID, imageURL, [bodyText, tags]
+ * @json Payload : function, userID, imageURL, token, [bodyText, tags]
  * @json Response: postID
  *
  * @param mysqli $dbConnection MySQL connection instance
@@ -298,6 +303,7 @@ function createPost($dbConnection, $jsonPayload)
     $bodyText = trim($jsonPayload['bodyText']);
     $imageURL = trim($jsonPayload['imageURL']);
     $tags     = $jsonPayload['tags'];
+    $token    = $jsonPayload['token'];
 
     // Trim whitespace from all tags
     // The strange syntax allows the updated values to escape the scope of the foreach loop
@@ -306,7 +312,11 @@ function createPost($dbConnection, $jsonPayload)
     }
 
     // Posts are not actually required to have $bodyText or $tags
-    checkForEmptyProperties([$userID, $imageURL]);
+    checkForEmptyProperties([$userID, $imageURL, token]);
+
+    if (!verifyToken($dbConnection, $userID, $token)) {
+        returnError('User token failed verification.');
+    }
 
     // Add newly created post to the database
     $statement = "INSERT INTO Posts (userID, bodyText, imageURL) VALUES (?, ?, ?)";
@@ -342,7 +352,7 @@ function createPost($dbConnection, $jsonPayload)
 /**
  * Get database information for a single post by its ID
  *
- * @json Payload : function, userID, postID
+ * @json Payload : function, userID, postID, token
  * @json Response: postID, userID, username, [bodyText, imageURL, tags], isLiked
  *
  * @param mysqli $dbConnection MySQL connection instance
@@ -352,8 +362,13 @@ function getPost($dbConnection, $jsonPayload)
 {
     $userID = $jsonPayload['userID'];
     $postID = $jsonPayload['postID'];
+    $token  = $jsonPayload['token'];
 
-    checkForEmptyProperties([$userID, $postID]);
+    checkForEmptyProperties([$userID, $postID, $token]);
+
+    if (!verifyToken($dbConnection, $userID, $token)) {
+        returnError('User token failed verification.');
+    }
 
     $statement =
         "SELECT id, userID, bodyText, imageURL,
@@ -394,7 +409,7 @@ function getPost($dbConnection, $jsonPayload)
 /**
  * Get the most relevant posts for a particular user (based on tag likes)
  *
- * @json Payload : function, userID, numberOfPosts
+ * @json Payload : function, userID, numberOfPosts, token
  * @json Response: (multiple) postID, userID, username, [bodyText, imageURL, tags], isLiked
  *
  * @param mysqli $dbConnection MySQL connection instance
@@ -404,8 +419,13 @@ function getPostsPersonal($dbConnection, $jsonPayload)
 {
     $userID        = $jsonPayload['userID'];
     $numberOfPosts = $jsonPayload['numberOfPosts'];
+    $token         = $jsonPayload['token'];
 
-    checkForEmptyProperties([$userID, $numberOfPosts]);
+    checkForEmptyProperties([$userID, $numberOfPosts, $token]);
+
+    if (!verifyToken($dbConnection, $userID, $token)) {
+        returnError('User token failed verification.');
+    }
 
     $statement =
         "SELECT id, userID, bodyText, imageURL,
@@ -485,7 +505,7 @@ function getPostsPersonal($dbConnection, $jsonPayload)
 /**
  * Get the specified amount of latest posts
  *
- * @json Payload : function, userID, numberOfPosts
+ * @json Payload : function, userID, numberOfPosts, token
  * @json Response: (multiple) postID, userID, username, [bodyText, imageURL, tags], isLiked
  *
  * @param mysqli $dbConnection MySQL connection instance
@@ -495,8 +515,13 @@ function getPostsLatest($dbConnection, $jsonPayload)
 {
     $userID        = $jsonPayload['userID'];
     $numberOfPosts = $jsonPayload['numberOfPosts'];
+    $token         = $jsonPayload['token'];
 
-    checkForEmptyProperties([$userID, $numberOfPosts]);
+    checkForEmptyProperties([$userID, $numberOfPosts, $token]);
+
+    if (!verifyToken($dbConnection, $userID, $token)) {
+        returnError('User token failed verification.');
+    }
 
     $statement =
         "SELECT id, userID, bodyText, imageURL,
@@ -544,7 +569,7 @@ function getPostsLatest($dbConnection, $jsonPayload)
 /**
  * Get the specified amount of latest posts created by groups
  *
- * @json Payload : function, userID, numberOfPosts
+ * @json Payload : function, userID, numberOfPosts, token
  * @json Response: (multiple) postID, userID, username, [bodyText, imageURL, tags], isLiked
  *
  * @param mysqli $dbConnection MySQL connection instance
@@ -554,8 +579,13 @@ function getPostsGroups($dbConnection, $jsonPayload)
 {
     $userID        = $jsonPayload['userID'];
     $numberOfPosts = $jsonPayload['numberOfPosts'];
+    $token         = $jsonPayload['token'];
 
-    checkForEmptyProperties([$userID, $numberOfPosts]);
+    checkForEmptyProperties([$userID, $numberOfPosts, $token]);
+
+    if (!verifyToken($dbConnection, $userID, $token)) {
+        returnError('User token failed verification.');
+    }
 
     $statement =
         "SELECT p.id, p.userID, p.bodyText, p.imageURL,
@@ -603,7 +633,7 @@ function getPostsGroups($dbConnection, $jsonPayload)
 /**
  * Like a post
  *
- * @json Payload : function, userID, postID
+ * @json Payload : function, userID, postID, token
  * @json Response: tagsLikedCount
  *
  * @param mysqli $dbConnection MySQL connection instance
@@ -613,8 +643,13 @@ function likePost($dbConnection, $jsonPayload)
 {
     $userID = $jsonPayload['userID'];
     $postID = $jsonPayload['postID'];
+    $token  = $jsonPayload['token'];
 
-    checkForEmptyProperties([$userID, $postID]);
+    checkForEmptyProperties([$userID, $postID, $token]);
+
+    if (!verifyToken($dbConnection, $userID, $token)) {
+        returnError('User token failed verification.');
+    }
 
     // Create the relationship row for the userID and the postID
     $statement = "INSERT IGNORE INTO Users_Posts_Likes (userID, postID) VALUES (?, ?)";
@@ -672,7 +707,7 @@ function likePost($dbConnection, $jsonPayload)
 /**
  * Unlike a post
  *
- * @json Payload : function, userID, postID
+ * @json Payload : function, userID, postID, token
  * @json Response: tagsUnlikedCount
  *
  * @param mysqli $dbConnection MySQL connection instance
@@ -682,8 +717,13 @@ function unlikePost($dbConnection, $jsonPayload)
 {
     $userID = $jsonPayload['userID'];
     $postID = $jsonPayload['postID'];
+    $token  = $jsonPayload['token'];
 
-    checkForEmptyProperties([$userID, $postID]);
+    checkForEmptyProperties([$userID, $postID, $token]);
+
+    if (!verifyToken($dbConnection, $userID, $token)) {
+        returnError('User token failed verification.');
+    }
 
     // Delete the relationship row for the userID and the postID
     $statement = "DELETE FROM Users_Posts_Likes WHERE userID = ? AND postID = ?";
@@ -772,7 +812,7 @@ function suggestTags($dbConnection, $jsonPayload)
 /**
  * Update a user's personal account information
  *
- * @json Payload : function, userID, [username, password, firstName, lastName, emailAddress]
+ * @json Payload : function, userID, token, [username, password, firstName, lastName, emailAddress]
  * @json Response: [none]
  *
  * @param mysqli $dbConnection MySQL connection instance
@@ -787,8 +827,13 @@ function updateUser($dbConnection, $jsonPayload)
     $firstName    = trim($jsonPayload['firstName']);
     $lastName     = trim($jsonPayload['lastName']);
     $emailAddress = trim($jsonPayload['emailAddress']);
+    $token        = $jsonPayload['token'];
 
-    checkForEmptyProperties([$userID]);
+    checkForEmptyProperties([$userID, $token]);
+
+    if (!verifyToken($dbConnection, $userID, $token)) {
+        returnError('User token failed verification.');
+    }
 
     // Check for various error-inducing inputs
     if (strlen($username) > 60) {
@@ -1019,6 +1064,7 @@ function generateToken($length = 64)
 /**
  * Create a user login token or update the token's expiration time
  *
+ * @param mysqli $dbConnection MySQL connection instance
  * @param integer $userID The database ID of a user
  */
 function updateToken($dbConnection, $userID)
@@ -1034,4 +1080,40 @@ function updateToken($dbConnection, $userID)
     $query->close();
 
     return $token;
+}
+
+/**
+ * Verify a user token is valid and not expired
+ *
+ * @param mysqli $dbConnection MySQL connection instance
+ * @param integer $userID The database ID of a user
+ * @param string $token The user's authentication token
+ */
+function verifyToken($dbConnection, $userID, $token)
+{
+    // MySQL query to check if the token exists in the database (and get the expiresAt time)
+    $statement = "SELECT expiresAt FROM Tokens WHERE userID = ? AND token = ?";
+    $query = $dbConnection->prepare($statement);
+    $query->bind_param('is', $userID, $token);
+    $query->execute();
+
+    $result = $query->get_result();
+
+    $query->close();
+
+    // Verify if a token was found
+    if ($result->num_rows > 0) {
+        // If the token exists...
+
+        // Get the expiresAt date
+        $row = $result->fetch_assoc();
+
+        // Verify the token is not expired
+        if ($row['expiresAt'] > time()) {
+            return true;
+        }
+    }
+
+    // Else...
+    return false;
 }
