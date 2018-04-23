@@ -271,7 +271,7 @@ function deletePost($dbConnection, $jsonPayload)
     // Delete post from the database (ensuring that we also delete relations)
     $statement = "CALL deletePost(?, ?)";
     $query = $dbConnection->prepare($statement);
-    $query->bind_param('i', $userID, $postID);
+    $query->bind_param('ii', $userID, $postID);
     $query->execute();
 
     $result = $query->affected_rows;
