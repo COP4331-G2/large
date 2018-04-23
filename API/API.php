@@ -22,7 +22,8 @@ $functionWhiteList = [
     'getPostsLatest',
     'getPostsPersonal',
     'likePost',
-    'loginAttempt',
+    'loginWithToken',
+    'loginWithUsername',
     'suggestTags',
     'unlikePost',
     'updateUser',
@@ -44,7 +45,7 @@ callVariableFunction($dbConnection, $jsonPayload, $functionWhiteList);
  * @param mysqli $dbConnection MySQL connection instance
  * @param array $jsonPayload Decoded JSON object
  */
-function loginAttempt($dbConnection, $jsonPayload)
+function loginWithUsername($dbConnection, $jsonPayload)
 {
     // Always store username in lowercase
     $username = strtolower(trim($jsonPayload['username']));
@@ -75,6 +76,8 @@ function loginAttempt($dbConnection, $jsonPayload)
             $userInfo['userID']   = $row['id'];
             $userInfo['username'] = $row['username'];
 
+            updateToken($dbConnection, $userInfo['userID']);
+
             // If the password is correct...
             returnSuccess('Login successful.', $userInfo);
         } else {
@@ -84,6 +87,59 @@ function loginAttempt($dbConnection, $jsonPayload)
     } else {
         // If the username doesn't exist...
         returnError('Username not found.');
+    }
+}
+
+/**
+ * Verify userID/token information and (perhaps) login to a user's account
+ *
+ * @json Payload : function, userID, token
+ * @json Response: userID, username
+ *
+ * @param mysqli $dbConnection MySQL connection instance
+ * @param array $jsonPayload Decoded JSON object
+ */
+function loginWithToken($dbConnection, $jsonPayload)
+{
+    $userID = $jsonPayload['userID'];
+    $token  = $jsonPayload['token'];
+
+    checkForEmptyProperties([$userID, $token]);
+
+    // MySQL query to check if the token exists in the database (and get the expiresAt time and username)
+    $statement = "SELECT expiresAt, (SELECT username FROM Users WHERE id = ?) AS username FROM Tokens WHERE userID = ? AND token = ?";
+    $query = $dbConnection->prepare($statement);
+    $query->bind_param('iis', $userID, $userID, $token);
+    $query->execute();
+
+    $result = $query->get_result();
+
+    $query->close();
+
+    // Verify if a token was found
+    if ($result->num_rows > 0) {
+        // If the token exists...
+
+        // Get the expiresAt date
+        $row = $result->fetch_assoc();
+
+        // Verify the token is not expired
+        if ($row['expiresAt'] > time()) {
+            $userInfo = [];
+            $userInfo['userID']   = $userID;
+            $userInfo['username'] = $row['username'];
+
+            updateToken($dbConnection, $userID);
+
+            // If the token is not expired...
+            returnSuccess('Login successful.', $userInfo);
+        } else {
+            // If the token is expired...
+            returnError('Token is expired.');
+        }
+    } else {
+        // If the token does not exist...
+        returnError('Token and User ID combination not found.');
     }
 }
 
@@ -947,4 +1003,22 @@ function generateToken($length = 64)
     $token = bin2hex(random_bytes($length / 2));
 
     return $token;
+}
+
+/**
+ * Create a user login token or update the token's expiration time
+ *
+ * @param integer $userID The database ID of a user
+ */
+function updateToken($dbConnection, $userID)
+{
+    $token     = generateToken();
+    $expiresAt = strtotime('+72 hours');
+
+    $statement = "INSERT INTO Tokens (token, userID, expiresAt) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE expiresAt = ?";
+    $query = $dbConnection->prepare($statement);
+    $query->bind_param('siii', $token, $userID, $expiresAt, $expiresAt);
+    $query->execute();
+
+    $query->close();
 }
