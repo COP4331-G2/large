@@ -1,5 +1,5 @@
 const unsignedUploadPreset = "gppxllz4";
-const API = "http://www.musuapp.com/API/API.php";
+const API = "API/API.php";
 var cloudinaryURL = "https://api.cloudinary.com/v1_1/cop4331g2/upload";
 
 var currentUserID;
@@ -18,8 +18,8 @@ function populatePosts(number)
     {
             function: "getPostsLatest",
             numberOfPosts: number,
-            userID: currentUserID
-    };    
+            userID: currentUserID,
+    };
 
     jsonPayload = JSON.stringify(jsonPayload);
 
@@ -35,6 +35,9 @@ function populatePosts(number)
             if (this.readyState === 4 && this.status === 200)
             {
                 var jsonObject = JSON.parse(xhr.responseText);
+
+                console.log(jsonObject);
+
                 if (jsonObject.success)
                 {
                     postList = jsonObject.results;
@@ -74,7 +77,7 @@ function buildPostData(posts)
         var tumbsupdiv = document.createElement('div');
         tumbsupdiv.className = "buttsup";
         var tumbsup = document.createElement('button');
-        if (posts[i].isLiked) 
+        if (posts[i].isLiked)
         {
             tumbsup.className = "btn btn-secondary mr-2 my-2 my-sm-0 unlikeButton";
             tumbsup.innerHTML = "Unlike";
@@ -114,7 +117,7 @@ function buildPostData(posts)
                 {
                     console.log(e.message);
                 }
-         
+
             }
             else
             {
@@ -286,7 +289,7 @@ function suggestTags()
         fd.append('file', _picFile);
         xhr1.send(fd);
     }
-    
+
 
     var jsonPayload =
         {
@@ -315,7 +318,7 @@ function suggestTags()
                 {
                    var tags = jsonObject.results;
 
-                   var _tags = document.getElementById("postTags").value.replace(" ,", ",").replace(", ", ",").split(",");                  
+                   var _tags = document.getElementById("postTags").value.replace(" ,", ",").replace(", ", ",").split(",");
 
                     for (var i = 0; i < tags.length; i++)
                     {
@@ -377,7 +380,7 @@ function createPost()
     {
         return;
     }
-   
+
     var jsonPayload =
         {
             function: "createPost",
