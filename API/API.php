@@ -116,8 +116,8 @@ function loginWithUsername($dbConnection, $jsonPayload)
  */
 function loginWithToken($dbConnection, $jsonPayload)
 {
-    $userID = $jsonPayload['userID'];
-    $token  = $jsonPayload['token'];
+    $userID = isset($jsonPayload['userID']) ? $jsonPayload['userID'] : $_COOKIE['musu_userID'];
+    $token  = isset($jsonPayload['token']) ? $jsonPayload['token'] : $_COOKIE['musu_token'];
 
     checkForEmptyProperties([$userID, $token]);
 

@@ -13,6 +13,36 @@ var failwhale = `
 </pre>
 `;
 
+function autoLoginAttempt() {
+    // Setup the JSON payload to send to the API
+    var jsonPayload = {
+        function: "loginWithToken",
+    };
+    jsonPayload = JSON.stringify(jsonPayload);
+    console.log("JSON Payload: " + jsonPayload);
+
+    // Setup the HMLHttpRequest
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", API, false);
+    xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+
+    // Attempt to login and catch any error message
+    try {
+        // Send the XMLHttpRequest
+        xhr.send(jsonPayload);
+
+        // Parse the JSON returned from the request
+        var jsonObject = JSON.parse(xhr.responseText);
+
+        console.log(jsonObject);
+
+        if (jsonObject.success) {
+            window.location = 'posts.html?currentUserID=' + jsonObject.results.userID + '&username=' + jsonObject.results.username;
+        }
+    } catch (e) {
+        // If there is an error parsing the JSON, attempt to set the HTML login result message
+    }
+}
 
 function login() {
     // Get the username and password from the HTML fields
