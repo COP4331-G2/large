@@ -24,6 +24,7 @@ $functionWhiteList = [
     'likePost',
     'loginWithToken',
     'loginWithUsername',
+    'logout',
     'suggestTags',
     'unlikePost',
     'updateUser',
@@ -874,6 +875,30 @@ function updateUser($dbConnection, $jsonPayload)
     } else {
         returnError('User information not updated.');
     }
+}
+
+/**
+ * Logout of a user account (and delete cookie and/or token)
+ *
+ * @json Payload : function, userID
+ * @json Response: [none]
+ *
+ * @param mysqli $dbConnection MySQL connection instance
+ * @param object $jsonPayload Decoded JSON stdClass object
+ *
+ */
+function logout($dbConnection, $jsonPayload)
+{
+    $userID = $jsonPayload['userID'];
+
+    checkForEmptyProperties([$userID]);
+
+    deleteToken($dbConnection, $userID);
+
+    unset($_COOKIE['musu_token']);
+    unset($_COOKIE['musu_userID']);
+
+    returnSuccess('Logout successful.');
 }
 
 /* **************************************************** */
