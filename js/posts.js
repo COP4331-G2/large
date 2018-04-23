@@ -16,7 +16,7 @@ function populatePosts(number)
 {
     var jsonPayload =
     {
-            function: "getPostsLatest",
+            function: "getPostsPersonal",
             numberOfPosts: number,
             userID: currentUserID,
     };
@@ -210,23 +210,28 @@ function settings()
 {
     //@json Payload : function, userID, [username, password, firstName, lastName, emailAddress]
     // Get the username and password from the HTML fields
-    currentUserID = getParameterByName('currentUserID');
-    var newusername = document.getElementById("username").value;
-    var newfirstname = document.getElementById("firstname").value;
-    var newlastname = document.getElementById("lastname").value;
-    var newpassword = document.getElementById("password").value;
-    var newemail = document.getElementById("emailAdress").value;
+    currentUserID           = getParameterByName('currentUserID');
+    var newusername         = document.getElementById("username").value;
+    var newfirstname        = document.getElementById("firstName").value;
+    var newlastname         = document.getElementById("lastName").value;
+    var newpassword         = document.getElementById("password").value;
+    var newpassword_confirm = document.getElementById("password_confirm").value;
+    var newemail            = document.getElementById("emailAddress").value;
 
+    if (newpassword !== newpassword_confirm) {
+        alert("Passwords don't match!");
+        return;
+    }
 
     // Setup the JSON payload to send to the API
     var jsonPayload = {
         function: "updateUser",
         userID: currentUserID,
         username: newusername,
-        password: newpassword,
         firstName: newfirstname,
         lastName: newlastname,
-        emailAddress: newemail
+        emailAddress: newemail,
+        password: newpassword
     };
     jsonPayload = JSON.stringify(jsonPayload);
     console.log("JSON Payload: " + jsonPayload);
@@ -245,9 +250,13 @@ function settings()
         var jsonObject = JSON.parse(xhr.responseText);
 
         if (jsonObject.success) {
-
-            //do something
-
+            document.getElementById("username").value = "";
+            document.getElementById("firstName").value = "";
+            document.getElementById("lastName").value = "";
+            document.getElementById("emailAddress").value = "";
+            document.getElementById("password").value = "";
+            document.getElementById("password_confirm").value = "";
+            $("#SettingsModal").modal('hide');
         }
         else
         {
