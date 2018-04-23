@@ -1,5 +1,5 @@
 const unsignedUploadPreset = "gppxllz4";
-const API = "http://www.musuapp.com/API/API.php";
+const API = "API/API.php";
 var cloudinaryURL = "https://api.cloudinary.com/v1_1/cop4331g2/upload";
 
 var currentUserID;
@@ -18,8 +18,8 @@ function populatePosts(number)
     {
             function: "getPostsLatest",
             numberOfPosts: number,
-            userID: currentUserID
-    };    
+            userID: currentUserID,
+    };
 
     jsonPayload = JSON.stringify(jsonPayload);
 
@@ -35,6 +35,9 @@ function populatePosts(number)
             if (this.readyState === 4 && this.status === 200)
             {
                 var jsonObject = JSON.parse(xhr.responseText);
+
+                console.log(jsonObject);
+
                 if (jsonObject.success)
                 {
                     postList = jsonObject.results;
@@ -44,7 +47,6 @@ function populatePosts(number)
                     tud.innerHTML = "";
                     buildPostData(filteredPostList.slice(0, 10));
                 }
-                console.log(jsonObject.message);
             }
         };
         xhr.send(jsonPayload);
@@ -75,7 +77,7 @@ function buildPostData(posts)
         var tumbsupdiv = document.createElement('div');
         tumbsupdiv.className = "buttsup";
         var tumbsup = document.createElement('button');
-        if (posts[i].isLiked) 
+        if (posts[i].isLiked)
         {
             tumbsup.className = "btn btn-secondary mr-2 my-2 my-sm-0 unlikeButton";
             tumbsup.innerHTML = "Unlike";
@@ -115,7 +117,7 @@ function buildPostData(posts)
                 {
                     console.log(e.message);
                 }
-         
+
             }
             else
             {
@@ -149,7 +151,7 @@ function buildPostData(posts)
         };
         verticalLine.className = "line-separator";
         text.innerHTML = posts[i].bodyText;
-        tags.innerHTML = posts[i].tags;
+        tags.innerHTML = posts[i].tags.join(', ');
         username.innerHTML = posts[i].username;
         var image = document.createElement('img');
         image.src = posts[i].imageURL;
@@ -261,8 +263,33 @@ function settings()
 
 function suggestTags()
 {
-    var _bodyText = document.getElementById("postText").innerText;
-    var _imageURL = uploadImage();
+    var _bodyText = document.getElementById("postText").value;
+    var _picFile = document.getElementById("postImage").files[0];
+    var _imageURL;
+
+    if (_picFile === null || _picFile === 'undefined') {
+        alert("You must select an image!");
+        return;
+    }
+
+    if (_picFile !== null) {
+        var xhr1 = new XMLHttpRequest();
+        var fd = new FormData();
+        xhr1.open('POST', cloudinaryURL, false);
+        xhr1.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+        xhr1.onreadystatechange = function (e) {
+            if (xhr1.readyState === 4 && xhr1.status === 200) {
+                var response = JSON.parse(xhr1.responseText);
+                _imageURL = response.secure_url;
+            }
+        };
+
+        fd.append('upload_preset', unsignedUploadPreset);
+        fd.append('file', _picFile);
+        xhr1.send(fd);
+    }
+
 
     var jsonPayload =
         {
@@ -271,10 +298,12 @@ function suggestTags()
             imageURL: _imageURL
         };
 
+    console.log(jsonPayload);
+
     jsonPayload = JSON.stringify(jsonPayload);
 
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", API, true);
+    xhr.open("POST", API, false);
     xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
 
     try
@@ -284,22 +313,34 @@ function suggestTags()
             if (this.readyState === 4 && this.status === 200)
             {
                 var jsonObject = JSON.parse(xhr.responseText);
-                if (jsonObject.success)
+
+               if (jsonObject.success)
                 {
-                    var tags = jsonObject.results;
+                   var tags = jsonObject.results;
 
-                    //populate tags onto text label
+                   var _tags = document.getElementById("postTags").value.replace(" ,", ",").replace(", ", ",").split(",");
+
+                    for (var i = 0; i < tags.length; i++)
+                    {
+                        if (!_tags.includes(tags[i]))
+                        {
+                            _tags.push(tags[i]);
+                        }
+                   }
+
+                    _tags.clean("");
+
+                    _tags.clean(undefined);
+
+                    document.getElementById("postTags").value = _tags.join(', ');
                 }
-
-
-                console.log(jsonObject.message);
             }
         };
 
         xhr.send(jsonPayload);
     } catch (err)
     {
-        console.log(err);
+        console.log(err.message);
         alert("Error when suggesting tags, please try again later");
     }
 }
@@ -311,7 +352,7 @@ function createPost()
     var _picFile = document.getElementById("postImage").files[0];
     var _imageURL;
 
-    if (_picFile === null || +_picFile === 'undefined')
+    if (_picFile === null || _picFile === 'undefined')
     {
         alert("You must upload an image!");
         return;
@@ -335,7 +376,11 @@ function createPost()
         fd.append('file', _picFile);
         xhr1.send(fd);
     }
-   
+    else
+    {
+        return;
+    }
+
     var jsonPayload =
         {
             function: "createPost",
@@ -383,5 +428,43 @@ function createPost()
 }
 
 function logout() {
-    window.location = 'http://www.musuapp.com';
+    // Setup the JSON payload to send to the API
+    var jsonPayload = {
+        function: "logout",
+        userID: currentUserID,
+    };
+    jsonPayload = JSON.stringify(jsonPayload);
+    console.log("JSON Payload: " + jsonPayload);
+
+    // Setup the HMLHttpRequest
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", API, false);
+    xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+
+    // Attempt to loutout and catch any error message
+    try {
+        // Send the XMLHttpRequest
+        xhr.send(jsonPayload);
+
+        // Parse the JSON returned from the request
+        var jsonObject = JSON.parse(xhr.responseText);
+
+        if (jsonObject.success) {
+            window.location = 'index.html';
+        }
+
+        return true;
+    } catch (e) {
+        // Do something?
+    }
 }
+
+Array.prototype.clean = function (deleteValue) {
+    for (var i = 0; i < this.length; i++) {
+        if (this[i] === deleteValue) {
+            this.splice(i, 1);
+            i--;
+        }
+    }
+    return this;
+};

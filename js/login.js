@@ -1,5 +1,4 @@
-
-const API = "http://www.musuapp.com/API/API.php";
+const API = "API/API.php";
 
 
 var failwhale = `
@@ -44,7 +43,7 @@ function login() {
 
     // Setup the JSON payload to send to the API
     var jsonPayload = {
-        function: "loginAttempt",
+        function: "loginWithUsername",
         username: username,
         password: password
     };
@@ -65,7 +64,8 @@ function login() {
         var jsonObject = JSON.parse(xhr.responseText);
 
         if (jsonObject.success) {
-            window.location = 'http://www.musuapp.com/posts.html?currentUserID=' + jsonObject.results.userID + '&username=' + jsonObject.results.username;
+            console.log("... " + decodeURIComponent(document.cookie) + " ...");
+            window.location = 'posts.html?currentUserID=' + jsonObject.results.userID + '&username=' + jsonObject.results.username;
         }
 
         document.getElementById("loginResult").innerHTML = jsonObject.error;
@@ -145,9 +145,9 @@ function createAccount() {
         xhr.send(jsonPayload);
 
         var jsonObject = JSON.parse(xhr.responseText);
-        
+
         if (jsonObject.success) {
-            window.location = 'http://www.musuapp.com/posts.html?currentUserID=' + jsonObject.results.userID + '&username=' + jsonObject.results.username;
+            window.location = 'posts.html?currentUserID=' + jsonObject.results.userID + '&username=' + jsonObject.results.username;
         }
 
         //make forms blank and add error to form
