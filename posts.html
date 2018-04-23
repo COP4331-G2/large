@@ -1,6 +1,6 @@
 ﻿
 <html>
- 
+
 
 <head>
     <title>Musū</title>
@@ -19,7 +19,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="col-sm-2"><a class="navbar-brand mt-0" href="#">連絡<hr class="mx-0 my-0"> <span style="font-size: 12px">Musū</span> </a></div>
-        <form class="form-inline mr-sm-2 my-2 my-lg-0 ml-auto">       
+        <form class="form-inline mr-sm-2 my-2 my-lg-0 ml-auto">
             <div id="loggedinDiv" >
                 <span class="navbar-text">Logged in as&nbsp;</span><span class="navbar-text text-info mr-2" id="currentUserName">username</span>
                 <button type="button" class="btn btn-danger ml-2" id="logoutButton" onclick="logout();"><i class="fas fa-sign-out-alt mr-1"></i>Logout</button>
@@ -75,20 +75,20 @@
                     <div class="col-sm-3" >
                         <div id="mySidenav" class="sidenav">
                             <!--<a href="#" id="about">About</a> -->
-                            <a href="#" id="createPostButton" data-toggle="modal" data-target="#createPostModal"><span class="glyphicon" >&#x270f;</span></a> 
+                            <a href="#" id="createPostButton" data-toggle="modal" data-target="#createPostModal"><span class="glyphicon" >&#x270f;</span></a>
 
                             <a href="#" id="openSettingsButton"><span class="glyphicon">&#9881;</span></a>
                         </div>
                     </div>
 
-                    <div class="col-sm-6" style="background-color:white; ">   
+                    <div class="col-sm-6" style="background-color:white; ">
                         <div style="padding-bottom: 5px;">
                             <input type="text" class="form-control mr-auto postSearch" id="searchText" placeholder="Search Posts" oninput="searchPosts();" />
                         </div>
                         <div class="scrollertable" id="postScroll">
                             <!-- This is where posts go -->
                         </div>
-                    </div> 
+                    </div>
 
                     <div class="col-sm-3">
                         <!-- This is where right column goes -->
@@ -105,7 +105,7 @@
                 loadNext();
             }
         });
-            
+
         document.addEventListener("keyup", function (event) {
             event.preventDefault();
             // 27 = Escape key
@@ -123,7 +123,7 @@
             document.getElementById("postTags").value = "";
             document.getElementById("postImage").value = null;
         }
-        
+
     </script>
 </body>
 
