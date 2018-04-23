@@ -231,7 +231,7 @@ function deletePost($dbConnection, $jsonPayload)
 {
     $userID = $jsonPayload['userID'];
     $postID = $jsonPayload['postID'];
-    $token  = $jsonPayload['token'];
+    $token  = isset($jsonPayload['token']) ? $jsonPayload['token'] : $_COOKIE['musu_token'];
 
     checkForEmptyProperties([$postID, $token]);
 
@@ -287,7 +287,7 @@ function createPost($dbConnection, $jsonPayload)
     $bodyText = trim($jsonPayload['bodyText']);
     $imageURL = trim($jsonPayload['imageURL']);
     $tags     = $jsonPayload['tags'];
-    $token    = $jsonPayload['token'];
+    $token    = isset($jsonPayload['token']) ? $jsonPayload['token'] : $_COOKIE['musu_token'];
 
     // Trim whitespace from all tags
     // The strange syntax allows the updated values to escape the scope of the foreach loop
@@ -346,7 +346,7 @@ function getPost($dbConnection, $jsonPayload)
 {
     $userID = $jsonPayload['userID'];
     $postID = $jsonPayload['postID'];
-    $token  = $jsonPayload['token'];
+    $token  = isset($jsonPayload['token']) ? $jsonPayload['token'] : $_COOKIE['musu_token'];
 
     checkForEmptyProperties([$userID, $postID, $token]);
 
@@ -403,7 +403,7 @@ function getPostsPersonal($dbConnection, $jsonPayload)
 {
     $userID        = $jsonPayload['userID'];
     $numberOfPosts = $jsonPayload['numberOfPosts'];
-    $token         = $jsonPayload['token'];
+    $token         = isset($jsonPayload['token']) ? $jsonPayload['token'] : $_COOKIE['musu_token'];
 
     checkForEmptyProperties([$userID, $numberOfPosts, $token]);
 
@@ -563,7 +563,7 @@ function getPostsGroups($dbConnection, $jsonPayload)
 {
     $userID        = $jsonPayload['userID'];
     $numberOfPosts = $jsonPayload['numberOfPosts'];
-    $token         = $jsonPayload['token'];
+    $token         = isset($jsonPayload['token']) ? $jsonPayload['token'] : $_COOKIE['musu_token'];
 
     checkForEmptyProperties([$userID, $numberOfPosts, $token]);
 
@@ -627,7 +627,7 @@ function likePost($dbConnection, $jsonPayload)
 {
     $userID = $jsonPayload['userID'];
     $postID = $jsonPayload['postID'];
-    $token  = $jsonPayload['token'];
+    $token  = isset($jsonPayload['token']) ? $jsonPayload['token'] : $_COOKIE['musu_token'];
 
     checkForEmptyProperties([$userID, $postID, $token]);
 
@@ -701,7 +701,7 @@ function unlikePost($dbConnection, $jsonPayload)
 {
     $userID = $jsonPayload['userID'];
     $postID = $jsonPayload['postID'];
-    $token  = $jsonPayload['token'];
+    $token  = isset($jsonPayload['token']) ? $jsonPayload['token'] : $_COOKIE['musu_token'];
 
     checkForEmptyProperties([$userID, $postID, $token]);
 
@@ -811,7 +811,7 @@ function updateUser($dbConnection, $jsonPayload)
     $firstName    = trim($jsonPayload['firstName']);
     $lastName     = trim($jsonPayload['lastName']);
     $emailAddress = trim($jsonPayload['emailAddress']);
-    $token        = $jsonPayload['token'];
+    $token        = isset($jsonPayload['token']) ? $jsonPayload['token'] : $_COOKIE['musu_token'];
 
     checkForEmptyProperties([$userID, $token]);
 
