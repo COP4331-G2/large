@@ -115,41 +115,20 @@ function loginWithToken($dbConnection, $jsonPayload)
 
     checkForEmptyProperties([$userID, $token]);
 
-    // MySQL query to check if the token exists in the database (and get the expiresAt time and username)
-    $statement = "SELECT expiresAt, (SELECT username FROM Users WHERE id = ?) AS username FROM Tokens WHERE userID = ? AND token = ?";
-    $query = $dbConnection->prepare($statement);
-    $query->bind_param('iis', $userID, $userID, $token);
-    $query->execute();
+    // Check to see if the token verification succeeded
+    if (verifyToken($dbConnection, $userID, $token)) {
+        $userInfo = [];
+        $userInfo['userID']   = $userID;
+        $userInfo['username'] = getUsernameFromUserID($dbConnection, $userID);
+        $userInfo['token']    = $token;
 
-    $result = $query->get_result();
+        updateToken($dbConnection, $userID);
 
-    $query->close();
-
-    // Verify if a token was found
-    if ($result->num_rows > 0) {
-        // If the token exists...
-
-        // Get the expiresAt date
-        $row = $result->fetch_assoc();
-
-        // Verify the token is not expired
-        if ($row['expiresAt'] > time()) {
-            $userInfo = [];
-            $userInfo['userID']   = $userID;
-            $userInfo['username'] = $row['username'];
-            $userInfo['token']    = $token;
-
-            updateToken($dbConnection, $userID);
-
-            // If the token is not expired...
-            returnSuccess('Login successful.', $userInfo);
-        } else {
-            // If the token is expired...
-            returnError('Token is expired.');
-        }
+        // If the token verification succeeds...
+        returnSuccess('Login successful.', $userInfo);
     } else {
-        // If the token does not exist...
-        returnError('Token and User ID combination not found.');
+        // If the token verification fails...
+        returnError('User token failed verification.');
     }
 }
 
@@ -1082,6 +1061,16 @@ function updateToken($dbConnection, $userID)
     return $token;
 }
 
+function deleteToken($dbConnection, $userID)
+{
+    $statement = "DELETE FROM Tokens WHERE userID = ?";
+    $query = $dbConnection->prepare($statement);
+    $query->bind_param('i', $userID);
+    $query->execute();
+
+    $query->close();
+}
+
 /**
  * Verify a user token is valid and not expired
  *
@@ -1108,9 +1097,13 @@ function verifyToken($dbConnection, $userID, $token)
         // Get the expiresAt date
         $row = $result->fetch_assoc();
 
-        // Verify the token is not expired
+        // Verify if the token is expired
         if ($row['expiresAt'] > time()) {
+            // If the token is not exipred...
             return true;
+        } else {
+            // If the token is expired...
+            deleteToken($dbConnection, $userID);
         }
     }
 
