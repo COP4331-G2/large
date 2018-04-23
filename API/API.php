@@ -297,7 +297,7 @@ function createPost($dbConnection, $jsonPayload)
     }
 
     // Posts are not actually required to have $bodyText or $tags
-    checkForEmptyProperties([$userID, $imageURL, token]);
+    checkForEmptyProperties([$userID, $imageURL, $token]);
 
     if (!verifyToken($dbConnection, $userID, $token)) {
         returnError('User token failed verification.');
