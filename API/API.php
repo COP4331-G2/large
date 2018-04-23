@@ -936,3 +936,15 @@ function decreaseStrengthCount($dbConnection, $userID, $strengthDecrease)
 
     $query->close();
 }
+
+/**
+ * Generates a cryptographically secure pseudo-random string
+ *
+ * @param integer $length The desired length of the generated string
+ */
+function generateToken($length = 64)
+{
+    $token = bin2hex(random_bytes($length / 2));
+
+    return $token;
+}
