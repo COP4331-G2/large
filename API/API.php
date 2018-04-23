@@ -83,7 +83,7 @@ function loginWithUsername($dbConnection, $jsonPayload)
             $query->bind_param('i', $userInfo['userID']);
             $query->execute();
 
-            $userInfo['token'] = $query->get_result()->fetch_assoc();
+            $userInfo['token'] = $query->get_result()->fetch_assoc()['token'];
 
             $query->close();
 
