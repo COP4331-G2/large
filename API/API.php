@@ -87,6 +87,11 @@ function loginWithUsername($dbConnection, $jsonPayload)
 
             $query->close();
 
+            /* ********** */
+            setcookie('musu_token', $userInfo['token'], strtotime('+72 hours'));
+            setcookie('musu_userID', $userInfo['userID'], strtotime('+72 hours'));
+            /* ********** */
+
             // If the password is correct...
             returnSuccess('Login successful.', $userInfo);
         } else {
@@ -494,7 +499,7 @@ function getPostsLatest($dbConnection, $jsonPayload)
 {
     $userID        = $jsonPayload['userID'];
     $numberOfPosts = $jsonPayload['numberOfPosts'];
-    $token         = $jsonPayload['token'];
+    $token         = isset($jsonPayload['token']) ? $jsonPayload['token'] : $_COOKIE['musu_token'];
 
     checkForEmptyProperties([$userID, $numberOfPosts, $token]);
 
