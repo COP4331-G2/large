@@ -40,7 +40,7 @@ callVariableFunction($dbConnection, $jsonPayload, $functionWhiteList);
  * Verify username/password information and (perhaps) login to a user's account
  *
  * @json Payload : function, username, password
- * @json Response: userID, username
+ * @json Response: userID, username, token
  *
  * @param mysqli $dbConnection MySQL connection instance
  * @param array $jsonPayload Decoded JSON object
@@ -53,8 +53,8 @@ function loginWithUsername($dbConnection, $jsonPayload)
 
     checkForEmptyProperties([$username, $password]);
 
-    // MySQL query to check if the username exists in the database
-    $statement = "SELECT * FROM Users WHERE username = ?";
+    // MySQL query to check if the username exists in the database (and get the user token if it does)
+    $statement = "SELECT *, (SELECT token FROM Tokens WHERE userID = Users.id) AS token FROM Users WHERE username = ?";
     $query = $dbConnection->prepare($statement);
     $query->bind_param('s', $username);
     $query->execute();
@@ -78,6 +78,15 @@ function loginWithUsername($dbConnection, $jsonPayload)
 
             updateToken($dbConnection, $userInfo['userID']);
 
+            $statement = "SELECT token FROM Tokens WHERE userID = ?";
+            $query = $dbConnection->prepare($statement);
+            $query->bind_param('i', $userInfo['userID']);
+            $query->execute();
+
+            $userInfo['token'] = $query->get_result()->fetch_assoc();
+
+            $query->close();
+
             // If the password is correct...
             returnSuccess('Login successful.', $userInfo);
         } else {
@@ -94,7 +103,7 @@ function loginWithUsername($dbConnection, $jsonPayload)
  * Verify userID/token information and (perhaps) login to a user's account
  *
  * @json Payload : function, userID, token
- * @json Response: userID, username
+ * @json Response: userID, username, token
  *
  * @param mysqli $dbConnection MySQL connection instance
  * @param array $jsonPayload Decoded JSON object
@@ -128,6 +137,7 @@ function loginWithToken($dbConnection, $jsonPayload)
             $userInfo = [];
             $userInfo['userID']   = $userID;
             $userInfo['username'] = $row['username'];
+            $userInfo['token']    = $token;
 
             updateToken($dbConnection, $userID);
 
@@ -147,7 +157,7 @@ function loginWithToken($dbConnection, $jsonPayload)
  * Create a new user account
  *
  * @json Payload : function, username, password, firstName, lastName, emailAddress, [isGroup]
- * @json Response: userID, username
+ * @json Response: userID, username, token
  *
  * @param mysqli $dbConnection MySQL connection instance
  * @param array $jsonPayload Decoded JSON object
@@ -214,6 +224,7 @@ function createUser($dbConnection, $jsonPayload)
         $userInfo = [];
         $userInfo['userID']   = $userID;
         $userInfo['username'] = getUsernameFromUserID($dbConnection, $userID);
+        $userInfo['token']    = updateToken($dbConnection, $userID);
 
         // If successful...
         returnSuccess('User created.', $userInfo);
@@ -1021,4 +1032,6 @@ function updateToken($dbConnection, $userID)
     $query->execute();
 
     $query->close();
+
+    return $token;
 }
