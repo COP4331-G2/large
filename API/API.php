@@ -170,7 +170,7 @@ function createUser($dbConnection, $jsonPayload)
 /**
  * Delete a user post
  *
- * @json Payload : function, postID
+ * @json Payload : function, userID, postID
  * @json Response: [none]
  *
  * @param mysqli $dbConnection MySQL connection instance
@@ -178,25 +178,28 @@ function createUser($dbConnection, $jsonPayload)
  */
 function deletePost($dbConnection, $jsonPayload)
 {
+    $userID = $jsonPayload['userID'];
     $postID = $jsonPayload['postID'];
 
     checkForEmptyProperties([$postID]);
 
     /* STORED PROCEDURE
         DELIMITER ;;
-        CREATE DEFINER=`root`@`%` PROCEDURE `deletePost`(inputPostID INT)
-            BEGIN
+        CREATE DEFINER=`root`@`%` PROCEDURE `deletePost`(inputUserID INT, inputPostID INT)
+        BEGIN
+            IF ((SELECT userID FROM Posts WHERE id = inputPostID) = inputUserID) THEN
                 DELETE FROM Posts_Tags WHERE postID = inputPostID;
                 DELETE FROM Users_Posts_Likes WHERE postID = inputPostID;
                 DELETE FROM Posts WHERE id = inputPostID;
-            END;;
+            END IF;
+        END;;
         DELIMITER ;
      */
 
     // Delete post from the database (ensuring that we also delete relations)
-    $statement = "CALL deletePost(?)";
+    $statement = "CALL deletePost(?, ?)";
     $query = $dbConnection->prepare($statement);
-    $query->bind_param('i', $postID);
+    $query->bind_param('i', $userID, $postID);
     $query->execute();
 
     $result = $query->affected_rows;
