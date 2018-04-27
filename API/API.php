@@ -1140,3 +1140,4 @@ function verifyToken($dbConnection, $userID, $token)
     // Else...
     return false;
 }
+

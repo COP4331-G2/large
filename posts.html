@@ -14,17 +14,33 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+
+
 </head>
 
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="col-sm-2"><a class="navbar-brand mt-0" href="#">連絡<hr class="mx-0 my-0"> <span style="font-size: 12px">Musū</span> </a></div>
-        <form class="form-inline mr-sm-2 my-2 my-lg-0 ml-auto">
-            <div id="loggedinDiv" >
+       <!-- <form class="col-sm-9" > -->  
+          <form class="form-inline mr-sm-2 my-2 my-lg-0 ml-auto" > 
+                <div id="searchPersonalDiv" >
+                   <div class="wrapper">
+                     <div class="btn-group btn-group-justified">
+                          <a href="#" class="btn btn-primary" id="getPersonalPostsButton" onclick="getPostPersonal(1000);"> <i class="fa fa-user"></i></a>
+                          <a href="#" class="btn btn-primary" id="getGroupPostsButton" onclick="getPostGroups(1000);"><i class="fa fa-group"></i></a>
+                          <a href="#" class="btn btn-primary" id="getLatestPostsButton" onclick="getPostsLatest(1000);"><i class="fa fa-fire"></i></a>
+                     </div>
+                  </div>
+               </div>
+            </form>
+            <form class="form-inline mr-sm-2 my-2 my-lg-0 ml-auto" > 
+                <div id="loggedinDiv" >
                 <span class="navbar-text">Logged in as&nbsp;</span><span class="navbar-text text-info mr-2" id="currentUserName">username</span>
                 <button type="button" class="btn btn-danger ml-2" id="logoutButton" onclick="logout();"><i class="fas fa-sign-out-alt mr-1"></i>Logout</button>
-            </div>
-        </form>
+               </div>
+           <!-- </form>  -->
+           </form> 
     </nav>
     <div class="container">
         <!-- The Modal -->
@@ -111,22 +127,22 @@
                     <div class="modal-footer">
                         <span id="createResult" class="text-danger mr-auto"> </span>
                         <button type="button" class="btn btn-secondary" id="openSettingsButton" onclick="settings();">UPDATE</button>
+                        <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="clearErrors();">Cancel</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     <!--END OF MODAL CONTAINER FOR SETTINGS -->
+
     <div id="accessUIDiv" >
         <div class="container-fluid">
             <div class="card center-block">
                 <div class="card-body row bg2">
                     <div class="col-sm-3" >
                         <div id="mySidenav" class="sidenav">
-                            <!--<a href="#" id="about">About</a> -->
-                            <a href="#" id="createPostButton" data-toggle="modal" data-target="#createPostModal"><span class="glyphicon" >&#x270f;</span></a>
-
-                            <a href="#" id="openSettingsButton" data-toggle="modal" data-target="#SettingsModal"><span class="glyphicon">&#9881;</span></a>
+                        <a href="#" id="createPostButton" data-toggle="modal" data-target="#createPostModal"><span class="glyphicon" >&#x270f;</span></a> 
+                        <a href="#" id="openSettingsButton" data-toggle="modal" data-target="#SettingsModal"><span class="glyphicon">&#9881;</span></a>
                         </div>
                     </div>
 
