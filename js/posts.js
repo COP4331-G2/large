@@ -91,34 +91,39 @@ function buildPostData(posts)
 
         if(posts[i].userID == currentUserID){
             deleteButton.style.visibility = "visible";
-            // deleteButton.className = "btn fa fa-trash float-right deleteButton";
             deleteButton.className = deleteButtonClass;
         }
 
         deleteButton.id = posts[i].postID;
-        deleteButton.onclick= function()
+        deleteButton.onclick = function()
         {
-           var jsonPayload =
-           {
-             function:"deletePost",
-             userID:currentUserID,
-             postID:this.id
+            var jsonPayload = {
+             function: "deletePost",
+             userID: currentUserID,
+             postID: this.id
+            };
 
-           };
             jsonPayload= JSON.stringify(jsonPayload);
-                //
-                var xhr = new XMLHttpRequest();
-                xhr.open("POST", API, true);
-                xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
 
-                try {
-                    //send the xml request
-                    xhr.send(jsonPayload);
-                }
-                catch(e)
-                {
-                    console.log(e.message);
-                }
+            console.log(jsonPayload);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", API, false);
+            xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+
+            try {
+                //send the xml request
+                xhr.send(jsonPayload);
+                startPosts();
+
+                var jsonObject = JSON.parse(xhr.responseText);
+
+                console.log(jsonObject);
+            }
+            catch(e)
+            {
+                console.log(e.message);
+            }
 
         }
 
