@@ -24,7 +24,7 @@ function getPosts(functionName, numberOfPosts)
     jsonPayload = JSON.stringify(jsonPayload);
 
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", API, true);
+    xhr.open("POST", API, false);
     xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
 
     try
@@ -69,25 +69,23 @@ function buildPostData(posts)
     }
 
     for (i = 0; i < posts.length; i++) {
-        var post = document.createElement('div');
-        var text = document.createElement('div');
-        var tags = document.createElement('div');
-        var username = document.createElement('div');
+        var post         = document.createElement('div');
+        var text         = document.createElement('div');
+        var tags         = document.createElement('div');
+        var username     = document.createElement('div');
         var verticalLine = document.createElement('div');
-        var tumbsupdiv = document.createElement('div');
-        var deletediv = document.createElement('div');
-        var tumbsup = document.createElement('button');
+        var tumbsupdiv   = document.createElement('div');
+        var deletediv    = document.createElement('div');
+        var tumbsup      = document.createElement('button');
 
-        if (posts[i].isLiked)
-        {
+        if (posts[i].isLiked) {
             tumbsup.className = "btn btn-secondary mr-2 my-2 my-sm-0 unlikeButton";
             tumbsup.innerHTML = "Unlike";
-        }
-        else
-        {
+        } else {
             tumbsup.className = "btn btn-primary mr-2 my-2 my-sm-0 likeButton";
             tumbsup.innerHTML = "Like";
         }
+
         tumbsup.id = posts[i].postID;
         tumbsup.onclick = function ()
         {
@@ -107,7 +105,7 @@ function buildPostData(posts)
 
                 //setup
                 var xhr = new XMLHttpRequest();
-                xhr.open("POST", API, true);
+                xhr.open("POST", API, false);
                 xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
 
                 try {
@@ -137,7 +135,7 @@ function buildPostData(posts)
 
                 //setup
                 xhr = new XMLHttpRequest();
-                xhr.open("POST", API, true);
+                xhr.open("POST", API, false);
                 xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
 
                 try {
@@ -150,6 +148,7 @@ function buildPostData(posts)
 
             }
         };
+
         verticalLine.className = "line-separator";
         text.innerHTML = posts[i].bodyText;
         tags.innerHTML = posts[i].tags.join(', ');
