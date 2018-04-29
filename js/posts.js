@@ -12,52 +12,6 @@ function stringContains(stringToCheck, substring)
     return stringToCheck.toString().toLowerCase().indexOf(substring.toLowerCase()) !== -1;
 }
 
-function populatePosts(number)
-{
-    var jsonPayload =
-    {
-            function: "getPostsLatest",
-            numberOfPosts: number,
-            userID: currentUserID,
-    };
-
-    jsonPayload = JSON.stringify(jsonPayload);
-
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", API, true);
-    xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
-
-    try
-    {
-        xhr.onreadystatechange = function ()
-        {
-
-            if (this.readyState === 4 && this.status === 200)
-            {
-                var jsonObject = JSON.parse(xhr.responseText);
-
-                console.log(jsonObject);
-
-                if (jsonObject.success)
-                {
-                    postList = jsonObject.results;
-                    filteredPostList = jsonObject.results;
-                    indexLoaded = 0;
-                    var tud = document.getElementById("postScroll");
-                    tud.innerHTML = "";
-                    buildPostData(filteredPostList.slice(0, 10));
-                }
-            }
-        };
-        xhr.send(jsonPayload);
-
-    } catch (err)
-    {
-        console.log(err);
-        alert("Error when reading posts, please try again later");
-    }
-}
-
 function getPosts(functionName, numberOfPosts)
 {
     var jsonPayload =
@@ -122,8 +76,8 @@ function buildPostData(posts)
         var verticalLine = document.createElement('div');
         var tumbsupdiv = document.createElement('div');
         var deletediv = document.createElement('div');
-       
         var tumbsup = document.createElement('button');
+
         if (posts[i].isLiked)
         {
             tumbsup.className = "btn btn-secondary mr-2 my-2 my-sm-0 unlikeButton";
@@ -250,7 +204,7 @@ function startPosts()
 {
     currentUserID = getParameterByName('currentUserID');
     document.getElementById("currentUserName").innerHTML = getParameterByName('username');
-    populatePosts(1000);
+    getPosts("getPostsPersonal", 1000);
 }
 
 function settings()
