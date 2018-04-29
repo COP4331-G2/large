@@ -177,7 +177,7 @@ function createAccount() {
         var jsonObject = JSON.parse(xhr.responseText);
 
         if (jsonObject.success) {
-            window.location = 'posts.html?currentUserID=' + jsonObject.results.userID + '&username=' + jsonObject.results.username;
+            autoLoginAttempt();
         }
 
         //make forms blank and add error to form
