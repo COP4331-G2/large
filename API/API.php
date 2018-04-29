@@ -835,7 +835,7 @@ function updateUser($dbConnection, $jsonPayload)
     // MySQL query to check if a username already exists in the database
     $statement = "SELECT * FROM Users WHERE username = ? AND id != ?";
     $query = $dbConnection->prepare($statement);
-    $query->bind_param('s', $username, $userID);
+    $query->bind_param('si', $username, $userID);
     $query->execute();
 
     $result = $query->get_result();
