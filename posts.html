@@ -27,9 +27,9 @@
                 <div id="searchPersonalDiv" >
                    <div class="wrapper">
                      <div class="btn-group btn-group-justified">
-                          <a href="#" class="btn btn-primary" id="getPersonalPostsButton" onclick="getPosts('getPostsPersonal', 1000);"> <i class="fa fa-user"></i></a>
-                          <a href="#" class="btn btn-primary" id="getGroupPostsButton" onclick="getPosts('getPostsGroups', 1000);"><i class="fa fa-group"></i></a>
-                          <a href="#" class="btn btn-primary" id="getLatestPostsButton" onclick="getPosts('getPostsLatest', 1000);"><i class="fa fa-fire"></i></a>
+                        <a href="#" class="btn btn-primary" id="getPostsPersonalButton" onclick="selectGetPosts(this, 'getPostsPersonal', 1000);"> <i class="fa fa-user"><br><id="personal_label" style="font-size:12px">Personal</></i></a>
+                         <a href="#" class="btn btn-primary" id="getPostsLatestButton" onclick="selectGetPosts(this, 'getPostsLatest', 1000);"><i class="fa fa-fire"><br><id="latest_label" style="font-size:12px">Latest</></i></a>
+                         <a href="#" class="btn btn-primary" id="getPostsGroupsButton" onclick="selectGetPosts(this, 'getPostsGroups', 1000);"><i class="fa fa-group"><br><id="groups_label" style="font-size:12px">Groups</></i></a>
                      </div>
                   </div>
                </div>
@@ -189,6 +189,29 @@
             document.getElementById("postImage").value = null;
         }
 
+    </script>
+
+    <script>
+        function selectGetPosts(button, functionName, numberOfPosts) {
+            var buttons = [
+                document.getElementById("getPostsPersonalButton"),
+                document.getElementById("getPostsLatestButton"),
+                document.getElementById("getPostsGroupsButton"),
+            ];
+
+            var buttonIndex = buttons.indexOf(button);
+            if (buttonIndex > -1) {
+                buttons.splice(buttonIndex, 1);
+            }
+
+            button.classList.toggle("active");
+
+            buttons.forEach(function(element) {
+                element.classList.remove("active");
+            });
+
+            getPosts(functionName, numberOfPosts);
+        }
     </script>
 </body>
 
