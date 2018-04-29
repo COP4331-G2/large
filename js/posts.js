@@ -62,34 +62,45 @@ function buildPostData(posts)
 {
     var tud = document.getElementById("postScroll");
     var i;
+
     if(!posts)
     {
       console.log("data is not available");
       return;
     }
 
-    for (i = 0; i < posts.length; i++) {
-        var post         = document.createElement('div');
-        var text         = document.createElement('div');
-        var tags         = document.createElement('div');
-        var username     = document.createElement('div');
-        var verticalLine = document.createElement('div');
-        var tumbsupdiv   = document.createElement('div');
-        var deletediv    = document.createElement('div');
-        var tumbsup      = document.createElement('button');
-        var deleteIt      = document.createElement('button');
+    likeButtonClass   = "btn fa fa-heart likeButton";
+    unlikeButtonClass = "btn fa fa-heart-o unlikeButton";
+    deleteButtonClass = "btn fa fa-trash float-right deleteButton";
 
-        if(posts[i].userID === currentUserID){
-            deleteIt.className= "btn btn-secondary mr-2 my-2 my-sm-0 deleteButton"
-             deleteIt.innerHTML = "fa fa-trash";
+    for (i = 0; i < posts.length; i++) {
+        var post                = document.createElement('div');
+        var text                = document.createElement('div');
+        var tags                = document.createElement('div');
+        var username            = document.createElement('div');
+        var verticalLine        = document.createElement('div');
+        var likeUnlikeButtonDiv = document.createElement('div');
+        var deleteButtonDiv     = document.createElement('div');
+        var likeUnlikeButton    = document.createElement('button');
+        var deleteButton        = document.createElement('button');
+
+        deleteButton.style = "color: red";
+        deleteButton.style.visibility = "hidden";
+
+        likeUnlikeButton.style = "color: red";
+
+        if(posts[i].userID == currentUserID){
+            deleteButton.style.visibility = "visible";
+            // deleteButton.className = "btn fa fa-trash float-right deleteButton";
+            deleteButton.className = deleteButtonClass;
         }
-     
-        deleteIt.id = post[i].postID;
-        deleteIt.onclick= function()
+
+        deleteButton.id = posts[i].postID;
+        deleteButton.onclick= function()
         {
-           var jsonPayload = 
+           var jsonPayload =
            {
-             function:"deletePost";
+             function:"deletePost",
              userID:currentUserID,
              postID:this.id
 
@@ -112,25 +123,23 @@ function buildPostData(posts)
         }
 
         if (posts[i].isLiked) {
-            tumbsup.className = "btn btn-secondary mr-2 my-2 my-sm-0 unlikeButton";
-            tumbsup.innerHTML = "Unlike";
+            likeUnlikeButton.className = likeButtonClass;
         } else {
-            tumbsup.className = "btn btn-primary mr-2 my-2 my-sm-0 likeButton";
-            tumbsup.innerHTML = "Like";
+            likeUnlikeButton.className = unlikeButtonClass;
         }
-        tumbsup.id = posts[i].postID;
-        tumbsup.onclick = function ()
+
+        likeUnlikeButton.id = posts[i].postID;
+        likeUnlikeButton.onclick = function ()
         {
-            if (this.innerHTML === "Like")
+            if (this.className === unlikeButtonClass)
             {
-                this.className = "btn btn-secondary mr-2 my-2 my-sm-0 unlikeButton";
-                this.innerHTML = "Unlike";
-                var jsonPayload =
-                    {
-                        function: "likePost",
-                        userID: currentUserID,
-                        postID: this.id
-                    };
+                this.className = likeButtonClass;
+
+                var jsonPayload = {
+                    function: "likePost",
+                    userID: currentUserID,
+                    postID: this.id
+                };
 
 
                 jsonPayload = JSON.stringify(jsonPayload);
@@ -152,16 +161,13 @@ function buildPostData(posts)
             }
             else
             {
-                this.className = "btn btn-primary mr-2 my-2 my-sm-0 likeButton";
-                this.innerHTML = "Like";
+                this.className = unlikeButtonClass;
 
-                jsonPayload =
-                    {
-                        function: "unlikePost",
-                        userID: currentUserID,
-                        postID: this.id
-                    };
-
+                jsonPayload = {
+                    function: "unlikePost",
+                    userID: currentUserID,
+                    postID: this.id
+                };
 
                 jsonPayload = JSON.stringify(jsonPayload);
 
@@ -191,14 +197,15 @@ function buildPostData(posts)
         text.className = "postBodyText";
         tags.className = "tagsText";
         username.className = "usernamePostText";
-        tumbsupdiv.appendChild(tumbsup);
-        deletediv.appendChild(deleteIt);
+        likeUnlikeButtonDiv.appendChild(likeUnlikeButton);
+        likeUnlikeButtonDiv.appendChild(deleteButton);
+        // deleteButtonDiv.appendChild(deleteButton);
         post.appendChild(username);
         post.appendChild(tags);
         post.appendChild(text);
         post.appendChild(image);
-        post.appendChild(tumbsupdiv);
-        post.appendChild(deletediv);
+        post.appendChild(likeUnlikeButtonDiv);
+        // post.appendChild(deleteButtonDiv);
         post.appendChild(verticalLine);
         tud.appendChild(post);
     }

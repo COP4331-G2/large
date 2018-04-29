@@ -25,23 +25,34 @@ body, html
     background-attachment: local;
 }
 
-.likeButton 
-{
-    font-family: 'Roboto', sans-serif;
-    font-size: 12px; 
+.likeButton {
+    line-height: 1em;
+    margin-left: 12px;
+
+    background-color: white;
+    border: none;
+    overflow: hidden;
+    outline:none;
 }
 
 .unlikeButton {
-    font-family: 'Roboto', sans-serif;
-    font-size: 12px;
+    line-height: 1em;
+    margin-left: 12px;
+
+    background-color: white;
+    border: none;
+    overflow: hidden;
+    outline:none;
 }
 
-.buttsup
-{
-    margin-left: auto;
-    margin-right: auto;
-    padding-bottom: 10px;
-    width: 95%;
+.deleteButton {
+    line-height: 1em;
+    margin-right: 12px;
+
+    background-color: white;
+    border: none;
+    overflow: hidden;
+    outline:none;
 }
 
 .scrollertable {
@@ -85,10 +96,11 @@ body, html
 }
 
 .line-separator {
+    display: inline-block;
     margin-left: auto;
     margin-right: auto;
     width: 98%;
-    border-top: 1px solid #efeeee;
+    margin-top: 10px;
     height: 1px;
     background: #efeeee;
 }
@@ -166,6 +178,7 @@ body, html
 .my-form {
     margin-top: 10px;
 }
+
 ss-bar {
     width: 200px;
     position: relative;
