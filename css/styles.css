@@ -124,9 +124,9 @@ body, html
     margin-left: auto;
     margin-right: auto;
     font-family: 'Roboto', sans-serif;
-    font-size: 1px; /* Increase font size */
+    font-size: 18px; /* Increase font size */
     color: black;
-    font-weight: 400;
+    font-weight: 300;
     width: 95%;
 }
 
