@@ -88,10 +88,8 @@ function loginWithUsername($dbConnection, $jsonPayload)
 
             $query->close();
 
-            /* ********** */
             setcookie('musu_token', $userInfo['token'], strtotime('+72 hours'));
             setcookie('musu_userID', $userInfo['userID'], strtotime('+72 hours'));
-            /* ********** */
 
             // If the password is correct...
             returnSuccess('Login successful.', $userInfo);
@@ -210,6 +208,9 @@ function createUser($dbConnection, $jsonPayload)
         $userInfo['userID']   = $userID;
         $userInfo['username'] = getUsernameFromUserID($dbConnection, $userID);
         $userInfo['token']    = updateToken($dbConnection, $userID);
+
+        setcookie('musu_token', $userInfo['token'], strtotime('+72 hours'));
+        setcookie('musu_userID', $userInfo['userID'], strtotime('+72 hours'));
 
         // If successful...
         returnSuccess('User created.', $userInfo);
