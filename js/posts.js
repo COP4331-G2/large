@@ -77,6 +77,39 @@ function buildPostData(posts)
         var tumbsupdiv   = document.createElement('div');
         var deletediv    = document.createElement('div');
         var tumbsup      = document.createElement('button');
+        var deleteIt      = document.createElement('button');
+
+        if(posts[i].userID === currentUserID){
+            deleteIt.className= "btn btn-secondary mr-2 my-2 my-sm-0 deleteButton"
+             deleteIt.innerHTML = "fa fa-trash";
+        }
+     
+        deleteIt.id = post[i].postID;
+        deleteIt.onclick= function()
+        {
+           var jsonPayload = 
+           {
+             function:"deletePost";
+             userID:currentUserID,
+             postID:this.id
+
+           };
+            jsonPayload= JSON.stringify(jsonPayload);
+                //
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", API, true);
+                xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+
+                try {
+                    //send the xml request
+                    xhr.send(jsonPayload);
+                }
+                catch(e)
+                {
+                    console.log(e.message);
+                }
+
+        }
 
         if (posts[i].isLiked) {
             tumbsup.className = "btn btn-secondary mr-2 my-2 my-sm-0 unlikeButton";
@@ -85,7 +118,6 @@ function buildPostData(posts)
             tumbsup.className = "btn btn-primary mr-2 my-2 my-sm-0 likeButton";
             tumbsup.innerHTML = "Like";
         }
-
         tumbsup.id = posts[i].postID;
         tumbsup.onclick = function ()
         {
@@ -160,11 +192,13 @@ function buildPostData(posts)
         tags.className = "tagsText";
         username.className = "usernamePostText";
         tumbsupdiv.appendChild(tumbsup);
+        deletediv.appendChild(deleteIt);
         post.appendChild(username);
         post.appendChild(tags);
         post.appendChild(text);
         post.appendChild(image);
         post.appendChild(tumbsupdiv);
+        post.appendChild(deletediv);
         post.appendChild(verticalLine);
         tud.appendChild(post);
     }
