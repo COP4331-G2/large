@@ -808,7 +808,7 @@ function suggestTags($dbConnection, $jsonPayload)
 function updateUser($dbConnection, $jsonPayload)
 {
     $userID       = $jsonPayload['userID'];
-    $username     = strtolower(trim($jsonPayload['username']));
+    $username     = trim($jsonPayload['username']);
     $password     = trim($jsonPayload['password']);
     $firstName    = trim($jsonPayload['firstName']);
     $lastName     = trim($jsonPayload['lastName']);
