@@ -57,57 +57,13 @@ function populatePosts(number)
         alert("Error when reading posts, please try again later");
     }
 }
-function getPostsPersonal(number)
+
+function getPosts(functionName, numberOfPosts)
 {
     var jsonPayload =
     {
-            function: "getPostsPersonal",
-            numberOfPosts: number,
-            userID: currentUserID,
-    };
-
-    jsonPayload = JSON.stringify(jsonPayload);
-
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", API, true);
-    xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
-
-    try
-    {
-        xhr.onreadystatechange = function ()
-        {
-
-            if (this.readyState === 4 && this.status === 200)
-            {
-                var jsonObject = JSON.parse(xhr.responseText);
-
-                console.log(jsonObject);
-
-                if (jsonObject.success)
-                {
-                    postList = jsonObject.results;
-                    filteredPostList = jsonObject.results;
-                    indexLoaded = 0;
-                    var tud = document.getElementById("postScroll");
-                    tud.innerHTML = "";
-                    buildPostData(filteredPostList.slice(0, 10));
-                }
-            }
-        };
-        xhr.send(jsonPayload);
-
-    } catch (err)
-    {
-        console.log(err);
-        alert("Error when reading posts, please try again later");
-    }
-}
-function getGroupPosts(number)
-{
-    var jsonPayload =
-    {
-            function: "getPostGroups",
-            numberOfPosts: number,
+            function: functionName,
+            numberOfPosts: numberOfPosts,
             userID: currentUserID,
     };
 
