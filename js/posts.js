@@ -24,7 +24,7 @@ function getPosts(functionName, numberOfPosts)
     jsonPayload = JSON.stringify(jsonPayload);
 
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", API, false);
+    xhr.open("POST", API, true);
     xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
 
     try
@@ -105,7 +105,7 @@ function buildPostData(posts)
 
                 //setup
                 var xhr = new XMLHttpRequest();
-                xhr.open("POST", API, false);
+                xhr.open("POST", API, true);
                 xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
 
                 try {
@@ -135,7 +135,7 @@ function buildPostData(posts)
 
                 //setup
                 xhr = new XMLHttpRequest();
-                xhr.open("POST", API, false);
+                xhr.open("POST", API, true);
                 xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
 
                 try {
