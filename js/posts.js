@@ -249,6 +249,8 @@ function settings()
         // Parse the JSON returned from the request
         var jsonObject = JSON.parse(xhr.responseText);
 
+        console.log(jsonObject);
+
         if (jsonObject.success) {
             document.getElementById("username").value = "";
             document.getElementById("firstName").value = "";
