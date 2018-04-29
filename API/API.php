@@ -147,7 +147,7 @@ function loginWithToken($dbConnection, $jsonPayload)
  */
 function createUser($dbConnection, $jsonPayload)
 {
-    $username     = strtolower(trim($jsonPayload['username']));
+    $username     = trim($jsonPayload['username']);
     $password     = trim($jsonPayload['password']);
     $firstName    = trim($jsonPayload['firstName']);
     $lastName     = trim($jsonPayload['lastName']);
