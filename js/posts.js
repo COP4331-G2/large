@@ -309,6 +309,7 @@ function settings()
             document.getElementById("password").value = "";
             document.getElementById("password_confirm").value = "";
             $("#SettingsModal").modal('hide');
+            alert("User settings updated.");
         }
         else
         {
