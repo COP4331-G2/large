@@ -252,6 +252,10 @@ function settings()
         console.log(jsonObject);
 
         if (jsonObject.success) {
+            if (newusername != "") {
+                document.getElementById("currentUserName").innerHTML = newusername;
+            }
+
             document.getElementById("username").value = "";
             document.getElementById("firstName").value = "";
             document.getElementById("lastName").value = "";
@@ -262,6 +266,7 @@ function settings()
         }
         else
         {
+            alert(jsonObject.error);
             return false;
         }
     } catch (e)
@@ -421,6 +426,7 @@ function createPost()
                     document.getElementById("postText").value = "";
                     document.getElementById("postTags").value = "";
                     document.getElementById("postImage").files = null;
+                    document.getElementById("postImage").value = "";
                     $("#createPostModal").modal('hide');
                     startPosts();
                 }
