@@ -147,11 +147,11 @@ function loginWithToken($dbConnection, $jsonPayload)
  */
 function createUser($dbConnection, $jsonPayload)
 {
-    $username     = trim($jsonPayload['username']);
+    $username     = strip_tags(trim($jsonPayload['username']));
     $password     = trim($jsonPayload['password']);
-    $firstName    = trim($jsonPayload['firstName']);
-    $lastName     = trim($jsonPayload['lastName']);
-    $emailAddress = trim($jsonPayload['emailAddress']);
+    $firstName    = strip_tags(trim($jsonPayload['firstName']));
+    $lastName     = strip_tags(trim($jsonPayload['lastName']));
+    $emailAddress = strip_tags(trim($jsonPayload['emailAddress']));
     $isGroup      = 0;
 
     // This purposefully doesn't include $isGroup because 0 will evaluate to false in empty()
@@ -286,15 +286,15 @@ function deletePost($dbConnection, $jsonPayload)
 function createPost($dbConnection, $jsonPayload)
 {
     $userID   = $jsonPayload['userID'];
-    $bodyText = trim($jsonPayload['bodyText']);
+    $bodyText = strip_tags(trim($jsonPayload['bodyText']));
     $imageURL = trim($jsonPayload['imageURL']);
     $tags     = $jsonPayload['tags'];
     $token    = isset($jsonPayload['token']) ? $jsonPayload['token'] : $_COOKIE['musu_token'];
 
-    // Trim whitespace from all tags
+    // Trim whitespace, PHP tags, and HTML tags from all tags
     // The strange syntax allows the updated values to escape the scope of the foreach loop
     foreach ($tags as $key => $field) {
-        $tags[$key] = trim($tags[$key]);
+        $tags[$key] = strip_tags(trim($tags[$key]));
     }
 
     // Posts are not actually required to have $bodyText or $tags
