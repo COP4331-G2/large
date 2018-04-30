@@ -22,8 +22,8 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="col-sm-2"><a class="navbar-brand mt-0" href="#">連絡<hr class="mx-0 my-0"> <span style="font-size: 12px">Musū</span> </a></div>
-       <!-- <form class="col-sm-9" > -->  
-          <form class="form-inline mr-sm-2 my-2 my-lg-0 ml-auto" > 
+       <!-- <form class="col-sm-9" > -->
+          <form class="form-inline mr-sm-2 my-2 my-lg-0 ml-auto" >
                 <div id="searchPersonalDiv" >
                    <div class="wrapper">
                      <div class="btn-group btn-group-justified">
@@ -34,13 +34,13 @@
                   </div>
                </div>
             </form>
-            <form class="form-inline mr-sm-2 my-2 my-lg-0 ml-auto" > 
+            <form class="form-inline mr-sm-2 my-2 my-lg-0 ml-auto" >
                 <div id="loggedinDiv" >
                 <span class="navbar-text">Logged in as&nbsp;</span><span class="navbar-text text-info mr-2" id="currentUserName">username</span>
                 <button type="button" class="btn btn-danger ml-2" id="logoutButton" onclick="logout();"><i class="fas fa-sign-out-alt mr-1"></i>Logout</button>
                </div>
            <!-- </form>  -->
-           </form> 
+           </form>
     </nav>
     <div class="container">
         <!-- The Modal -->
@@ -105,18 +105,19 @@
                                         <div class="form-group col-md-12">
                                             <!--<label for="userImage">Image</label>
                                             <input type="file" class="form-control" id="userImage" accept="image/*">-->
-                                            <label for="userName">UserName</label> 
-                                            <input type="text" class="form-control" id="username" placeholder="Enter User Name here..">
-                                            <label for="password">Password</label>
-                                            <input type="text" class="form-control" id="password" placeholder="Enter Password here..">
-                                            <label for="password_confirm">Confirm Password</label>
-                                            <input type="text" class="form-control" id="password_confirm" placeholder="Confirm Password here..">
-                                            <label for="firstName">Firstname</label>
-                                            <input type="text" class="form-control" id="firstName" placeholder="Enter First Name here..">
-                                            <label for="lastName">Lastname</label>
-                                            <input type="text" class="form-control" id="lastName" placeholder="Enter Last Name here..">
-                                            <label for="emailAddress">Email</label>
-                                            <input type="text" class="form-control" id="emailAddress" placeholder="Enter Email here..">
+                                            <p>Enter any information that you wish to change...</p>
+                                            <label for="userName"></label>
+                                            <input type="text" class="form-control" id="username" placeholder="new username">
+                                            <label for="password"><br></label>
+                                            <input type="text" class="form-control" id="password" placeholder="new password">
+                                            <label for="password_confirm"><br></label>
+                                            <input type="text" class="form-control" id="password_confirm" placeholder="new password (confirm)">
+                                            <label for="firstName"><br></label>
+                                            <input type="text" class="form-control" id="firstName" placeholder="new first name">
+                                            <label for="lastName"><br></label>
+                                            <input type="text" class="form-control" id="lastName" placeholder="new last name">
+                                            <label for="emailAddress"><br></label>
+                                            <input type="text" class="form-control" id="emailAddress" placeholder="new email address">
                                         </div>
                                     </div>
                                 </form>
@@ -141,7 +142,7 @@
                 <div class="card-body row bg2">
                     <div class="col-sm-3" >
                         <div id="mySidenav" class="sidenav">
-                        <a href="#" id="createPostButton" data-toggle="modal" data-target="#createPostModal"><span class="glyphicon" >&#x270f;</span></a> 
+                        <a href="#" id="createPostButton" data-toggle="modal" data-target="#createPostModal"><span class="glyphicon" >&#x270f;</span></a>
                         <a href="#" id="openSettingsButton" data-toggle="modal" data-target="#SettingsModal"><span class="glyphicon">&#9881;</span></a>
                         </div>
                     </div>
