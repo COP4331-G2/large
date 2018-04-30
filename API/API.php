@@ -21,6 +21,7 @@ $functionWhiteList = [
     'getPostsGroups',
     'getPostsLatest',
     'getPostsPersonal',
+    'getPostsUser',
     'likePost',
     'loginWithToken',
     'loginWithUsername',
@@ -484,6 +485,74 @@ function getPostsPersonal($dbConnection, $jsonPayload)
     usort($postResults, function ($post1, $post2) {
         return $post2['weight'] <=> $post1['weight'];
     });
+
+    returnSuccess('Post(s) found.', $postResults);
+}
+
+/**
+ * Get the specified amount of latest posts
+ *
+ * NOTE: userID is the current user ID
+ *       targetUserID is the user ID of the desired posts
+ *
+ * @json Payload : function, userID, targetUserID, numberOfPosts, token
+ * @json Response: (multiple) postID, userID, username, [bodyText, imageURL, tags], isLiked
+ *
+ * @param mysqli $dbConnection MySQL connection instance
+ * @param array $jsonPayload Decoded JSON object
+ */
+function getPostsUser($dbConnection, $jsonPayload)
+{
+    $userID        = $jsonPayload['userID'];
+    $targetUserID  = $jsonPayload['targetUserID'];
+    $numberOfPosts = $jsonPayload['numberOfPosts'];
+    $token         = isset($jsonPayload['token']) ? $jsonPayload['token'] : $_COOKIE['musu_token'];
+
+    checkForEmptyProperties([$userID, $targetUserID, $numberOfPosts, $token]);
+
+    if (!verifyToken($dbConnection, $userID, $token)) {
+        returnError('User token failed verification.');
+    }
+
+    $statement =
+        "SELECT id, userID, bodyText, imageURL,
+        (SELECT GROUP_CONCAT(t.name) FROM Tags AS t, Posts_Tags AS pt WHERE pt.postID = Posts.id AND t.id = pt.tagID) AS tags,
+        (SELECT username FROM Users WHERE id = Posts.userID) AS username,
+        CASE WHEN (SELECT id FROM Users_Posts_Likes WHERE userID = ? AND postID = Posts.id) IS NOT NULL THEN 1 ELSE 0 END AS isLiked
+        FROM Posts WHERE userID = ? ORDER BY id DESC LIMIT ?";
+
+    $query = $dbConnection->prepare($statement);
+    $query->bind_param('iii', $userID, $targetUserID, $numberOfPosts);
+    $query->execute();
+
+    $result = $query->get_result();
+
+    $query->close();
+
+    // Verify post(s) were found
+    if ($result->num_rows <= 0) {
+        returnError('No posts found: ' . $dbConnection->error);
+    }
+
+    $postResults = [];
+
+    // NOTE: $userID is the ID of the actual user fetching the posts
+    //       $row['userID'] is the ID of each user that created the post(s) being fetched
+    while ($row = $result->fetch_assoc()) {
+        $postID = $row['id'];
+
+        $postInformation = [
+            'postID'   => $postID,
+            'userID'   => $row['userID'],
+            'username' => $row['username'],
+            'bodyText' => $row['bodyText'],
+            'imageURL' => $row['imageURL'],
+            'tags'     => preg_split('/,/', $row['tags'], null, PREG_SPLIT_NO_EMPTY),
+            'isLiked'  => ($row['isLiked'] == TRUE),
+        ];
+
+        $postResults[] = $postInformation;
+    }
 
     returnSuccess('Post(s) found.', $postResults);
 }
@@ -1092,6 +1161,12 @@ function updateToken($dbConnection, $userID)
     return $token;
 }
 
+/**
+ * Delete a user login token
+ *
+ * @param mysqli $dbConnection MySQL connection instance
+ * @param integer $userID The database ID of a user
+ */
 function deleteToken($dbConnection, $userID)
 {
     $statement = "DELETE FROM Tokens WHERE userID = ?";
