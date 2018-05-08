@@ -162,11 +162,11 @@ function createUser($dbConnection, $jsonPayload)
     // Check for various error-inducing inputs
     if (strlen($username) > 60) {
         returnError('Username cannot exceed 60 characters.');
-    } else if (strlen($firstName) > 60) {
+    } elseif (strlen($firstName) > 60) {
         returnError('First name cannot exceed 60 characters.');
-    } else if (strlen($lastName) > 60) {
+    } elseif (strlen($lastName) > 60) {
         returnError('Last name cannot exceed 60 characters.');
-    } else if (strlen($emailAddress) > 60) {
+    } elseif (strlen($emailAddress) > 60) {
         returnError('Email address cannot exceed 60 characters.');
     }
 
@@ -382,7 +382,7 @@ function getPost($dbConnection, $jsonPayload)
             'bodyText' => $row['bodyText'],
             'imageURL' => $row['imageURL'],
             'tags'     => preg_split('/,/', $row['tags'], null, PREG_SPLIT_NO_EMPTY),
-            'isLiked'  => ($row['isLiked'] == TRUE),
+            'isLiked'  => ($row['isLiked'] == true),
         ];
 
         // If the post was found...
@@ -449,7 +449,7 @@ function getPostsPersonal($dbConnection, $jsonPayload)
             'bodyText' => $row['bodyText'],
             'imageURL' => $row['imageURL'],
             'tags'     => preg_split('/,/', $row['tags'], null, PREG_SPLIT_NO_EMPTY),
-            'isLiked'  => ($row['isLiked'] == TRUE),
+            'isLiked'  => ($row['isLiked'] == true),
             'strength' => (double) $row['strength'],
         ];
 
@@ -548,7 +548,7 @@ function getPostsUser($dbConnection, $jsonPayload)
             'bodyText' => $row['bodyText'],
             'imageURL' => $row['imageURL'],
             'tags'     => preg_split('/,/', $row['tags'], null, PREG_SPLIT_NO_EMPTY),
-            'isLiked'  => ($row['isLiked'] == TRUE),
+            'isLiked'  => ($row['isLiked'] == true),
         ];
 
         $postResults[] = $postInformation;
@@ -612,7 +612,7 @@ function getPostsLatest($dbConnection, $jsonPayload)
             'bodyText' => $row['bodyText'],
             'imageURL' => $row['imageURL'],
             'tags'     => preg_split('/,/', $row['tags'], null, PREG_SPLIT_NO_EMPTY),
-            'isLiked'  => ($row['isLiked'] == TRUE),
+            'isLiked'  => ($row['isLiked'] == true),
         ];
 
         $postResults[] = $postInformation;
@@ -676,7 +676,7 @@ function getPostsGroups($dbConnection, $jsonPayload)
             'bodyText' => $row['bodyText'],
             'imageURL' => $row['imageURL'],
             'tags'     => preg_split('/,/', $row['tags'], null, PREG_SPLIT_NO_EMPTY),
-            'isLiked'  => ($row['isLiked'] == TRUE),
+            'isLiked'  => ($row['isLiked'] == true),
         ];
 
         $postResults[] = $postInformation;
@@ -893,11 +893,11 @@ function updateUser($dbConnection, $jsonPayload)
     // Check for various error-inducing inputs
     if (strlen($username) > 60) {
         returnError('Username cannot exceed 60 characters.');
-    } else if (strlen($firstName) > 60) {
+    } elseif (strlen($firstName) > 60) {
         returnError('First name cannot exceed 60 characters.');
-    } else if (strlen($lastName) > 60) {
+    } elseif (strlen($lastName) > 60) {
         returnError('Last name cannot exceed 60 characters.');
-    } else if (strlen($emailAddress) > 60) {
+    } elseif (strlen($emailAddress) > 60) {
         returnError('Email address cannot exceed 60 characters.');
     }
 
@@ -1216,4 +1216,3 @@ function verifyToken($dbConnection, $userID, $token)
     // Else...
     return false;
 }
-
